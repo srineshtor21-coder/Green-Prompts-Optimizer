@@ -1,681 +1,816 @@
-from flask import Flask, request, jsonify, render_template_string
-from flask_cors import CORS
-import torch
-import os
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-import logging
+"""
+Green-Prompts-Optimizer: Energy-Efficient AI Prompt Optimization System
+Author: Srinesh Toranala
+ISM Original Work - Energy Saver AI
 
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-app = Flask(__name__)
-CORS(app)  # Enable CORS for external connections
-app.config['JSON_SORT_KEYS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-
-class PromptOptimizer:
-    def __init__(self, model_path="optimizer_model"):
-        self.model_path = model_path
-        self.device = self._setup_device()
-        self.tokenizer = None
-        self.model = None
-        self._load_model()
-       
-    def _setup_device(self):
-        if torch.cuda.is_available():
-            device = torch.device("cuda")
-            logger.info(f"Using CUDA device: {torch.cuda.get_device_name(0)}")
-        else:
-            device = torch.device("cpu")
-            logger.info("Using CPU device")
-        return device
-   
-    def _load_model(self):
-        try:
-            logger.info(f"Loading model from {self.model_path}")
-           
-            if not os.path.exists(self.model_path):
-                raise FileNotFoundError(f"Model directory not found: {self.model_path}")
-           
-            self.tokenizer = T5Tokenizer.from_pretrained(
-                self.model_path,
-                local_files_only=True
-            )
-           
-            self.model = T5ForConditionalGeneration.from_pretrained(
-                self.model_path,
-                local_files_only=True
-            )
-           
-            self.model.to(self.device)
-            self.model.eval()
-           
-            logger.info("Model loaded successfully")
-           
-        except Exception as e:
-            logger.error(f"Error loading model: {str(e)}")
-            raise
-   
-    def optimize(self, prompt, max_length=64, num_beams=5, temperature=0.7):
-        """Optimize a verbose prompt to be more concise"""
-        if not prompt or len(prompt.strip()) == 0:
-            raise ValueError("Empty prompt provided")
-       
-        # Add the task prefix that the model was trained with
-        input_text = f"optimize: {prompt}"
-       
-        # Tokenize input
-        inputs = self.tokenizer(
-            input_text,
-            return_tensors="pt",
-            max_length=128,
-            truncation=True,
-            padding=True
-        )
-       
-        inputs = {key: value.to(self.device) for key, value in inputs.items()}
-       
-        # Generate optimized prompt
-        with torch.no_grad():
-            output_ids = self.model.generate(
-                **inputs,
-                max_length=max_length,
-                num_beams=num_beams,
-                early_stopping=True,
-                no_repeat_ngram_size=2,
-                do_sample=False,
-                length_penalty=0.6  # Encourage shorter outputs
-            )
-       
-        # Decode the optimized text
-        optimized_text = self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
-       
-        # If the model didn't optimize well, apply fallback rules
-        if len(optimized_text) >= len(prompt) * 0.9:
-            optimized_text = self._fallback_optimization(prompt)
-       
-        return optimized_text.strip()
-   
-    def _fallback_optimization(self, prompt):
-        """Simple rule-based optimization as fallback"""
-        # Remove filler words
-        filler_words = [
-            "please", "can you", "could you", "i need", "i want to",
-            "help me", "tell me", "explain to me", "for me", "to me"
-        ]
-       
-        optimized = prompt.lower()
-        for filler in filler_words:
-            optimized = optimized.replace(filler, "")
-       
-        # Clean up extra spaces
-        optimized = " ".join(optimized.split())
-       
-        # Capitalize first letter
-        optimized = optimized[0].upper() + optimized[1:] if optimized else ""
-       
-        return optimized
-   
-    def calculate_metrics(self, original, optimized):
-        """Calculate token savings and energy metrics"""
-        # Count tokens
-        original_tokens = len(self.tokenizer.encode(original, add_special_tokens=False))
-        optimized_tokens = len(self.tokenizer.encode(optimized, add_special_tokens=False))
-       
-        tokens_saved = original_tokens - optimized_tokens
-       
-        # Calculate percentage savings
-        if original_tokens > 0:
-            savings_percent = (tokens_saved / original_tokens) * 100
-        else:
-            savings_percent = 0
-       
-        # Energy calculation based on research
-        # GPT-3 uses approximately 0.0004 kWh per 1000 tokens
-        # Source: Patterson et al. "Carbon Emissions and Large Neural Network Training"
-        kwh_per_1000_tokens = 0.0004
-       
-        # Calculate energy saved in Watt-hours (Wh)
-        energy_saved_kwh = (tokens_saved / 1000) * kwh_per_1000_tokens
-        energy_saved_wh = energy_saved_kwh * 1000
-       
-        # CO2 calculation: Average grid ~0.5 kg CO2 per kWh
-        co2_per_kwh = 0.5
-        co2_saved_kg = energy_saved_kwh * co2_per_kwh
-        co2_saved_grams = co2_saved_kg * 1000
-       
-        return {
-            'original_tokens': original_tokens,
-            'optimized_tokens': optimized_tokens,
-            'tokens_saved': tokens_saved,
-            'savings_percent': round(savings_percent, 1),
-            'compression_ratio': round(optimized_tokens / original_tokens, 2) if original_tokens > 0 else 1.0,
-            'energy_saved_wh': round(energy_saved_wh, 6),
-            'co2_saved_grams': round(co2_saved_grams, 4)
-        }
-
-
-# Initialize optimizer
-optimizer = PromptOptimizer()
-
-
-# Example prompts
-EXAMPLE_PROMPTS = [
-    {
-        "verbose": "Can you please explain to me what black holes are and how they work in space?",
-        "optimized": "Explain black holes and their mechanics"
-    },
-    {
-        "verbose": "I need help writing a Python program that can sort a list of numbers using bubble sort",
-        "optimized": "Write Python bubble sort program"
-    },
-    {
-        "verbose": "Could you help me understand how photosynthesis works in plants?",
-        "optimized": "Explain photosynthesis process"
-    },
-    {
-        "verbose": "I want to learn about the difference between machine learning and deep learning",
-        "optimized": "Machine learning vs deep learning"
-    },
-    {
-        "verbose": "Please tell me how I can improve the performance of my React application",
-        "optimized": "Optimize React app performance"
-    }
-]
-
-
-# HTML Template
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>GreenPrompts - AI Prompt Optimizer</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 20px;
-        }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        h1 {
-            font-size: 36px;
-            background: linear-gradient(135deg, #10b981, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: rgba(16, 185, 129, 0.7);
-        }
-        .card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
-        }
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            color: white;
-            font-size: 14px;
-            resize: vertical;
-            margin-bottom: 15px;
-        }
-        textarea::placeholder {
-            color: rgba(16, 185, 129, 0.3);
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
-        }
-        button:disabled {
-            background: rgba(100, 116, 139, 0.5);
-            cursor: not-allowed;
-            transform: none;
-        }
-        .examples {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .example-btn {
-            padding: 8px 16px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 8px;
-            color: #10b981;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: auto;
-        }
-        .example-btn:hover {
-            background: rgba(16, 185, 129, 0.2);
-            transform: none;
-        }
-        .result {
-            display: none;
-            margin-top: 20px;
-        }
-        .result.show {
-            display: block;
-        }
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .result-box {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-        }
-        .result-box h3 {
-            font-size: 14px;
-            color: #10b981;
-            margin-bottom: 10px;
-        }
-        .result-box p {
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        .metric {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-        .metric-label {
-            font-size: 12px;
-            color: rgba(16, 185, 129, 0.7);
-            margin-bottom: 5px;
-        }
-        .metric-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #10b981;
-        }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🌱</div>
-            <h1>GreenPrompts</h1>
-            <p class="subtitle">AI-Powered Prompt Optimizer - Reduce Tokens & Save Energy</p>
-        </div>
-
-
-        <div class="card">
-            <div class="examples">
-                <button class="example-btn" onclick="setExample(0)">Example 1</button>
-                <button class="example-btn" onclick="setExample(1)">Example 2</button>
-                <button class="example-btn" onclick="setExample(2)">Example 3</button>
-                <button class="example-btn" onclick="setExample(3)">Example 4</button>
-            </div>
-
-
-            <textarea
-                id="prompt"
-                placeholder="Enter your verbose prompt here, e.g., 'Can you please explain to me what black holes are and how they work in space?'"
-            ></textarea>
-
-
-            <button onclick="optimize()" id="optimizeBtn">
-                ⚡ Optimize Prompt
-            </button>
-
-
-            <div id="result" class="result">
-                <div class="result-grid">
-                    <div class="result-box">
-                        <h3>📝 Original Prompt</h3>
-                        <p id="originalText"></p>
-                        <small id="originalTokens" style="color: rgba(16, 185, 129, 0.7);"></small>
-                    </div>
-                    <div class="result-box">
-                        <h3>✨ Optimized Prompt</h3>
-                        <p id="optimizedText" style="font-weight: 600; color: #10b981;"></p>
-                        <small id="optimizedTokens" style="color: rgba(16, 185, 129, 0.7);"></small>
-                    </div>
-                </div>
-
-
-                <div class="metrics">
-                    <div class="metric">
-                        <div class="metric-label">Tokens Saved</div>
-                        <div class="metric-value" id="tokensSaved">0</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Savings %</div>
-                        <div class="metric-value" id="savingsPercent">0%</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Energy Saved</div>
-                        <div class="metric-value" id="energySaved">0 Wh</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">CO₂ Saved</div>
-                        <div class="metric-value" id="co2Saved">0 g</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <script>
-        const examples = [
-            "Can you please explain to me what black holes are and how they work in space?",
-            "I need help writing a Python program that can sort a list of numbers using bubble sort",
-            "Could you help me understand how photosynthesis works in plants?",
-            "Please tell me how I can improve the performance of my React application"
-        ];
-
-
-        function setExample(index) {
-            document.getElementById('prompt').value = examples[index];
-        }
-
-
-        async function optimize() {
-            const prompt = document.getElementById('prompt').value.trim();
-            if (!prompt) {
-                alert('Please enter a prompt');
-                return;
-            }
-
-
-            const btn = document.getElementById('optimizeBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span> Optimizing...';
-
-
-            try {
-                const response = await fetch('/optimize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-
-
-                const data = await response.json();
-
-
-                if (data.status === 'success') {
-                    document.getElementById('originalText').textContent = data.original;
-                    document.getElementById('originalTokens').textContent = data.original_tokens + ' tokens';
-                    document.getElementById('optimizedText').textContent = data.optimized;
-                    document.getElementById('optimizedTokens').textContent = data.optimized_tokens + ' tokens';
-                    document.getElementById('tokensSaved').textContent = data.tokens_saved;
-                    document.getElementById('savingsPercent').textContent = data.savings_percent + '%';
-                    document.getElementById('energySaved').textContent = data.energy_saved_wh.toFixed(6) + ' Wh';
-                    document.getElementById('co2Saved').textContent = data.co2_saved_grams.toFixed(4) + ' g';
-                    document.getElementById('result').classList.add('show');
-                } else {
-                    alert('Optimization failed: ' + data.error);
-                }
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '⚡ Optimize Prompt';
-            }
-        }
-
-
-        // Allow Enter key to submit (with Shift+Enter for newline)
-        document.getElementById('prompt').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                optimize();
-            }
-        });
-    </script>
-</body>
-</html>
+This application optimizes AI prompts to reduce computational load and energy consumption
+while maintaining semantic meaning and effectiveness.
 """
 
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import torch
+from transformers import T5Tokenizer, T5ForConditionalGeneration, AutoTokenizer, AutoModelForSeq2SeqLM
+import json
+import time
+import datetime
+import hashlib
+import secrets
+import os
+from pathlib import Path
+import sqlite3
+from functools import wraps
+import re
+import numpy as np
+from collections import defaultdict
+import pickle
 
-@app.route("/")
-def index():
-    return render_template_string(HTML_TEMPLATE)
+# ============================================================================
+# CONFIGURATION AND INITIALIZATION
+# ============================================================================
 
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(32)
+CORS(app)
 
-@app.route("/health", methods=["GET"])
-def health_check():
-    return jsonify({
-        "status": "healthy",
-        "model_loaded": optimizer.model is not None,
-        "device": str(optimizer.device)
-    })
+# Rate limiting to prevent abuse
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
 
+# Directory setup
+BASE_DIR = Path(__file__).parent
+DATA_DIR = BASE_DIR / "data"
+MODELS_DIR = BASE_DIR / "models"
+CACHE_DIR = BASE_DIR / "cache"
 
-@app.route("/optimize", methods=["POST"])
-def optimize_endpoint():
-    try:
-        data = request.get_json()
-       
-        if not data:
-            return jsonify({"error": "No JSON data provided"}), 400
-       
-        prompt = data.get("prompt", "").strip()
-       
-        if not prompt:
-            return jsonify({"error": "Prompt cannot be empty"}), 400
-       
-        if len(prompt) > 500:
-            return jsonify({
-                "error": "Prompt exceeds maximum length of 500 characters"
-            }), 400
-       
-        # Optimize the prompt
-        optimized_prompt = optimizer.optimize(prompt)
-       
-        # Calculate metrics
-        metrics = optimizer.calculate_metrics(prompt, optimized_prompt)
-       
-        response_data = {
-            "original": prompt,
-            "optimized": optimized_prompt,
-            "original_tokens": metrics['original_tokens'],
-            "optimized_tokens": metrics['optimized_tokens'],
-            "tokens_saved": metrics['tokens_saved'],
-            "savings_percent": metrics['savings_percent'],
-            "compression_ratio": metrics['compression_ratio'],
-            "energy_saved_wh": metrics['energy_saved_wh'],
-            "co2_saved_grams": metrics['co2_saved_grams'],
-            "status": "success"
+for directory in [DATA_DIR, MODELS_DIR, CACHE_DIR]:
+    directory.mkdir(exist_ok=True)
+
+# Database setup
+DB_PATH = DATA_DIR / "users.db"
+CACHE_DB_PATH = DATA_DIR / "prompt_cache.db"
+
+# ============================================================================
+# DATABASE INITIALIZATION
+# ============================================================================
+
+def init_database():
+    """Initialize SQLite databases for users and prompt caching"""
+    # Users database
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            total_prompts INTEGER DEFAULT 0,
+            total_energy_saved REAL DEFAULT 0.0,
+            total_co2_saved REAL DEFAULT 0.0
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            original_prompt TEXT NOT NULL,
+            optimized_prompt TEXT NOT NULL,
+            energy_saved REAL,
+            co2_saved REAL,
+            tokens_saved INTEGER,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+    
+    # Prompt cache database
+    cache_conn = sqlite3.connect(CACHE_DB_PATH)
+    cache_cursor = cache_conn.cursor()
+    
+    cache_cursor.execute('''
+        CREATE TABLE IF NOT EXISTS prompt_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            prompt_hash TEXT UNIQUE NOT NULL,
+            original_prompt TEXT NOT NULL,
+            optimized_prompt TEXT NOT NULL,
+            token_count_original INTEGER,
+            token_count_optimized INTEGER,
+            energy_saved REAL,
+            usage_count INTEGER DEFAULT 1,
+            last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cache_conn.commit()
+    cache_conn.close()
+
+init_database()
+
+# ============================================================================
+# ENERGY CALCULATION MODELS
+# ============================================================================
+
+class EnergyCalculator:
+    """
+    Calculate energy consumption and CO2 emissions for AI model inference
+    Based on research from Zeus library and GPU power consumption data
+    """
+    
+    def __init__(self):
+        # Average power consumption per token (in Watt-hours)
+        # Based on T5-small model running on CPU
+        self.power_per_token_cpu = 0.0001  # Wh per token
+        self.power_per_token_gpu = 0.0003  # Wh per token (if GPU available)
+        
+        # CO2 emissions factor (kg CO2 per kWh) - US average
+        self.co2_factor = 0.385
+        
+        # Device detection
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.power_per_token = self.power_per_token_gpu if self.device == "cuda" else self.power_per_token_cpu
+    
+    def calculate_energy(self, token_count, inference_time=None):
+        """
+        Calculate energy consumption for processing tokens
+        
+        Args:
+            token_count: Number of tokens processed
+            inference_time: Actual inference time (optional)
+        
+        Returns:
+            dict with energy metrics
+        """
+        # Base calculation on token count
+        energy_wh = token_count * self.power_per_token
+        
+        # If we have actual inference time, adjust calculation
+        if inference_time:
+            # Assume model uses about 15W on CPU during inference
+            model_power = 15 if self.device == "cpu" else 75  # watts
+            time_based_energy = (model_power * inference_time) / 3600  # convert to Wh
+            energy_wh = max(energy_wh, time_based_energy)
+        
+        # Convert to kWh
+        energy_kwh = energy_wh / 1000
+        
+        # Calculate CO2 emissions
+        co2_kg = energy_kwh * self.co2_factor
+        co2_g = co2_kg * 1000
+        
+        return {
+            'energy_wh': round(energy_wh, 6),
+            'energy_kwh': round(energy_kwh, 8),
+            'co2_kg': round(co2_kg, 8),
+            'co2_g': round(co2_g, 6),
+            'device': self.device
         }
-       
-        logger.info(f"✅ Optimized: '{prompt[:50]}...' → '{optimized_prompt}' | Saved {metrics['tokens_saved']} tokens ({metrics['savings_percent']}%) | Energy: {metrics['energy_saved_wh']:.6f} Wh")
-       
-        return jsonify(response_data), 200
-       
-    except ValueError as ve:
-        logger.warning(f"Validation error: {str(ve)}")
-        return jsonify({"error": str(ve), "status": "error"}), 400
-       
-    except Exception as e:
-        logger.error(f"Optimization error: {str(e)}")
-        return jsonify({
-            "error": "An error occurred during optimization",
-            "details": str(e),
-            "status": "error"
-        }), 500
+    
+    def calculate_savings(self, original_tokens, optimized_tokens, original_time=None, optimized_time=None):
+        """Calculate energy and CO2 savings from optimization"""
+        original_metrics = self.calculate_energy(original_tokens, original_time)
+        optimized_metrics = self.calculate_energy(optimized_tokens, optimized_time)
+        
+        savings = {
+            'original': original_metrics,
+            'optimized': optimized_metrics,
+            'saved_energy_wh': round(original_metrics['energy_wh'] - optimized_metrics['energy_wh'], 6),
+            'saved_co2_g': round(original_metrics['co2_g'] - optimized_metrics['co2_g'], 6),
+            'tokens_original': original_tokens,
+            'tokens_optimized': optimized_tokens,
+            'tokens_saved': original_tokens - optimized_tokens,
+            'percentage_reduction': round(((original_tokens - optimized_tokens) / original_tokens * 100), 2) if original_tokens > 0 else 0
+        }
+        
+        return savings
 
+# ============================================================================
+# PROMPT CACHE SYSTEM
+# ============================================================================
 
-@app.route("/batch-optimize", methods=["POST"])
-def batch_optimize():
-    try:
-        data = request.get_json()
-       
-        if not data:
-            return jsonify({"error": "No JSON data provided"}), 400
-       
-        prompts = data.get("prompts", [])
-       
-        if not isinstance(prompts, list):
-            return jsonify({"error": "Prompts must be a list"}), 400
-       
-        if len(prompts) == 0:
-            return jsonify({"error": "No prompts provided"}), 400
-       
-        if len(prompts) > 50:
-            return jsonify({"error": "Maximum 50 prompts per batch"}), 400
-       
+class PromptCache:
+    """
+    Intelligent caching system to store and reuse optimized prompts
+    Reduces redundant model inference, saving energy
+    """
+    
+    def __init__(self, db_path=CACHE_DB_PATH):
+        self.db_path = db_path
+        self.memory_cache = {}  # In-memory cache for faster access
+        self.max_memory_cache = 1000
+        self.load_frequent_prompts()
+    
+    def generate_hash(self, prompt):
+        """Generate a hash for the prompt"""
+        return hashlib.sha256(prompt.lower().strip().encode()).hexdigest()
+    
+    def load_frequent_prompts(self):
+        """Load frequently used prompts into memory"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT prompt_hash, original_prompt, optimized_prompt, 
+                   token_count_original, token_count_optimized, energy_saved
+            FROM prompt_cache
+            ORDER BY usage_count DESC
+            LIMIT ?
+        ''', (self.max_memory_cache,))
+        
+        for row in cursor.fetchall():
+            self.memory_cache[row[0]] = {
+                'original': row[1],
+                'optimized': row[2],
+                'tokens_original': row[3],
+                'tokens_optimized': row[4],
+                'energy_saved': row[5]
+            }
+        
+        conn.close()
+    
+    def get(self, prompt):
+        """Retrieve cached optimized prompt if exists"""
+        prompt_hash = self.generate_hash(prompt)
+        
+        # Check memory cache first
+        if prompt_hash in self.memory_cache:
+            self.increment_usage(prompt_hash)
+            return self.memory_cache[prompt_hash]
+        
+        # Check database
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT original_prompt, optimized_prompt, token_count_original, 
+                   token_count_optimized, energy_saved
+            FROM prompt_cache
+            WHERE prompt_hash = ?
+        ''', (prompt_hash,))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            cached_data = {
+                'original': row[0],
+                'optimized': row[1],
+                'tokens_original': row[2],
+                'tokens_optimized': row[3],
+                'energy_saved': row[4]
+            }
+            
+            # Add to memory cache
+            self.memory_cache[prompt_hash] = cached_data
+            self.increment_usage(prompt_hash)
+            
+            return cached_data
+        
+        return None
+    
+    def set(self, prompt, optimized, tokens_original, tokens_optimized, energy_saved):
+        """Store optimized prompt in cache"""
+        prompt_hash = self.generate_hash(prompt)
+        
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute('''
+                INSERT INTO prompt_cache 
+                (prompt_hash, original_prompt, optimized_prompt, token_count_original, 
+                 token_count_optimized, energy_saved)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (prompt_hash, prompt, optimized, tokens_original, tokens_optimized, energy_saved))
+            
+            conn.commit()
+            
+            # Add to memory cache
+            self.memory_cache[prompt_hash] = {
+                'original': prompt,
+                'optimized': optimized,
+                'tokens_original': tokens_original,
+                'tokens_optimized': tokens_optimized,
+                'energy_saved': energy_saved
+            }
+        except sqlite3.IntegrityError:
+            # Prompt already exists, update it
+            cursor.execute('''
+                UPDATE prompt_cache 
+                SET optimized_prompt = ?, token_count_optimized = ?, 
+                    energy_saved = ?, usage_count = usage_count + 1,
+                    last_used = CURRENT_TIMESTAMP
+                WHERE prompt_hash = ?
+            ''', (optimized, tokens_optimized, energy_saved, prompt_hash))
+            conn.commit()
+        
+        conn.close()
+    
+    def increment_usage(self, prompt_hash):
+        """Increment usage counter for cached prompt"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            UPDATE prompt_cache 
+            SET usage_count = usage_count + 1, last_used = CURRENT_TIMESTAMP
+            WHERE prompt_hash = ?
+        ''', (prompt_hash,))
+        
+        conn.commit()
+        conn.close()
+    
+    def get_stats(self):
+        """Get cache statistics"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT COUNT(*), SUM(usage_count), SUM(energy_saved) FROM prompt_cache')
+        total_cached, total_uses, total_energy_saved = cursor.fetchone()
+        
+        conn.close()
+        
+        return {
+            'total_cached_prompts': total_cached or 0,
+            'total_cache_hits': total_uses or 0,
+            'total_energy_saved_from_cache': round(total_energy_saved or 0, 4)
+        }
+
+# ============================================================================
+# AI MODEL LOADER AND OPTIMIZER
+# ============================================================================
+
+class PromptOptimizer:
+    """
+    Main AI model for prompt optimization
+    Uses T5 transformer for sequence-to-sequence optimization
+    """
+    
+    def __init__(self):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = None
+        self.tokenizer = None
+        self.energy_calc = EnergyCalculator()
+        self.cache = PromptCache()
+        self.load_model()
+    
+    def load_model(self):
+        """Load the T5 model for prompt optimization"""
+        try:
+            model_path = MODELS_DIR / "prompt_optimizer"
+            
+            if model_path.exists():
+                print(f"Loading fine-tuned model from {model_path}")
+                self.tokenizer = T5Tokenizer.from_pretrained(model_path)
+                self.model = T5ForConditionalGeneration.from_pretrained(model_path)
+            else:
+                print("Loading base T5-small model")
+                self.tokenizer = T5Tokenizer.from_pretrained("t5-small")
+                self.model = T5ForConditionalGeneration.from_pretrained("t5-small")
+            
+            self.model.to(self.device)
+            self.model.eval()
+            print(f"Model loaded successfully on {self.device}")
+            
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            raise
+    
+    def preprocess_prompt(self, prompt):
+        """Clean and prepare prompt for optimization"""
+        # Remove excessive whitespace
+        prompt = re.sub(r'\s+', ' ', prompt).strip()
+        
+        # Remove redundant phrases
+        redundant_phrases = [
+            'please help me',
+            'can you please',
+            'i need help with',
+            'could you',
+            'would you mind'
+        ]
+        
+        prompt_lower = prompt.lower()
+        for phrase in redundant_phrases:
+            prompt_lower = prompt_lower.replace(phrase, '')
+        
+        # Reconstruct with proper capitalization
+        if len(prompt_lower) > 0:
+            prompt = prompt_lower[0].upper() + prompt_lower[1:]
+        
+        return prompt.strip()
+    
+    def optimize_prompt(self, prompt, use_cache=True):
+        """
+        Optimize a prompt to reduce tokens while preserving meaning
+        
+        Args:
+            prompt: Original user prompt
+            use_cache: Whether to use cached results
+        
+        Returns:
+            dict with optimization results
+        """
+        start_time = time.time()
+        
+        # Check cache first
+        if use_cache:
+            cached = self.cache.get(prompt)
+            if cached:
+                inference_time = time.time() - start_time
+                return {
+                    'original_prompt': prompt,
+                    'optimized_prompt': cached['optimized'],
+                    'tokens_original': cached['tokens_original'],
+                    'tokens_optimized': cached['tokens_optimized'],
+                    'energy_saved_wh': cached['energy_saved'],
+                    'inference_time': inference_time,
+                    'from_cache': True
+                }
+        
+        # Preprocess
+        preprocessed = self.preprocess_prompt(prompt)
+        
+        # Tokenize original
+        original_tokens = self.tokenizer.encode(prompt, return_tensors="pt")
+        original_token_count = len(original_tokens[0])
+        
+        # Prepare input for model
+        input_text = f"optimize: {preprocessed}"
+        input_ids = self.tokenizer.encode(input_text, return_tensors="pt", max_length=512, truncation=True)
+        input_ids = input_ids.to(self.device)
+        
+        # Generate optimized prompt
+        with torch.no_grad():
+            outputs = self.model.generate(
+                input_ids,
+                max_length=128,
+                num_beams=4,
+                early_stopping=True,
+                no_repeat_ngram_size=2,
+                temperature=0.7
+            )
+        
+        optimized_prompt = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        # Tokenize optimized
+        optimized_tokens = self.tokenizer.encode(optimized_prompt, return_tensors="pt")
+        optimized_token_count = len(optimized_tokens[0])
+        
+        inference_time = time.time() - start_time
+        
+        # Calculate energy savings
+        savings = self.energy_calc.calculate_savings(
+            original_token_count,
+            optimized_token_count,
+            inference_time,
+            inference_time * 0.6  # Optimized prompt typically processes faster
+        )
+        
+        # Cache the result
+        if use_cache:
+            self.cache.set(
+                prompt,
+                optimized_prompt,
+                original_token_count,
+                optimized_token_count,
+                savings['saved_energy_wh']
+            )
+        
+        return {
+            'original_prompt': prompt,
+            'optimized_prompt': optimized_prompt,
+            'tokens_original': original_token_count,
+            'tokens_optimized': optimized_token_count,
+            'tokens_saved': savings['tokens_saved'],
+            'percentage_reduction': savings['percentage_reduction'],
+            'energy_original_wh': savings['original']['energy_wh'],
+            'energy_optimized_wh': savings['optimized']['energy_wh'],
+            'energy_saved_wh': savings['saved_energy_wh'],
+            'co2_saved_g': savings['saved_co2_g'],
+            'inference_time': inference_time,
+            'from_cache': False,
+            'device': self.device.type
+        }
+    
+    def batch_optimize(self, prompts):
+        """Optimize multiple prompts at once"""
         results = []
-        total_tokens_saved = 0
-        total_energy_saved = 0
-       
-        for idx, prompt in enumerate(prompts):
-            prompt = prompt.strip()
-           
-            if not prompt:
-                results.append({
-                    "index": idx,
-                    "error": "Empty prompt",
-                    "status": "skipped"
-                })
-                continue
-           
-            if len(prompt) > 500:
-                results.append({
-                    "index": idx,
-                    "error": "Prompt too long",
-                    "status": "skipped"
-                })
-                continue
-           
-            try:
-                optimized = optimizer.optimize(prompt)
-                metrics = optimizer.calculate_metrics(prompt, optimized)
-               
-                total_tokens_saved += metrics['tokens_saved']
-                total_energy_saved += metrics['energy_saved_wh']
-               
-                results.append({
-                    "index": idx,
-                    "original": prompt,
-                    "optimized": optimized,
-                    "tokens_saved": metrics['tokens_saved'],
-                    "savings_percent": metrics['savings_percent'],
-                    "energy_saved_wh": metrics['energy_saved_wh'],
-                    "status": "success"
-                })
-               
-            except Exception as e:
-                results.append({
-                    "index": idx,
-                    "error": str(e),
-                    "status": "failed"
-                })
-       
-        return jsonify({
-            "results": results,
-            "total_prompts": len(prompts),
-            "successful": sum(1 for r in results if r.get('status') == 'success'),
-            "total_tokens_saved": total_tokens_saved,
-            "total_energy_saved_wh": total_energy_saved,
-            "status": "complete"
-        }), 200
-       
-    except Exception as e:
-        logger.error(f"Batch optimization error: {str(e)}")
-        return jsonify({
-            "error": "Batch optimization failed",
-            "status": "error"
-        }), 500
+        for prompt in prompts:
+            result = self.optimize_prompt(prompt)
+            results.append(result)
+        return results
 
+# Initialize the optimizer
+optimizer = PromptOptimizer()
+
+# ============================================================================
+# USER AUTHENTICATION SYSTEM
+# ============================================================================
+
+def hash_password(password):
+    """Hash password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def login_required(f):
+    """Decorator to require login for certain routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+def create_user(username, email, password):
+    """Create a new user account"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    password_hash = hash_password(password)
+    
+    try:
+        cursor.execute('''
+            INSERT INTO users (username, email, password_hash)
+            VALUES (?, ?, ?)
+        ''', (username, email, password_hash))
+        
+        conn.commit()
+        user_id = cursor.lastrowid
+        conn.close()
+        return {'success': True, 'user_id': user_id}
+    
+    except sqlite3.IntegrityError:
+        conn.close()
+        return {'success': False, 'error': 'Username or email already exists'}
+
+def authenticate_user(username, password):
+    """Authenticate user credentials"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    password_hash = hash_password(password)
+    
+    cursor.execute('''
+        SELECT id, username, email FROM users
+        WHERE username = ? AND password_hash = ?
+    ''', (username, password_hash))
+    
+    user = cursor.fetchone()
+    conn.close()
+    
+    if user:
+        return {
+            'success': True,
+            'user_id': user[0],
+            'username': user[1],
+            'email': user[2]
+        }
+    
+    return {'success': False, 'error': 'Invalid credentials'}
+
+def save_user_history(user_id, original, optimized, energy_saved, co2_saved, tokens_saved):
+    """Save optimization to user history"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO user_history 
+        (user_id, original_prompt, optimized_prompt, energy_saved, co2_saved, tokens_saved)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (user_id, original, optimized, energy_saved, co2_saved, tokens_saved))
+    
+    cursor.execute('''
+        UPDATE users
+        SET total_prompts = total_prompts + 1,
+            total_energy_saved = total_energy_saved + ?,
+            total_co2_saved = total_co2_saved + ?
+        WHERE id = ?
+    ''', (energy_saved, co2_saved, user_id))
+    
+    conn.commit()
+    conn.close()
+
+def get_user_stats(user_id):
+    """Get user statistics"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT total_prompts, total_energy_saved, total_co2_saved
+        FROM users WHERE id = ?
+    ''', (user_id,))
+    
+    stats = cursor.fetchone()
+    conn.close()
+    
+    if stats:
+        return {
+            'total_prompts': stats[0],
+            'total_energy_saved': round(stats[1], 4),
+            'total_co2_saved': round(stats[2], 4)
+        }
+    
+    return None
+
+# ============================================================================
+# FLASK ROUTES
+# ============================================================================
+
+@app.route('/')
+def index():
+    """Main page"""
+    return render_template('index.html')
+
+@app.route('/api/signup', methods=['POST'])
+@limiter.limit("5 per hour")
+def signup():
+    """User registration endpoint"""
+    data = request.get_json()
+    
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
+    
+    # Validation
+    if len(username) < 3:
+        return jsonify({'error': 'Username must be at least 3 characters'}), 400
+    
+    if len(password) < 6:
+        return jsonify({'error': 'Password must be at least 6 characters'}), 400
+    
+    if '@' not in email:
+        return jsonify({'error': 'Invalid email address'}), 400
+    
+    result = create_user(username, email, password)
+    
+    if result['success']:
+        session['user_id'] = result['user_id']
+        session['username'] = username
+        return jsonify({
+            'success': True,
+            'message': 'Account created successfully',
+            'username': username
+        })
+    
+    return jsonify(result), 400
+
+@app.route('/api/login', methods=['POST'])
+@limiter.limit("10 per hour")
+def login():
+    """User login endpoint"""
+    data = request.get_json()
+    
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+    
+    result = authenticate_user(username, password)
+    
+    if result['success']:
+        session['user_id'] = result['user_id']
+        session['username'] = result['username']
+        return jsonify({
+            'success': True,
+            'message': 'Login successful',
+            'username': result['username']
+        })
+    
+    return jsonify(result), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    """User logout"""
+    session.clear()
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
+
+@app.route('/api/optimize', methods=['POST'])
+@limiter.limit("30 per minute")
+def optimize():
+    """Main optimization endpoint"""
+    data = request.get_json()
+    prompt = data.get('prompt', '').strip()
+    
+    if not prompt:
+        return jsonify({'error': 'Prompt cannot be empty'}), 400
+    
+    if len(prompt) > 2000:
+        return jsonify({'error': 'Prompt too long (max 2000 characters)'}), 400
+    
+    try:
+        result = optimizer.optimize_prompt(prompt)
+        
+        # Save to user history if logged in
+        if 'user_id' in session:
+            save_user_history(
+                session['user_id'],
+                result['original_prompt'],
+                result['optimized_prompt'],
+                result['energy_saved_wh'],
+                result['co2_saved_g'],
+                result['tokens_saved']
+            )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    """Get overall system statistics"""
+    cache_stats = optimizer.cache.get_stats()
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT COUNT(*), SUM(total_prompts), SUM(total_energy_saved), SUM(total_co2_saved) FROM users')
+    total_users, total_prompts, total_energy, total_co2 = cursor.fetchone()
+    
+    conn.close()
+    
+    stats = {
+        'total_users': total_users or 0,
+        'total_prompts_optimized': total_prompts or 0,
+        'total_energy_saved_wh': round(total_energy or 0, 4),
+        'total_co2_saved_g': round(total_co2 or 0, 4),
+        'cache_stats': cache_stats
+    }
+    
+    # Add user-specific stats if logged in
+    if 'user_id' in session:
+        user_stats = get_user_stats(session['user_id'])
+        stats['user_stats'] = user_stats
+    
+    return jsonify(stats)
+
+@app.route('/api/user/history', methods=['GET'])
+@login_required
+def user_history():
+    """Get user's optimization history"""
+    user_id = session['user_id']
+    limit = request.args.get('limit', 50, type=int)
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT original_prompt, optimized_prompt, energy_saved, co2_saved, 
+               tokens_saved, timestamp
+        FROM user_history
+        WHERE user_id = ?
+        ORDER BY timestamp DESC
+        LIMIT ?
+    ''', (user_id, limit))
+    
+    history = []
+    for row in cursor.fetchall():
+        history.append({
+            'original': row[0],
+            'optimized': row[1],
+            'energy_saved': round(row[2], 6),
+            'co2_saved': round(row[3], 6),
+            'tokens_saved': row[4],
+            'timestamp': row[5]
+        })
+    
+    conn.close()
+    
+    return jsonify({'history': history})
+
+# ============================================================================
+# ERROR HANDLERS
+# ============================================================================
 
 @app.errorhandler(404)
-def not_found(error):
-    return jsonify({"error": "Endpoint not found"}), 404
-
+def not_found(e):
+    return jsonify({'error': 'Not found'}), 404
 
 @app.errorhandler(500)
-def internal_error(error):
-    logger.error(f"Internal server error: {str(error)}")
-    return jsonify({"error": "Internal server error"}), 500
+def server_error(e):
+    return jsonify({'error': 'Internal server error'}), 500
 
+# ============================================================================
+# MAIN EXECUTION
+# ============================================================================
 
-if __name__ == "__main__":
-    import os
+if __name__ == '__main__':
+    print("=" * 70)
+    print("Green-Prompts-Optimizer: Energy Saver AI")
+    print("=" * 70)
+    print(f"Device: {optimizer.device}")
+    print(f"Cache loaded: {len(optimizer.cache.memory_cache)} prompts")
+    print("Starting Flask server...")
+    print("=" * 70)
     
-    # Use PORT from environment (for Render deployment)
-    port = int(os.environ.get("PORT", 5000))
-    
-    print("\n" + "="*60)
-    print("🌱 GreenPrompts - AI Prompt Optimizer")
-    print("="*60)
-    print(f"✅ Model loaded: {optimizer.model is not None}")
-    print(f"💻 Device: {optimizer.device}")
-    print(f"🌐 Server starting on port {port}")
-    print("="*60 + "\n")
-   
-    # Use debug=False for production
-    app.run(host="0.0.0.0", port=port, debug=False)
-
+    app.run(debug=True, host='0.0.0.0', port=5000)
