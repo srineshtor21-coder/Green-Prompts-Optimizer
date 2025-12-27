@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GreenPrompts Optimizer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">🌱 GreenPrompts</div>
+        <div class="nav-links">
+            <span class="active">Optimizer</span>
+            <span>How It Works</span>
+            <span>Documentation</span>
+            <span>Research</span>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Optimize AI Prompts</h1>
+        <p>Reduce token usage, energy consumption, and CO₂ emissions using AI-powered prompt optimization.</p>
+    </section>
+
+    <section class="card">
+        <h2>Input Prompt</h2>
+        <textarea id="inputPrompt" placeholder="Paste your AI prompt here..."></textarea>
+        <button onclick="optimizePrompt()">Optimize Prompt</button>
+
+        <div id="loading" class="loading">Optimizing...</div>
+    </section>
+
+    <section id="resultSection" class="card hidden">
+        <h2>Optimized Prompt</h2>
+        <textarea id="outputPrompt" readonly></textarea>
+
+        <div class="metrics">
+            <div><strong>Tokens Saved</strong><span id="tokensSaved">0</span></div>
+            <div><strong>Reduction</strong><span id="percentReduction">0%</span></div>
+            <div><strong>Energy Saved (Wh)</strong><span id="energySavedMetric">0</span></div>
+            <div><strong>CO₂ Saved (g)</strong><span id="co2SavedMetric">0</span></div>
+        </div>
+    </section>
+
+    <footer>
+        Built for sustainable and efficient AI systems
+    </footer>
+
+<script>
+async function optimizePrompt() {
+    const prompt = document.getElementById("inputPrompt").value.trim();
+    if (!prompt) {
+        alert("Please enter a prompt.");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("resultSection").classList.add("hidden");
+
+    try {
+        const response = await fetch("/optimize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || "Optimization failed");
+            return;
+        }
+
+        document.getElementById("outputPrompt").value = data.optimized_prompt;
+        document.getElementById("tokensSaved").textContent = data.tokens_saved;
+        document.getElementById("percentReduction").textContent =
+            data.percentage_reduction.toFixed(1) + "%";
+        document.getElementById("energySavedMetric").textContent =
+            data.energy_saved_wh.toFixed(6);
+        document.getElementById("co2SavedMetric").textContent =
+            data.co2_saved_g.toFixed(6);
+
+        document.getElementById("resultSection").classList.remove("hidden");
+
+    } catch {
+        alert("Network error.");
+    } finally {
+        document.getElementById("loading").style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>
