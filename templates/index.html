@@ -59,7 +59,7 @@ async function optimizePrompt() {
     document.getElementById("resultSection").classList.add("hidden");
 
     try {
-        const response = await fetch("/optimize", {
+        const response = await fetch("/api/optimize", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt })
