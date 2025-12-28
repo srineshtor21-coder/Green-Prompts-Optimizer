@@ -468,8 +468,9 @@ class PromptOptimizer:
         optimized_prompt = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         
         # Tokenize optimized
-        optimized_tokens = self.tokenizer(prompt, return_tensors="pt", truncation=True)
-        optimized_token_count = riginal_tokens.input_ids.size(1)
+        optimized_tokens = self.tokenizer(optimized_prompt, return_tensors="pt", truncation=True)
+        optimized_token_count = optimized_tokens.input_ids.size(1)
+
         
         inference_time = time.time() - start_time
         
