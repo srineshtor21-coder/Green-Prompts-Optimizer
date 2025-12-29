@@ -320,6 +320,31 @@ class PromptOptimizer:
                 conn.close()
         except:
             pass
+# ============================================================
+# GLOBAL STARTUP INITIALIZATION (Gunicorn-safe)
+# ============================================================
+
+print("=" * 80)
+print("🌿 GREEN PROMPTS OPTIMIZER - Startup Initialization")
+print("=" * 80)
+
+# Initialize databases at import time (Render-safe)
+try:
+    init_db()
+except Exception as e:
+    print(f"❌ Database initialization failed: {e}")
+
+# Initialize optimizer at import time (Gunicorn-safe)
+try:
+    print("🤖 Initializing optimizer at startup...")
+    optimizer = PromptOptimizer(CONFIG['model_path'], CONFIG['fallback_model'])
+    print(f"✅ Optimizer ready | Mode: {optimizer.model_type}")
+except Exception as e:
+    optimizer = None
+    print("❌ Optimizer failed to initialize")
+    traceback.print_exc()
+
+print("=" * 80)
 
 # AUTH ROUTES
 @app.route('/api/signup', methods=['POST', 'OPTIONS'])
@@ -455,7 +480,15 @@ def optimize_prompt():
         if not prompt:
             return jsonify({'error': 'No prompt', 'success': False}), 400
         
+        if optimizer is None:
+            return jsonify({
+                'success': False,
+                'error': 'Optimizer not available',
+                'model_status': 'offline'
+                }), 503
+
         result = optimizer.optimize(prompt)
+
         
         if not result.get('success'):
             return jsonify(result), 400
@@ -565,13 +598,6 @@ if __name__ == '__main__':
     print("=" * 80)
     print("🌿 GREEN PROMPTS OPTIMIZER - Starting...")
     print("=" * 80)
-    
-    # Initialize database
-    init_db()
-    
-    # Initialize optimizer
-    print("\n🤖 Loading AI model...")
-    optimizer = PromptOptimizer(CONFIG['model_path'], CONFIG['fallback_model'])
     
     print("\n" + "=" * 80)
     print(f"✅ Server ready on port {PORT}")
