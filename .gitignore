@@ -15,6 +15,11 @@ optimizer_model/
 *.bin
 *.safetensors
 
+# Allow trained model weights
+!models/
+!models/prompt_optimizer/
+!models/prompt_optimizer/model.safetensors
+
 # Data files
 *.json
 
