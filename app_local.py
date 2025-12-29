@@ -46,6 +46,10 @@ CONFIG = {
 PORT = int(os.environ.get('PORT', 5000))
 optimizer = None
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
 def get_db(db_name):
     try:
         conn = sqlite3.connect(db_name, timeout=30, check_same_thread=False)
@@ -59,7 +63,7 @@ def init_db():
     print("📊 Initializing databases...")
     
     # Users DB
-    conn = get_db('users.db')
+    conn = get_db(os.path.join(DATA_DIR, 'users.db'))
     if conn:
         conn.executescript('''
             CREATE TABLE IF NOT EXISTS users (
@@ -91,7 +95,7 @@ def init_db():
         print("✅ Users DB ready")
     
     # Cache DB
-    conn = get_db('cache.db')
+    conn = get_db(os.path.join(DATA_DIR, 'cache.db'))
     if conn:
         conn.executescript('''
             CREATE TABLE IF NOT EXISTS optimization_cache (
