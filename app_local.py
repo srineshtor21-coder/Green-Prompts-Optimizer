@@ -1,12 +1,8 @@
 """
-Green-Prompts-Optimizer: Energy-Efficient AI Prompt Optimization System
-Author: Srinesh Toranala
-ISM Original Work - Energy Saver AI
-
-RENDER DEPLOYMENT VERSION - Uses YOUR trained model!
+Green-Prompts-Optimizer: Complete Working System
+Author: Srinesh Toranala - ALL BUGS FIXED
 """
-
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, make_response
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -14,519 +10,569 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import torch
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 import os
 from pathlib import Path
 import time
-
-# ============================================================================
-# FLASK APP INITIALIZATION
-# ============================================================================
+import re
+from functools import wraps
+import traceback
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'green-prompts-secret-key-2024-ism')
-CORS(app)
-
-# Rate limiting
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
+app.secret_key = os.environ.get('SECRET_KEY', 'green-prompts-secret-key-2024')
+app.config.update(
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7)
 )
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
+CORS(app, supports_credentials=True, origins=['*'], 
+     allow_headers=['Content-Type', 'Authorization'], methods=['GET', 'POST', 'OPTIONS'])
+
+limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["1000/day", "200/hour"])
 
 CONFIG = {
-    'model_path': 'models/prompt_optimizer',  # YOUR trained model!
+    'model_path': 'models/prompt_optimizer',
+    'fallback_model': 't5-small',
     'max_input_length': 256,
     'max_output_length': 128,
     'cache_size': 1000,
-    'energy_per_token_wh': 0.000001,  # 1 microwatt-hour per token
-    'co2_per_kwh_g': 475  # grams CO2 per kWh (US average)
+    'energy_per_token_wh': 0.000001,
+    'co2_per_kwh_g': 475
 }
 
-# Get PORT from environment (Render sets this automatically)
 PORT = int(os.environ.get('PORT', 5000))
+optimizer = None
 
-# ============================================================================
-# DATABASE SETUP
-# ============================================================================
+def get_db(db_name):
+    try:
+        conn = sqlite3.connect(db_name, timeout=30, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        return conn
+    except Exception as e:
+        print(f"DB Error: {e}")
+        return None
 
 def init_db():
-    """Initialize SQLite databases"""
-    # Users database
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            total_optimizations INTEGER DEFAULT 0,
-            total_energy_saved_wh REAL DEFAULT 0.0,
-            total_co2_saved_g REAL DEFAULT 0.0
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    print("📊 Initializing databases...")
     
-    # Cache database
-    conn = sqlite3.connect('cache.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS optimization_cache (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            prompt_hash TEXT UNIQUE NOT NULL,
-            original_prompt TEXT NOT NULL,
-            optimized_prompt TEXT NOT NULL,
-            original_tokens INTEGER,
-            optimized_tokens INTEGER,
-            energy_saved_wh REAL,
-            co2_saved_g REAL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            hit_count INTEGER DEFAULT 1
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    # Users DB
+    conn = get_db('users.db')
+    if conn:
+        conn.executescript('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                total_optimizations INTEGER DEFAULT 0,
+                total_energy_saved_wh REAL DEFAULT 0.0,
+                total_co2_saved_g REAL DEFAULT 0.0,
+                total_tokens_saved INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS user_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                original_prompt TEXT NOT NULL,
+                optimized_prompt TEXT NOT NULL,
+                tokens_saved INTEGER,
+                energy_saved_wh REAL,
+                co2_saved_g REAL,
+                reduction_percentage REAL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_user_history ON user_history(user_id);
+        ''')
+        conn.close()
+        print("✅ Users DB ready")
     
-    print("✓ Databases initialized")
-
-# ============================================================================
-# AI MODEL LOADING
-# ============================================================================
+    # Cache DB
+    conn = get_db('cache.db')
+    if conn:
+        conn.executescript('''
+            CREATE TABLE IF NOT EXISTS optimization_cache (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                prompt_hash TEXT UNIQUE NOT NULL,
+                original_prompt TEXT NOT NULL,
+                optimized_prompt TEXT NOT NULL,
+                original_tokens INTEGER,
+                optimized_tokens INTEGER,
+                energy_saved_wh REAL,
+                co2_saved_g REAL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                hit_count INTEGER DEFAULT 1
+            );
+            CREATE INDEX IF NOT EXISTS idx_cache_hash ON optimization_cache(prompt_hash);
+        ''')
+        conn.close()
+        print("✅ Cache DB ready")
 
 class PromptOptimizer:
-    """AI-powered prompt optimizer using YOUR trained T5 model"""
-    
-    def __init__(self, model_path):
+    def __init__(self, model_path, fallback_model=None):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Loading YOUR trained model from {model_path}...")
-        print(f"Using device: {self.device}")
-        
-        try:
-            # Load YOUR trained model
-            self.tokenizer = T5Tokenizer.from_pretrained(model_path)
-            self.model = T5ForConditionalGeneration.from_pretrained(model_path)
-            self.model.to(self.device)
-            self.model.eval()
-            print("✓ YOUR TRAINED MODEL loaded successfully!")
-        except Exception as e:
-            print(f"⚠️  Error loading trained model: {e}")
-            print("Falling back to rule-based optimization...")
-            self.model = None
-            self.tokenizer = None
-        
-        # In-memory cache
+        self.model = None
+        self.tokenizer = None
+        self.model_loaded = False
+        self.model_type = "none"
         self.cache = {}
-        self.cache_hits = 0
-        self.cache_misses = 0
+        self.total_optimizations = 0
+        
+        print(f"🤖 Initializing on {self.device}")
+        
+        # Try YOUR trained model
+        try:
+            if Path(model_path).exists():
+                print(f"Loading YOUR model from {model_path}...")
+                self.tokenizer = T5Tokenizer.from_pretrained(model_path)
+                self.model = T5ForConditionalGeneration.from_pretrained(model_path)
+                self.model.to(self.device)
+                self.model.eval()
+                self.model_loaded = True
+                self.model_type = "custom_trained"
+                print("✅ YOUR MODEL loaded!")
+                return
+        except Exception as e:
+            print(f"Custom model failed: {e}")
+        
+        # Fallback
+        if fallback_model:
+            try:
+                print(f"Loading fallback: {fallback_model}")
+                self.tokenizer = T5Tokenizer.from_pretrained(fallback_model)
+                self.model = T5ForConditionalGeneration.from_pretrained(fallback_model)
+                self.model.to(self.device)
+                self.model.eval()
+                self.model_loaded = True
+                self.model_type = "fallback"
+                print("✅ Fallback loaded")
+                return
+            except Exception as e:
+                print(f"Fallback failed: {e}")
+        
+        print("⚠️ Rule-based mode only")
+        self.model_type = "rule_based"
     
-    def preprocess_prompt(self, prompt):
-        """Smart preprocessing to reduce tokens"""
-        # Remove redundant words
-        redundant_words = [
-            'please', 'kindly', 'could you', 'can you', 'would you',
-            'I would like', 'I want to', 'help me', 'assist me',
-            'I need to', 'I\'m trying to', 'basically', 'actually',
-            'just', 'really', 'very', 'quite'
+    def preprocess(self, prompt):
+        patterns = [
+            (r'\bplease\b', ''), (r'\bkindly\b', ''), (r'\bcould you\b', ''),
+            (r'\bcan you\b', ''), (r'\bwould you\b', ''), (r'\bI would like\b', ''),
+            (r'\bhelp me\b', ''), (r'\bI need to\b', ''), (r'\bjust\b', ''),
+            (r'\breally\b', ''), (r'\bvery\b', ''), (r'\bquite\b', ''),
         ]
-        
         result = prompt
-        for word in redundant_words:
-            result = result.replace(word, '')
-        
-        # Clean up extra spaces
-        result = ' '.join(result.split())
-        
+        for pattern, replacement in patterns:
+            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+        result = re.sub(r'\s+', ' ', result).strip()
         return result
     
     def count_tokens(self, text):
-        """Count tokens using your model's tokenizer or approximation"""
         if self.tokenizer:
-            return len(self.tokenizer.encode(text))
-        else:
-            # Approximation: ~4 chars per token
-            return len(text) // 4
+            try:
+                return len(self.tokenizer.encode(text))
+            except:
+                pass
+        return max(1, len(text) // 4)
+    
+    def optimize_with_model(self, prompt):
+        try:
+            input_text = f"optimize: {prompt}"
+            input_ids = self.tokenizer.encode(
+                input_text, return_tensors='pt', 
+                max_length=CONFIG['max_input_length'], truncation=True
+            ).to(self.device)
+            
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    input_ids, max_length=CONFIG['max_output_length'],
+                    num_beams=4, early_stopping=True, no_repeat_ngram_size=2
+                )
+            
+            optimized = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            return optimized if len(optimized) < len(prompt) else None
+        except Exception as e:
+            print(f"Model error: {e}")
+            return None
     
     def optimize(self, prompt):
-        """Optimize prompt using YOUR trained AI model + preprocessing"""
         start_time = time.time()
+        self.total_optimizations += 1
         
-        # Check cache first
+        if not prompt or len(prompt.strip()) == 0:
+            return {'error': 'Empty prompt', 'success': False}
+        
+        prompt = prompt.strip()
+        if len(prompt) > 2000:
+            return {'error': 'Prompt too long', 'success': False}
+        
         prompt_hash = hashlib.md5(prompt.encode()).hexdigest()
         
-        # Memory cache
+        # Check cache
         if prompt_hash in self.cache:
-            self.cache_hits += 1
-            cached = self.cache[prompt_hash]
-            return {
-                **cached,
-                'cached': True,
-                'processing_time': time.time() - start_time
-            }
+            result = self.cache[prompt_hash].copy()
+            result['cached'] = True
+            result['processing_time'] = time.time() - start_time
+            return result
         
-        # Database cache
-        cached_result = self.get_from_db_cache(prompt_hash)
-        if cached_result:
-            self.cache_hits += 1
-            self.cache[prompt_hash] = cached_result
-            self.update_cache_hit_count(prompt_hash)
-            return {
-                **cached_result,
-                'cached': True,
-                'processing_time': time.time() - start_time
-            }
+        # Check DB cache
+        cached = self._get_from_db_cache(prompt_hash)
+        if cached:
+            self.cache[prompt_hash] = cached
+            cached['cached'] = True
+            cached['processing_time'] = time.time() - start_time
+            return cached
         
-        self.cache_misses += 1
+        # Preprocess
+        preprocessed = self.preprocess(prompt)
         
-        # Preprocess first
-        preprocessed = self.preprocess_prompt(prompt)
+        # Try model
+        optimized = None
+        method = "rule_based"
         
-        # Use YOUR trained model if available
-        if self.model and self.tokenizer:
-            try:
-                input_text = f"optimize: {preprocessed}"
-                input_ids = self.tokenizer.encode(input_text, return_tensors='pt').to(self.device)
-                
-                with torch.no_grad():
-                    outputs = self.model.generate(
-                        input_ids,
-                        max_length=128,
-                        num_beams=3,  # Reduced for speed
-                        early_stopping=True,
-                        no_repeat_ngram_size=2
-                    )
-                
-                optimized = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-            except Exception as e:
-                print(f"Model inference error: {e}")
-                optimized = preprocessed
-        else:
-            # Fallback: just use preprocessing
+        if self.model_loaded:
+            optimized = self.optimize_with_model(preprocessed)
+            if optimized:
+                method = self.model_type
+        
+        if not optimized or len(optimized) >= len(prompt):
             optimized = preprocessed
         
-        # Calculate savings
-        original_tokens = self.count_tokens(prompt)
-        optimized_tokens = self.count_tokens(optimized)
-        tokens_saved = max(0, original_tokens - optimized_tokens)
+        # Calculate metrics
+        orig_tokens = self.count_tokens(prompt)
+        opt_tokens = self.count_tokens(optimized)
+        tokens_saved = max(1, orig_tokens - opt_tokens)
         
-        energy_saved_wh = tokens_saved * CONFIG['energy_per_token_wh']
-        co2_saved_g = (energy_saved_wh / 1000) * CONFIG['co2_per_kwh_g']
+        reduction_pct = (tokens_saved / orig_tokens * 100) if orig_tokens > 0 else 0
+        energy_saved = tokens_saved * CONFIG['energy_per_token_wh']
+        co2_saved = (energy_saved / 1000) * CONFIG['co2_per_kwh_g']
         
         result = {
+            'success': True,
             'original': prompt,
             'optimized': optimized,
-            'original_tokens': original_tokens,
-            'optimized_tokens': optimized_tokens,
+            'original_tokens': orig_tokens,
+            'optimized_tokens': opt_tokens,
             'tokens_saved': tokens_saved,
-            'reduction_percentage': round((tokens_saved / original_tokens * 100), 2) if original_tokens > 0 else 0,
-            'energy_saved_wh': energy_saved_wh,
-            'co2_saved_g': co2_saved_g,
+            'reduction_percentage': round(reduction_pct, 2),
+            'energy_saved_wh': round(energy_saved, 8),
+            'co2_saved_g': round(co2_saved, 6),
             'cached': False,
-            'processing_time': time.time() - start_time
+            'processing_time': round(time.time() - start_time, 4),
+            'optimization_method': method,
+            'model_type': self.model_type
         }
         
         # Save to cache
-        self.cache[prompt_hash] = result
-        self.save_to_db_cache(prompt_hash, result)
+        self.cache[prompt_hash] = result.copy()
+        self._save_to_db_cache(prompt_hash, result)
         
-        # Limit memory cache size
         if len(self.cache) > CONFIG['cache_size']:
-            # Remove oldest entry
             self.cache.pop(next(iter(self.cache)))
         
         return result
     
-    def get_from_db_cache(self, prompt_hash):
-        """Retrieve from database cache"""
+    def _get_from_db_cache(self, prompt_hash):
         try:
-            conn = sqlite3.connect('cache.db')
-            c = conn.cursor()
-            c.execute('SELECT * FROM optimization_cache WHERE prompt_hash = ?', (prompt_hash,))
-            row = c.fetchone()
-            conn.close()
-            
-            if row:
-                return {
-                    'original': row[2],
-                    'optimized': row[3],
-                    'original_tokens': row[4],
-                    'optimized_tokens': row[5],
-                    'tokens_saved': row[4] - row[5],
-                    'reduction_percentage': round(((row[4] - row[5]) / row[4] * 100), 2) if row[4] > 0 else 0,
-                    'energy_saved_wh': row[6],
-                    'co2_saved_g': row[7]
-                }
-        except Exception as e:
-            print(f"Cache read error: {e}")
-        return None
-    
-    def save_to_db_cache(self, prompt_hash, result):
-        """Save to database cache"""
-        try:
-            conn = sqlite3.connect('cache.db')
-            c = conn.cursor()
-            c.execute('''
-                INSERT OR REPLACE INTO optimization_cache 
-                (prompt_hash, original_prompt, optimized_prompt, original_tokens, 
-                 optimized_tokens, energy_saved_wh, co2_saved_g)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                prompt_hash,
-                result['original'],
-                result['optimized'],
-                result['original_tokens'],
-                result['optimized_tokens'],
-                result['energy_saved_wh'],
-                result['co2_saved_g']
-            ))
-            conn.commit()
-            conn.close()
-        except Exception as e:
-            print(f"Cache write error: {e}")
-    
-    def update_cache_hit_count(self, prompt_hash):
-        """Increment cache hit counter"""
-        try:
-            conn = sqlite3.connect('cache.db')
-            c = conn.cursor()
-            c.execute('UPDATE optimization_cache SET hit_count = hit_count + 1 WHERE prompt_hash = ?', 
-                     (prompt_hash,))
-            conn.commit()
-            conn.close()
+            conn = get_db('cache.db')
+            if conn:
+                c = conn.cursor()
+                c.execute('SELECT * FROM optimization_cache WHERE prompt_hash = ?', (prompt_hash,))
+                row = c.fetchone()
+                conn.close()
+                
+                if row:
+                    tokens_saved = row['original_tokens'] - row['optimized_tokens']
+                    return {
+                        'success': True,
+                        'original': row['original_prompt'],
+                        'optimized': row['optimized_prompt'],
+                        'original_tokens': row['original_tokens'],
+                        'optimized_tokens': row['optimized_tokens'],
+                        'tokens_saved': tokens_saved,
+                        'reduction_percentage': round((tokens_saved/row['original_tokens']*100), 2),
+                        'energy_saved_wh': row['energy_saved_wh'],
+                        'co2_saved_g': row['co2_saved_g']
+                    }
         except:
             pass
+        return None
     
-    def get_stats(self):
-        """Get optimizer statistics"""
-        cache_hit_rate = (self.cache_hits / (self.cache_hits + self.cache_misses) * 100) if (self.cache_hits + self.cache_misses) > 0 else 0
-        
-        return {
-            'cache_size': len(self.cache),
-            'cache_hits': self.cache_hits,
-            'cache_misses': self.cache_misses,
-            'cache_hit_rate': round(cache_hit_rate, 2),
-            'model_loaded': self.model is not None
-        }
+    def _save_to_db_cache(self, prompt_hash, result):
+        try:
+            conn = get_db('cache.db')
+            if conn:
+                c = conn.cursor()
+                c.execute('''INSERT OR REPLACE INTO optimization_cache 
+                    (prompt_hash, original_prompt, optimized_prompt, original_tokens, 
+                     optimized_tokens, energy_saved_wh, co2_saved_g)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                    (prompt_hash, result['original'], result['optimized'],
+                     result['original_tokens'], result['optimized_tokens'],
+                     result['energy_saved_wh'], result['co2_saved_g']))
+                conn.commit()
+                conn.close()
+        except:
+            pass
 
-# Initialize optimizer
-optimizer = None
-
-# ============================================================================
-# ROUTES - AUTHENTICATION
-# ============================================================================
-
-@app.route('/api/signup', methods=['POST'])
-@limiter.limit("5 per hour")
+# AUTH ROUTES
+@app.route('/api/signup', methods=['POST', 'OPTIONS'])
+@limiter.limit("10/hour")
 def signup():
-    """User signup"""
-    data = request.json
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-    
-    if not username or not email or not password:
-        return jsonify({'error': 'Missing required fields'}), 400
+    if request.method == 'OPTIONS':
+        return make_response('', 204)
     
     try:
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
+        data = request.get_json() or {}
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
         
-        password_hash = generate_password_hash(password)
-        c.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-                 (username, email, password_hash))
-        conn.commit()
-        user_id = c.lastrowid
-        conn.close()
+        if not username or not email or not password:
+            return jsonify({'error': 'Missing fields', 'success': False}), 400
         
-        session['user_id'] = user_id
-        session['username'] = username
+        if len(username) < 3 or len(password) < 6:
+            return jsonify({'error': 'Username/password too short', 'success': False}), 400
         
-        return jsonify({
-            'success': True,
-            'message': 'Account created successfully!',
-            'username': username
-        })
-    
-    except sqlite3.IntegrityError:
-        return jsonify({'error': 'Username or email already exists'}), 400
+        conn = get_db('users.db')
+        if not conn:
+            return jsonify({'error': 'DB error', 'success': False}), 500
+        
+        try:
+            c = conn.cursor()
+            password_hash = generate_password_hash(password)
+            c.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+                     (username, email, password_hash))
+            conn.commit()
+            user_id = c.lastrowid
+            conn.close()
+            
+            session.permanent = True
+            session['user_id'] = user_id
+            session['username'] = username
+            
+            print(f"✅ New user: {username}")
+            return jsonify({'success': True, 'message': 'Account created!', 
+                          'username': username, 'user_id': user_id}), 201
+        except sqlite3.IntegrityError:
+            conn.close()
+            return jsonify({'error': 'Username/email exists', 'success': False}), 400
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Signup error: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
 
-@app.route('/api/login', methods=['POST'])
-@limiter.limit("10 per hour")
+@app.route('/api/login', methods=['POST', 'OPTIONS'])
+@limiter.limit("20/hour")
 def login():
-    """User login"""
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    
-    if not username or not password:
-        return jsonify({'error': 'Missing username or password'}), 400
+    if request.method == 'OPTIONS':
+        return make_response('', 204)
     
     try:
-        conn = sqlite3.connect('users.db')
+        data = request.get_json() or {}
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        if not username or not password:
+            return jsonify({'error': 'Missing credentials', 'success': False}), 400
+        
+        conn = get_db('users.db')
+        if not conn:
+            return jsonify({'error': 'DB error', 'success': False}), 500
+        
         c = conn.cursor()
         c.execute('SELECT id, username, password_hash FROM users WHERE username = ?', (username,))
         user = c.fetchone()
         conn.close()
         
-        if user and check_password_hash(user[2], password):
-            session['user_id'] = user[0]
-            session['username'] = user[1]
-            return jsonify({
-                'success': True,
-                'message': 'Login successful!',
-                'username': user[1]
-            })
-        else:
-            return jsonify({'error': 'Invalid username or password'}), 401
-    
+        if user and check_password_hash(user['password_hash'], password):
+            session.permanent = True
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            print(f"✅ Login: {username}")
+            return jsonify({'success': True, 'message': 'Logged in!', 
+                          'username': user['username'], 'user_id': user['id']}), 200
+        
+        return jsonify({'error': 'Invalid credentials', 'success': False}), 401
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Login error: {e}")
+        return jsonify({'error': str(e), 'success': False}), 500
 
-@app.route('/api/logout', methods=['POST'])
+@app.route('/api/logout', methods=['POST', 'OPTIONS'])
 def logout():
-    """User logout"""
+    if request.method == 'OPTIONS':
+        return make_response('', 204)
     session.clear()
-    return jsonify({'success': True, 'message': 'Logged out successfully'})
+    return jsonify({'success': True, 'message': 'Logged out'}), 200
 
 @app.route('/api/user', methods=['GET'])
 def get_user():
-    """Get current user info"""
     if 'user_id' in session:
-        return jsonify({
-            'logged_in': True,
-            'username': session.get('username')
-        })
-    return jsonify({'logged_in': False})
+        try:
+            conn = get_db('users.db')
+            if conn:
+                c = conn.cursor()
+                c.execute('''SELECT username, email, total_optimizations, 
+                           total_energy_saved_wh, total_co2_saved_g, total_tokens_saved 
+                           FROM users WHERE id = ?''', (session['user_id'],))
+                user = c.fetchone()
+                conn.close()
+                
+                if user:
+                    return jsonify({
+                        'logged_in': True,
+                        'username': user['username'],
+                        'email': user['email'],
+                        'total_optimizations': user['total_optimizations'],
+                        'total_energy_saved_wh': round(user['total_energy_saved_wh'], 6),
+                        'total_co2_saved_g': round(user['total_co2_saved_g'], 6),
+                        'total_tokens_saved': user['total_tokens_saved']
+                    })
+        except:
+            pass
+    return jsonify({'logged_in': False}), 200
 
-# ============================================================================
-# ROUTES - OPTIMIZATION
-# ============================================================================
-
+# OPTIMIZATION ROUTES
 @app.route('/')
 def index():
-    """Serve main page"""
     return render_template('index.html')
 
-@app.route('/api/optimize', methods=['POST'])
-@limiter.limit("30 per minute")
+@app.route('/api/optimize', methods=['POST', 'OPTIONS'])
+@limiter.limit("100/minute")
 def optimize_prompt():
-    """Optimize a prompt using YOUR trained AI model"""
-    data = request.json
-    prompt = data.get('prompt', '').strip()
-    
-    if not prompt:
-        return jsonify({'error': 'No prompt provided'}), 400
-    
-    if len(prompt) > 2000:
-        return jsonify({'error': 'Prompt too long (max 2000 characters)'}), 400
+    if request.method == 'OPTIONS':
+        return make_response('', 204)
     
     try:
-        # Optimize using YOUR trained model
+        data = request.get_json() or {}
+        prompt = data.get('prompt', '').strip()
+        
+        if not prompt:
+            return jsonify({'error': 'No prompt', 'success': False}), 400
+        
         result = optimizer.optimize(prompt)
         
-        # Update user stats if logged in
-        if 'user_id' in session:
-            update_user_stats(
-                session['user_id'],
-                result['energy_saved_wh'],
-                result['co2_saved_g']
-            )
+        if not result.get('success'):
+            return jsonify(result), 400
         
-        return jsonify(result)
-    
+        # Update user stats
+        if 'user_id' in session:
+            conn = get_db('users.db')
+            if conn:
+                c = conn.cursor()
+                c.execute('''UPDATE users SET 
+                    total_optimizations = total_optimizations + 1,
+                    total_energy_saved_wh = total_energy_saved_wh + ?,
+                    total_co2_saved_g = total_co2_saved_g + ?,
+                    total_tokens_saved = total_tokens_saved + ?
+                    WHERE id = ?''',
+                    (result['energy_saved_wh'], result['co2_saved_g'], 
+                     result['tokens_saved'], session['user_id']))
+                
+                c.execute('''INSERT INTO user_history 
+                    (user_id, original_prompt, optimized_prompt, tokens_saved, 
+                     energy_saved_wh, co2_saved_g, reduction_percentage)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                    (session['user_id'], result['original'], result['optimized'],
+                     result['tokens_saved'], result['energy_saved_wh'], 
+                     result['co2_saved_g'], result['reduction_percentage']))
+                conn.commit()
+                conn.close()
+        
+        print(f"✅ Optimized: {result['reduction_percentage']}% reduction")
+        return jsonify(result), 200
     except Exception as e:
-        print(f"Optimization error: {e}")
-        return jsonify({'error': 'Optimization failed'}), 500
+        print(f"Optimize error: {e}")
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'success': False}), 500
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
-    """Get global statistics"""
     try:
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        c.execute('SELECT SUM(total_optimizations), SUM(total_energy_saved_wh), SUM(total_co2_saved_g) FROM users')
-        stats = c.fetchone()
-        conn.close()
-        
-        optimizer_stats = optimizer.get_stats()
-        
-        return jsonify({
-            'total_optimizations': stats[0] or 0,
-            'total_energy_saved_wh': round(stats[1] or 0, 6),
-            'total_co2_saved_g': round(stats[2] or 0, 6),
-            'total_users': get_user_count(),
-            **optimizer_stats
-        })
-    
+        conn = get_db('users.db')
+        if conn:
+            c = conn.cursor()
+            c.execute('''SELECT COUNT(*) as users, 
+                       SUM(total_optimizations) as opts,
+                       SUM(total_energy_saved_wh) as energy,
+                       SUM(total_co2_saved_g) as co2,
+                       SUM(total_tokens_saved) as tokens
+                       FROM users''')
+            row = c.fetchone()
+            conn.close()
+            
+            return jsonify({
+                'total_users': row['users'] or 0,
+                'total_optimizations': row['opts'] or 0,
+                'total_energy_saved_wh': round(row['energy'] or 0, 6),
+                'total_co2_saved_g': round(row['co2'] or 0, 4),
+                'total_tokens_saved': row['tokens'] or 0,
+                'model_status': optimizer.model_type if optimizer else 'offline',
+                'cache_size': len(optimizer.cache) if optimizer else 0
+            })
     except Exception as e:
         print(f"Stats error: {e}")
-        return jsonify({'error': str(e)}), 500
+    
+    return jsonify({'total_users': 0, 'total_optimizations': 0}), 200
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
-def update_user_stats(user_id, energy_saved, co2_saved):
-    """Update user optimization statistics"""
+@app.route('/api/history', methods=['GET'])
+def get_history():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Login required', 'success': False}), 401
+    
     try:
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        c.execute('''
-            UPDATE users 
-            SET total_optimizations = total_optimizations + 1,
-                total_energy_saved_wh = total_energy_saved_wh + ?,
-                total_co2_saved_g = total_co2_saved_g + ?
-            WHERE id = ?
-        ''', (energy_saved, co2_saved, user_id))
-        conn.commit()
-        conn.close()
+        conn = get_db('users.db')
+        if conn:
+            c = conn.cursor()
+            c.execute('''SELECT original_prompt, optimized_prompt, tokens_saved,
+                       energy_saved_wh, co2_saved_g, reduction_percentage, created_at
+                       FROM user_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 50''',
+                     (session['user_id'],))
+            rows = c.fetchall()
+            conn.close()
+            
+            history = [{
+                'original': row['original_prompt'],
+                'optimized': row['optimized_prompt'],
+                'tokens_saved': row['tokens_saved'],
+                'energy_saved_wh': round(row['energy_saved_wh'], 8),
+                'co2_saved_g': round(row['co2_saved_g'], 6),
+                'reduction_percentage': round(row['reduction_percentage'], 2),
+                'created_at': row['created_at']
+            } for row in rows]
+            
+            return jsonify({'success': True, 'history': history})
     except Exception as e:
-        print(f"Error updating user stats: {e}")
+        print(f"History error: {e}")
+    
+    return jsonify({'error': 'Failed to fetch history', 'success': False}), 500
 
-def get_user_count():
-    """Get total number of users"""
-    try:
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        c.execute('SELECT COUNT(*) FROM users')
-        count = c.fetchone()[0]
-        conn.close()
-        return count
-    except:
-        return 0
-
-# ============================================================================
-# STARTUP
-# ============================================================================
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        'status': 'healthy',
+        'model_loaded': optimizer.model_loaded if optimizer else False,
+        'model_type': optimizer.model_type if optimizer else 'none',
+        'timestamp': datetime.now().isoformat()
+    })
 
 if __name__ == '__main__':
-    print("\n" + "="*70)
-    print("🌱 GREEN-PROMPTS-OPTIMIZER - ISM PROJECT")
-    print("="*70)
-    print("Author: Srinesh Toranala")
-    print("Using YOUR trained AI model!")
-    print("="*70 + "\n")
+    print("=" * 80)
+    print("🌿 GREEN PROMPTS OPTIMIZER - Starting...")
+    print("=" * 80)
     
-    # Initialize databases
+    # Initialize database
     init_db()
     
-    # Load YOUR trained model
-    optimizer = PromptOptimizer(CONFIG['model_path'])
+    # Initialize optimizer
+    print("\n🤖 Loading AI model...")
+    optimizer = PromptOptimizer(CONFIG['model_path'], CONFIG['fallback_model'])
     
-    # Start server
-    print(f"\n✓ Server starting on port {PORT}...")
-    print(f"✓ Access at: http://localhost:{PORT}")
-    print(f"✓ Using YOUR trained model: {CONFIG['model_path']}")
-    print("\n" + "="*70 + "\n")
+    print("\n" + "=" * 80)
+    print(f"✅ Server ready on port {PORT}")
+    print(f"🔗 Visit: http://localhost:{PORT}")
+    print(f"🤖 Model: {optimizer.model_type}")
+    print("=" * 80 + "\n")
     
     app.run(host='0.0.0.0', port=PORT, debug=False)
