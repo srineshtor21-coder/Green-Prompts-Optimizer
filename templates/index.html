@@ -2,94 +2,951 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GreenPrompts Optimizer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
-<body>
-    <nav class="navbar">
-        <div class="logo">🌱 GreenPrompts</div>
-        <div class="nav-links">
-            <span class="active">Optimizer</span>
-            <span>How It Works</span>
-            <span>Documentation</span>
-            <span>Research</span>
-        </div>
-    </nav>
-
-    <section class="hero">
-        <h1>Optimize AI Prompts</h1>
-        <p>Reduce token usage, energy consumption, and CO₂ emissions using AI-powered prompt optimization.</p>
-    </section>
-
-    <section class="card">
-        <h2>Input Prompt</h2>
-        <textarea id="inputPrompt" placeholder="Paste your AI prompt here..."></textarea>
-        <button onclick="optimizePrompt()">Optimize Prompt</button>
-
-        <div id="loading" class="loading">Optimizing...</div>
-    </section>
-
-    <section id="resultSection" class="card hidden">
-        <h2>Optimized Prompt</h2>
-        <textarea id="outputPrompt" readonly></textarea>
-
-        <div class="metrics">
-            <div><strong>Tokens Saved</strong><span id="tokensSaved">0</span></div>
-            <div><strong>Reduction</strong><span id="percentReduction">0%</span></div>
-            <div><strong>Energy Saved (Wh)</strong><span id="energySavedMetric">0</span></div>
-            <div><strong>CO₂ Saved (g)</strong><span id="co2SavedMetric">0</span></div>
-        </div>
-    </section>
-
-    <footer>
-        Built for sustainable and efficient AI systems
-    </footer>
-
-<script>
-async function optimizePrompt() {
-    const prompt = document.getElementById("inputPrompt").value.trim();
-    if (!prompt) {
-        alert("Please enter a prompt.");
-        return;
-    }
-
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("resultSection").classList.add("hidden");
-
-    try {
-        const response = await fetch("/api/optimize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            alert(data.error || "Optimization failed");
-            return;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green-Prompts-Optimizer | Energy Saver AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        document.getElementById("outputPrompt").value = data.optimized_prompt;
-        document.getElementById("tokensSaved").textContent = data.tokens_saved;
-        document.getElementById("percentReduction").textContent =
-            data.percentage_reduction.toFixed(1) + "%";
-        document.getElementById("energySavedMetric").textContent =
-            data.energy_saved_wh.toFixed(6);
-        document.getElementById("co2SavedMetric").textContent =
-            data.co2_saved_g.toFixed(6);
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --secondary-color: #3b82f6;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-light: #f1f5f9;
+            --text-gray: #cbd5e1;
+            --accent-green: #34d399;
+            --accent-blue: #60a5fa;
+            --gradient-1: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            --gradient-2: linear-gradient(135deg, #059669 0%, #2563eb 100%);
+        }
 
-        document.getElementById("resultSection").classList.remove("hidden");
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-    } catch {
-        alert("Network error.");
-    } finally {
-        document.getElementById("loading").style.display = "none";
-    }
-}
-</script>
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--dark-bg);
+            overflow: hidden;
+        }
 
+        .background-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Header */
+        header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-green);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1400px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Optimizer Section */
+        .optimizer-container {
+            max-width: 900px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .optimizer-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-light);
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            margin-top: 0.25rem;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(16, 185, 129, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            color: var(--accent-green);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+        }
+
+        /* User Dashboard */
+        .dashboard {
+            display: none;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .welcome-banner {
+            background: var(--gradient-1);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .history-section {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+        }
+
+        .history-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .optimizer-card {
+                padding: 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--primary-color);
+            color: var(--accent-green);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <div class="logo-icon">🌱</div>
+                Green-Prompts-Optimizer
+            </div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#optimizer">Optimizer</a>
+                <a href="#features">Features</a>
+                <a href="#stats">Statistics</a>
+            </div>
+            <div class="auth-buttons" id="authButtons">
+                <button class="btn-secondary" onclick="showLoginModal()">Login</button>
+                <button class="btn-primary" onclick="showSignupModal()">Sign Up</button>
+            </div>
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <span id="usernameDisplay"></span>
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <h1>⚡ Energy Saver AI</h1>
+        <p>Optimize your AI prompts, reduce energy consumption, and save the planet—one token at a time.</p>
+        <button class="btn-primary" onclick="scrollToOptimizer()" style="padding: 1rem 2rem; font-size: 1.1rem;">
+            Get Started →
+        </button>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="stats-grid" id="stats">
+        <div class="stat-card">
+            <div class="stat-value" id="totalUsers">0</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalPrompts">0</div>
+            <div class="stat-label">Prompts Optimized</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="energySaved">0</div>
+            <div class="stat-label">Energy Saved (Wh)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="co2Saved">0</div>
+            <div class="stat-label">CO₂ Saved (g)</div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-grid" id="features">
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Smart Optimization</h3>
+            <p>Advanced T5 model trained on 127 prompt pairs to reduce token count while preserving meaning.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Energy Tracking</h3>
+            <p>Real-time calculation of energy savings and CO₂ reduction for every optimization.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💾</div>
+            <h3>Intelligent Caching</h3>
+            <p>Reuses previous optimizations to save even more energy and provide instant results.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Personal Dashboard</h3>
+            <p>Track your impact with detailed statistics and optimization history.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🌍</div>
+            <h3>Environmental Impact</h3>
+            <p>See the real-world environmental impact of your AI usage reduction.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure & Private</h3>
+            <p>Your data is encrypted and stored securely with user authentication.</p>
+        </div>
+    </section>
+
+    <!-- Optimizer Section -->
+    <section class="optimizer-container" id="optimizer">
+        <div class="optimizer-card">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: var(--accent-green);">
+                ✨ Optimize Your Prompt
+            </h2>
+
+            <div class="alert alert-success" id="alertSuccess"></div>
+            <div class="alert alert-error" id="alertError"></div>
+
+            <div class="input-group">
+                <label for="inputPrompt">Enter your prompt:</label>
+                <textarea id="inputPrompt" rows="5" placeholder="Type your prompt here... (e.g., 'Can you please help me understand how to write a Python function?')"></textarea>
+            </div>
+
+            <button class="btn-primary" onclick="optimizePrompt()" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                🚀 Optimize Prompt
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Optimizing your prompt...</p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <h3 style="color: var(--accent-green); margin-bottom: 1rem;">✅ Optimization Complete!</h3>
+                
+                <div class="input-group">
+                    <label>Optimized Prompt:</label>
+                    <textarea id="outputPrompt" rows="3" readonly></textarea>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value" id="tokensSaved">0</div>
+                        <div class="metric-label">Tokens Saved</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="percentReduction">0%</div>
+                        <div class="metric-label">Reduction</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="energySavedMetric">0</div>
+                        <div class="metric-label">Energy Saved (Wh)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="co2SavedMetric">0</div>
+                        <div class="metric-label">CO₂ Saved (g)</div>
+                    </div>
+                </div>
+
+                <button class="btn-secondary" onclick="copyToClipboard()" style="width: 100%; margin-top: 1rem;">
+                    📋 Copy Optimized Prompt
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('loginModal')">×</button>
+            <div class="modal-header">
+                <h2>Welcome Back!</h2>
+                <p style="color: var(--text-gray);">Login to track your impact</p>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+            <button class="btn-primary" onclick="login()" style="width: 100%;">Login</button>
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-gray);">
+                Don't have an account? <a href="#" onclick="switchToSignup()" style="color: var(--accent-green);">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signupModal')">×</button>
+            <div class="modal-header">
+                <h2>Join Us!</h2>
+                <p style="color: var(--text-gray);">Start saving energy today</p>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="signupUsername" placeholder="Choose username">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="signupEmail" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signupPassword" placeholder="Choose password (min 6 characters)">
+            </div>
+            <button class="btn-primary" onclick="signup()" style="width: 100%;">Sign Up</button>
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-gray);">
+                Already have an account? <a href="#" onclick="switchToLogin()" style="color: var(--accent-green);">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Load stats on page load
+        loadStats();
+
+        function loadStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalUsers').textContent = data.total_users || 0;
+                    document.getElementById('totalPrompts').textContent = data.total_prompts_optimized || 0;
+                    document.getElementById('energySaved').textContent = (data.total_energy_saved_wh || 0).toFixed(2);
+                    document.getElementById('co2Saved').textContent = (data.total_co2_saved_g || 0).toFixed(2);
+                });
+        }
+
+        function scrollToOptimizer() {
+            document.getElementById('optimizer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function showSignupModal() {
+            document.getElementById('signupModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function switchToSignup() {
+            closeModal('loginModal');
+            showSignupModal();
+        }
+
+        function switchToLogin() {
+            closeModal('signupModal');
+            showLoginModal();
+        }
+
+        function showAlert(message, type) {
+            const alertId = type === 'success' ? 'alertSuccess' : 'alertError';
+            const alertEl = document.getElementById(alertId);
+            alertEl.textContent = message;
+            alertEl.classList.add('active');
+            setTimeout(() => alertEl.classList.remove('active'), 5000);
+        }
+
+        async function signup() {
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                closeModal('signupModal');
+                showAlert('Account created successfully!', 'success');
+                updateAuthUI(username);
+            } else {
+                showAlert(data.error || 'Signup failed', 'error');
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                closeModal('loginModal');
+                showAlert('Login successful!', 'success');
+                updateAuthUI(username);
+            } else {
+                showAlert(data.error || 'Login failed', 'error');
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            showAlert('Logged out successfully', 'success');
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('userMenu').style.display = 'none';
+        }
+
+        function updateAuthUI(username) {
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('userMenu').style.display = 'flex';
+            document.getElementById('usernameDisplay').textContent = `👤 ${username}`;
+        }
+
+        async function optimizePrompt() {
+            const prompt = document.getElementById('inputPrompt').value.trim();
+
+            if (!prompt) {
+                showAlert('Please enter a prompt', 'error');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('resultSection').classList.remove('active');
+
+            try {
+                const response = await fetch('/api/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('outputPrompt').value = data.optimized_prompt;
+                    document.getElementById('tokensSaved').textContent = data.tokens_saved;
+                    document.getElementById('percentReduction').textContent = data.percentage_reduction.toFixed(1) + '%';
+                    document.getElementById('energySavedMetric').textContent = data.energy_saved_wh.toFixed(6);
+                    document.getElementById('co2SavedMetric').textContent = data.co2_saved_g.toFixed(6);
+
+                    document.getElementById('resultSection').classList.add('active');
+                    loadStats(); // Refresh global stats
+
+                    if (data.from_cache) {
+                        showAlert('✨ Result loaded from cache - extra energy saved!', 'success');
+                    }
+                } else {
+                    showAlert(data.error || 'Optimization failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('outputPrompt').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('Copied to clipboard!', 'success');
+            });
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const container = document.querySelector('.background-animation');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.width = Math.random() * 10 + 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.background = Math.random() > 0.5 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(59, 130, 246, 0.3)';
+                particle.style.animation = `float ${Math.random() * 3 + 2}s ease-in-out infinite`;
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+    </script>
 </body>
 </html>
