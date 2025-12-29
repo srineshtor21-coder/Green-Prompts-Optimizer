@@ -405,8 +405,7 @@ class PromptOptimizer:
         prompt_lower = prompt.lower()
         for phrase in redundant_phrases:
             prompt_lower = prompt_lower.replace(phrase, '')
-        prompt_lower = re.sub(r'\s+', ' ', prompt_lower).strip()
-
+        
         # Reconstruct with proper capitalization
         if len(prompt_lower) > 0:
             prompt = prompt_lower[0].upper() + prompt_lower[1:]
@@ -445,9 +444,8 @@ class PromptOptimizer:
         preprocessed = self.preprocess_prompt(prompt)
         
         # Tokenize original
-        original_tokens = self.tokenizer(prompt, return_tensors="pt", truncation=True)
-        original_token_count = original_tokens.input_ids.size(1)
-
+        original_tokens = self.tokenizer.encode(prompt, return_tensors="pt")
+        original_token_count = len(original_tokens[0])
         
         # Prepare input for model
         input_text = f"optimize: {preprocessed}"
@@ -468,9 +466,8 @@ class PromptOptimizer:
         optimized_prompt = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         
         # Tokenize optimized
-        optimized_tokens = self.tokenizer(optimized_prompt, return_tensors="pt", truncation=True)
-        optimized_token_count = optimized_tokens.input_ids.size(1)
-
+        optimized_tokens = self.tokenizer.encode(optimized_prompt, return_tensors="pt")
+        optimized_token_count = len(optimized_tokens[0])
         
         inference_time = time.time() - start_time
         
@@ -802,10 +799,7 @@ def not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return jsonify({'error': 'Internal server error'}), 500
-    
-@app.errorhandler(Exception)
-def handle_all_errors(e):
-    return jsonify({'error': str(e)}), 500
+
 # ============================================================================
 # MAIN EXECUTION
 # ============================================================================
