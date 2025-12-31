@@ -33,6 +33,13 @@ CORS(app, supports_credentials=True, origins=['*'],
 
 limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["1000/day", "200/hour"])
 
+# Initialize database when app starts (for gunicorn workers)
+@app.before_request
+def initialize_database():
+    if not hasattr(app, 'db_initialized'):
+        init_db()
+        app.db_initialized = True
+
 CONFIG = {
     'model_path': 'models/prompt_optimizer',
     'fallback_model': 't5-small',
@@ -127,7 +134,13 @@ class PromptOptimizer:
         
         print(f"🤖 Initializing on {self.device}")
         
-        # Try YOUR trained model
+        # SKIP MODEL LOADING ON RENDER (free tier can't handle it)
+        if os.environ.get('RENDER') or os.environ.get('PORT') == '10000':
+            print("⚠️ Running on Render - Rule-based optimization only (model in repo)")
+            self.model_type = "rule_based"
+            return
+        
+        # Try trained model (only loads locally)
         try:
             if Path(model_path).exists():
                 print(f"Loading YOUR model from {model_path}...")
@@ -598,6 +611,13 @@ if __name__ == '__main__':
     print("=" * 80)
     print("🌿 GREEN PROMPTS OPTIMIZER - Starting...")
     print("=" * 80)
+    
+    # Initialize database FIRST
+    init_db()
+    
+    # Initialize optimizer
+    print("\n🤖 Loading AI model...")
+    optimizer = PromptOptimizer(CONFIG['model_path'], CONFIG['fallback_model'])
     
     print("\n" + "=" * 80)
     print(f"✅ Server ready on port {PORT}")
