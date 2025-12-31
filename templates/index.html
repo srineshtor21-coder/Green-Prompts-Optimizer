@@ -783,10 +783,11 @@
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('totalUsers').textContent = data.total_users || 0;
-                    document.getElementById('totalPrompts').textContent = data.total_prompts_optimized || 0;
+                    document.getElementById('totalPrompts').textContent = data.total_optimizations || 0;  // FIXED
                     document.getElementById('energySaved').textContent = (data.total_energy_saved_wh || 0).toFixed(2);
                     document.getElementById('co2Saved').textContent = (data.total_co2_saved_g || 0).toFixed(2);
-                });
+                })
+                .catch(err => console.error('Stats error:', err));
         }
 
         function scrollToOptimizer() {
@@ -900,28 +901,28 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    document.getElementById('outputPrompt').value = data.optimized_prompt;
+                    document.getElementById('outputPrompt').value = data.optimized;
                     document.getElementById('tokensSaved').textContent = data.tokens_saved;
-                    document.getElementById('percentReduction').textContent = data.percentage_reduction.toFixed(1) + '%';
+                    document.getElementById('percentReduction').textContent = data.reduction_percentage.toFixed(1) + '%';
                     document.getElementById('energySavedMetric').textContent = data.energy_saved_wh.toFixed(6);
                     document.getElementById('co2SavedMetric').textContent = data.co2_saved_g.toFixed(6);
-
                     document.getElementById('resultSection').classList.add('active');
-                    loadStats(); // Refresh global stats
+                    loadStats(); 
 
-                    if (data.from_cache) {
+                    if (data.cached) {
                         showAlert('✨ Result loaded from cache - extra energy saved!', 'success');
                     }
                 } else {
                     showAlert(data.error || 'Optimization failed', 'error');
                 }
             } catch (error) {
+                console.error('Optimization error:', error);
                 showAlert('Network error. Please try again.', 'error');
             } finally {
                 document.getElementById('loading').classList.remove('active');
             }
         }
-
+        
         function copyToClipboard() {
             const text = document.getElementById('outputPrompt').value;
             navigator.clipboard.writeText(text).then(() => {
