@@ -24,7 +24,7 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
 Large AI models consume significant energy due to computational demands. Many prompts are unnecessarily complex, using more tokens than needed. **Green-Prompts-Optimizer** is an AI-driven application that:
 
@@ -50,7 +50,7 @@ An intelligent T5-based model trained on 127 carefully crafted prompt pairs that
 
 ---
 
-## ✨ Features
+## Features
 
 ### Core Features
 - **Smart Optimization:** T5 transformer model trained on 127 prompt optimization pairs
@@ -74,7 +74,7 @@ An intelligent T5-based model trained on 127 carefully crafted prompt pairs that
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Green-Prompts-Optimizer/
@@ -110,7 +110,7 @@ Green-Prompts-Optimizer/
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -152,7 +152,7 @@ mkdir data models cache templates
 
 ---
 
-## 🎓 Training the Model
+## Training the Model
 
 ### Step 1: Generate Training Dataset
 
@@ -228,7 +228,7 @@ The trained model will be saved to `models/prompt_optimizer/`.
 
 ---
 
-## 💻 Running the Application
+## Running the Application
 
 ### Development Server
 
@@ -268,7 +268,7 @@ http://localhost:5000
 
 ---
 
-## 🔌 Chrome Extension Setup
+## Chrome Extension Setup
 
 ### Step 1: Prepare Extension Files
 
@@ -318,7 +318,7 @@ const API_URL = 'http://localhost:5000';
 
 ---
 
-## 🌐 Deploying to Render
+## Deploying to Render
 
 ### Step 1: Prepare for Deployment
 
@@ -368,7 +368,7 @@ Add these in Render dashboard if needed:
 
 ---
 
-## 📚 API Documentation
+## API Documentation
 
 ### Base URL
 ```
@@ -515,7 +515,7 @@ Two-tier caching:
 
 ---
 
-## 📊 ISM Project Documentation
+## ISM Project Documentation
 
 ### Project Goal
 
@@ -558,7 +558,7 @@ Design and implement an AI-driven application that analyzes, optimizes, and trac
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 This is an ISM project by Srinesh Toranala. For questions or feedback, please contact through school channels.
 
@@ -570,7 +570,7 @@ This project is created for educational purposes as part of an ISM (Independent 
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Hugging Face:** For T5 model and transformers library
 - **Zeus Library:** For energy calculation inspiration
@@ -579,7 +579,7 @@ This project is created for educational purposes as part of an ISM (Independent 
 
 ---
 
-## 📞 Support
+## Support
 
 For technical issues or questions:
 1. Check the documentation above
