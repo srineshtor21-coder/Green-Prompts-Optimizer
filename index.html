@@ -3,175 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green-Prompts-Optimizer | Energy Saver AI</title>
+    <title>Green Prompts Optimizer | Energy Saver AI</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            margin: 0;
-            font-family: Inter, Arial, sans-serif;
-            background: radial-gradient(circle at top, #0f766e, #020617);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f766e 0%, #020617 100%);
             color: #e5e7eb;
+            min-height: 100vh;
         }
+
+        /* Navbar */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 40px;
-            background: rgba(2, 6, 23, 0.85);
+            padding: 1rem 3rem;
+            background: rgba(2, 6, 23, 0.8);
             backdrop-filter: blur(10px);
         }
+
         .logo {
-            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #22c55e;
         }
-        .nav-links span {
-            margin-left: 24px;
-            color: #94a3b8;
-            cursor: pointer;
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
         }
-        .nav-links .active {
+
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
             color: #22c55e;
         }
+
+        /* Hero Section */
         .hero {
             text-align: center;
-            padding: 70px 20px 40px;
-        }
-        .hero h1 {
-            font-size: 42px;
-            margin-bottom: 12px;
-        }
-        .hero p {
-            color: #cbd5f5;
-            max-width: 700px;
-            margin: auto;
-        }
-        .card {
+            padding: 4rem 2rem 3rem;
             max-width: 900px;
-            margin: 30px auto;
-            padding: 28px;
-            background: rgba(2, 6, 23, 0.9);
-            border-radius: 14px;
-            border: 1px solid #1e293b;
+            margin: 0 auto;
         }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        /* Main Card */
+        .main-card {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #22c55e;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e5e7eb;
+            font-weight: 500;
+        }
+
         textarea {
             width: 100%;
-            height: 140px;
-            margin-top: 12px;
+            padding: 1rem;
             background: #020617;
             border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 14px;
+            border-radius: 0.5rem;
             color: #e5e7eb;
-            font-size: 14px;
+            font-size: 0.95rem;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
         }
+
+        textarea:focus {
+            outline: none;
+            border-color: #22c55e;
+        }
+
+        textarea[readonly] {
+            background: #0f172a;
+            cursor: default;
+        }
+
         button {
-            margin-top: 16px;
-            padding: 14px 24px;
+            margin-top: 1rem;
+            padding: 0.875rem 1.5rem;
             background: linear-gradient(135deg, #22c55e, #4ade80);
             border: none;
-            border-radius: 10px;
-            font-size: 15px;
+            border-radius: 0.5rem;
+            color: #022c22;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            color: #022c22;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.3s, transform 0.2s;
         }
+
         button:hover {
             opacity: 0.9;
+            transform: translateY(-1px);
         }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .loading {
             display: none;
-            margin-top: 14px;
-            color: #94a3b8;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            text-align: center;
         }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(34, 197, 94, 0.3);
+            border-top-color: #22c55e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
+        .results {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .results.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results h3 {
+            color: #22c55e;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Metrics Grid */
         .metrics {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-            margin-top: 24px;
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
-        .metrics div {
+
+        .metric {
             background: #020617;
-            padding: 16px;
-            border-radius: 10px;
+            padding: 1rem;
+            border-radius: 0.5rem;
             border: 1px solid #334155;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
-        .hidden {
-            display: none;
+
+        .metric-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
         }
+
+        .metric-value {
+            color: #22c55e;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .copy-btn {
+            width: 100%;
+            margin-top: 1rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+
+        .copy-btn:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+
+        /* Footer */
         footer {
             text-align: center;
-            padding: 30px;
-            color: #94a3b8;
-            font-size: 13px;
+            padding: 3rem 2rem;
+            color: #64748b;
+            font-size: 0.9rem;
         }
-        .result-card {
-            margin-top: 20px;
-            padding: 20px;
+
+        footer a {
+            color: #22c55e;
+            text-decoration: none;
+        }
+
+        /* Alert Messages */
+        .alert {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .alert-success {
             background: rgba(34, 197, 94, 0.1);
-            border-radius: 10px;
-            border: 1px solid #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .main-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar">
-        <div class="logo">🌱 Green Prompts Optimizer</div>
+        <div class="logo">
+            🌱 Green Prompts Optimizer
+        </div>
         <div class="nav-links">
-            <span class="active">Home</span>
-            <span>About</span>
-            <span>Stats</span>
+            <a href="#" class="active">Home</a>
+            <a href="#about">About</a>
+            <a href="#stats">Stats</a>
         </div>
     </nav>
 
-    <div class="hero">
+    <!-- Hero Section -->
+    <section class="hero">
         <h1>⚡ Energy Saver AI</h1>
         <p>Optimize your AI prompts, reduce energy consumption, and save the planet—one token at a time.</p>
-    </div>
+    </section>
 
-    <div class="card">
-        <h2 style="color: #22c55e; margin-bottom: 16px;">✨ Optimize Your Prompt</h2>
-        
-        <label for="inputPrompt" style="color: #cbd5e1;">Enter your prompt:</label>
-        <textarea id="inputPrompt" placeholder="Type your prompt here..."></textarea>
-        
-        <button onclick="optimizePrompt()">🚀 Optimize Prompt</button>
-        
-        <div class="loading" id="loading">⏳ Optimizing your prompt...</div>
-        
-        <div id="resultSection" class="hidden">
-            <div class="result-card">
-                <h3 style="color: #22c55e;">✅ Optimized Prompt:</h3>
-                <textarea id="outputPrompt" readonly></textarea>
-                
-                <div class="metrics">
-                    <div>
-                        <span>Tokens Saved:</span>
-                        <strong id="tokensSaved">0</strong>
-                    </div>
-                    <div>
-                        <span>Reduction:</span>
-                        <strong id="percentReduction">0%</strong>
-                    </div>
-                    <div>
-                        <span>Energy Saved (Wh):</span>
-                        <strong id="energySaved">0</strong>
-                    </div>
-                    <div>
-                        <span>CO₂ Saved (g):</span>
-                        <strong id="co2Saved">0</strong>
-                    </div>
+    <!-- Main Optimizer Card -->
+    <div class="main-card">
+        <div class="card-header">
+            ✨ Optimize Your Prompt
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertError" class="alert alert-error"></div>
+        <div id="alertSuccess" class="alert alert-success"></div>
+
+        <!-- Input Section -->
+        <div>
+            <label for="inputPrompt">Enter your prompt:</label>
+            <textarea 
+                id="inputPrompt" 
+                placeholder="Whats up my homy can you explain how I can read and write much better"
+            ></textarea>
+        </div>
+
+        <button id="optimizeBtn" onclick="optimizePrompt()">
+            🚀 Optimize Prompt
+        </button>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <span class="spinner"></span>
+            Optimizing your prompt...
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results">
+            <h3>✅ Optimized Prompt:</h3>
+            <textarea id="outputPrompt" readonly></textarea>
+
+            <div class="metrics">
+                <div class="metric">
+                    <span class="metric-label">Tokens Saved:</span>
+                    <span class="metric-value" id="tokensSaved">0</span>
                 </div>
-                
-                <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                <div class="metric">
+                    <span class="metric-label">Reduction:</span>
+                    <span class="metric-value" id="reduction">0%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Energy Saved (Wh):</span>
+                    <span class="metric-value" id="energySaved">0.00</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">CO₂ Saved (g):</span>
+                    <span class="metric-value" id="co2Saved">0.00</span>
+                </div>
             </div>
+
+            <button class="copy-btn" onclick="copyToClipboard()">
+                📋 Copy to Clipboard
+            </button>
         </div>
     </div>
 
+    <!-- Footer -->
     <footer>
         Created by Srinesh Toranala | ISM Original Work 2024-2025<br>
         Reducing AI's carbon footprint, one prompt at a time 🌍
@@ -179,59 +399,84 @@
 
     <script>
         const API_URL = 'https://greenprompts.onrender.com/';
-        
+
+        function showAlert(message, type) {
+            const alertId = type === 'error' ? 'alertError' : 'alertSuccess';
+            const alert = document.getElementById(alertId);
+            alert.textContent = message;
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
         async function optimizePrompt() {
             const prompt = document.getElementById('inputPrompt').value.trim();
             
             if (!prompt) {
-                alert('Please enter a prompt!');
+                showAlert('Please enter a prompt to optimize!', 'error');
                 return;
             }
-            
+
             // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('resultSection').classList.add('hidden');
-            
+            const btn = document.getElementById('optimizeBtn');
+            btn.disabled = true;
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+
             try {
                 const response = await fetch(`${API_URL}/api/optimize`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok && data.success) {
                     // Display results
                     document.getElementById('outputPrompt').value = data.optimized;
                     document.getElementById('tokensSaved').textContent = data.tokens_saved;
-                    document.getElementById('percentReduction').textContent = data.reduction_percentage.toFixed(1) + '%';
+                    document.getElementById('reduction').textContent = data.reduction_percentage.toFixed(1) + '%';
                     document.getElementById('energySaved').textContent = data.energy_saved_wh.toFixed(6);
-                    document.getElementById('co2Saved').textContent = data.co2_saved_g.toFixed(6);
-                    
-                    // Show results
-                    document.getElementById('resultSection').classList.remove('hidden');
+                    document.getElementById('co2Saved').textContent = data.co2_saved_g.toFixed(4);
+
+                    // Show results section
+                    document.getElementById('results').classList.add('active');
+
+                    if (data.cached) {
+                        showAlert('✨ Result from cache - extra energy saved!', 'success');
+                    }
                 } else {
-                    alert('Error: ' + (data.error || 'Optimization failed'));
+                    showAlert(data.error || 'Optimization failed. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Network error. Is your backend running?');
+                showAlert('Unable to connect to server. Please try again later.', 'error');
             } finally {
                 // Hide loading
-                document.getElementById('loading').style.display = 'none';
+                btn.disabled = false;
+                document.getElementById('loading').classList.remove('active');
             }
         }
-        
+
         function copyToClipboard() {
             const text = document.getElementById('outputPrompt').value;
             navigator.clipboard.writeText(text).then(() => {
-                alert('✅ Copied to clipboard!');
+                showAlert('✅ Copied to clipboard!', 'success');
             }).catch(err => {
                 console.error('Copy failed:', err);
-                alert('Failed to copy');
+                showAlert('Failed to copy. Please try manually.', 'error');
             });
         }
+
+        // Allow Enter key to optimize (Ctrl+Enter for newline)
+        document.getElementById('inputPrompt').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                e.preventDefault();
+                optimizePrompt();
+            }
+        });
     </script>
 </body>
 </html>
