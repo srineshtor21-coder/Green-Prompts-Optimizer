@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics | Green Prompts Optimizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #10b981;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-light: #f1f5f9;
+            --text-gray: #cbd5e1;
+            --accent-green: #34d399;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--dark-bg);
+            overflow: hidden;
+        }
+        .background-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.1));
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+            animation: float-bubble 20s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        @keyframes float-bubble {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.6;
+            }
+            25% {
+                transform: translateY(-40px) translateX(30px) scale(1.1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-20px) translateX(-20px) scale(0.9);
+                opacity: 0.7;
+            }
+            75% {
+                transform: translateY(-50px) translateX(40px) scale(1.05);
+                opacity: 0.75;
+            }
+        }
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
+            animation: wave 15s ease-in-out infinite;
+        }
+        .wave:nth-child(2) {
+            background: linear-gradient(to top, rgba(59, 130, 246, 0.08), transparent);
+            animation: wave 20s ease-in-out infinite reverse;
+        }
+        @keyframes wave {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+            50% {
+                transform: translateX(-25%) translateY(-10px);
+            }
+        }
+        header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--accent-green); }
+        .container {
+            max-width: 1400px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+        .hero-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+        }
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 1rem 0;
+        }
+        .chart-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        .chart-label {
+            width: 150px;
+            font-weight: 600;
+        }
+        .chart-bar-bg {
+            flex: 1;
+            height: 30px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 0 1rem;
+        }
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .leaderboard {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .leaderboard-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 50px;
+        }
+        .rank.gold { color: #fbbf24; }
+        .rank.silver { color: #d1d5db; }
+        .rank.bronze { color: #f97316; }
+        .milestone-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin: 2rem 0;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .milestone-progress {
+            margin: 2rem 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="wave-container">
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    <header>
+        <nav>
+            <div class="logo">
+                <div class="logo-icon">🌱</div>
+                Green Prompts Optimizer
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="impact.html">Impact</a>
+                <a href="stats.html">Stats</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="hero-section">
+            <h1>📊 Statistics Dashboard</h1>
+            <p style="font-size: 1.2rem; color: var(--text-gray);">
+                Real-time metrics and community achievements
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">2,547</div>
+                <div style="color: var(--text-gray);">Total Optimizations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value">15,234</div>
+                <div style="color: var(--text-gray);">Tokens Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value">12.4</div>
+                <div style="color: var(--text-gray);">Watt-hours Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🌍</div>
+                <div class="stat-value">8.7</div>
+                <div style="color: var(--text-gray);">Grams CO₂ Reduced</div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2 style="color: var(--accent-green); margin-bottom: 2rem;">📈 Optimization by Category</h2>
+            
+            <div class="chart-bar">
+                <div class="chart-label">💻 Coding</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 45%;">45%</div>
+                </div>
+            </div>
+
+            <div class="chart-bar">
+                <div class="chart-label">✍️ Writing</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 30%;">30%</div>
+                </div>
+            </div>
+
+            <div class="chart-bar">
+                <div class="chart-label">🔍 Analysis</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 15%;">15%</div>
+                </div>
+            </div>
+
+            <div class="chart-bar">
+                <div class="chart-label">💬 General</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 10%;">10%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2 style="color: var(--accent-green); margin-bottom: 2rem;">📉 Average Token Reduction</h2>
+            
+            <div class="chart-bar">
+                <div class="chart-label">Week 1</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 35%;">35%</div>
+                </div>
+            </div>
+
+            <div class="chart-bar">
+                <div class="chart-label">Week 2</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 38%;">38%</div>
+                </div>
+            </div>
+
+            <div class="chart-bar">
+                <div class="chart-label">Week 3</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 42%;">42%</div>
+                </div>
+            </div>
+
+            <div class="chart-bar">
+                <div class="chart-label">Week 4</div>
+                <div class="chart-bar-bg">
+                    <div class="chart-bar-fill" style="width: 40%;">40%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h2 style="color: var(--accent-green); margin-bottom: 2rem;">🏆 Top Energy Savers</h2>
+            
+            <div class="leaderboard-item">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="rank gold">🥇</div>
+                    <div>
+                        <div style="font-weight: 600;">EcoWarrior</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">127 optimizations</div>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
+                    0.98 Wh saved
+                </div>
+            </div>
+
+            <div class="leaderboard-item">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="rank silver">🥈</div>
+                    <div>
+                        <div style="font-weight: 600;">GreenCoder</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">98 optimizations</div>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
+                    0.76 Wh saved
+                </div>
+            </div>
+
+            <div class="leaderboard-item">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="rank bronze">🥉</div>
+                    <div>
+                        <div style="font-weight: 600;">PromptMaster</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">84 optimizations</div>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
+                    0.65 Wh saved
+                </div>
+            </div>
+
+            <div class="leaderboard-item">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="rank">4</div>
+                    <div>
+                        <div style="font-weight: 600;">TokenSaver</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">72 optimizations</div>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
+                    0.56 Wh saved
+                </div>
+            </div>
+
+            <div class="leaderboard-item">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="rank">5</div>
+                    <div>
+                        <div style="font-weight: 600;">AIOptimizer</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">65 optimizations</div>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
+                    0.51 Wh saved
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-card">
+            <h2 style="color: var(--accent-green); margin-bottom: 1rem;">🎯 Community Milestone Progress</h2>
+            <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                Next Goal: 20,000 tokens saved
+            </p>
+            
+            <div class="milestone-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 76.17%;">
+                        15,234 / 20,000
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem;">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">✅</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">10K Milestone</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">✅</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">15K Milestone</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-gray);">⏳</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">20K Goal</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 3rem 0;">
+            <h2 style="color: var(--accent-green); margin-bottom: 1rem;">🚀 Join the Movement</h2>
+            <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                Help us reach the next milestone
+            </p>
+            <a href="index.html#optimizer" style="display: inline-block; padding: 1rem 2rem; background: linear-gradient(135deg, #10b981, #3b82f6); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                Start Optimizing →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Create floating bubbles
+        function createBubbles() {
+            const bg = document.querySelector('.background-animation');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 15 + 5; // Small bubbles: 5-20px
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = Math.random() * 100 + '%';
+                bubble.style.animationDelay = Math.random() * 5 + 's';
+                bubble.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                bg.appendChild(bubble);
+            }
+        }
+        createBubbles();
+    </script>
+</body>
+</html>
