@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Impact | Green Prompts Optimizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #10b981;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-light: #f1f5f9;
+            --text-gray: #cbd5e1;
+            --accent-green: #34d399;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--dark-bg);
+            overflow: hidden;
+        }
+        .background-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.1));
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+            animation: float-bubble 20s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        @keyframes float-bubble {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.6;
+            }
+            25% {
+                transform: translateY(-40px) translateX(30px) scale(1.1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-20px) translateX(-20px) scale(0.9);
+                opacity: 0.7;
+            }
+            75% {
+                transform: translateY(-50px) translateX(40px) scale(1.05);
+                opacity: 0.75;
+            }
+        }
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
+            animation: wave 15s ease-in-out infinite;
+        }
+        .wave:nth-child(2) {
+            background: linear-gradient(to top, rgba(59, 130, 246, 0.08), transparent);
+            animation: wave 20s ease-in-out infinite reverse;
+        }
+        @keyframes wave {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+            50% {
+                transform: translateX(-25%) translateY(-10px);
+            }
+        }
+        header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--accent-green); }
+        .container {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+        .hero-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .impact-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .impact-card:hover {
+            transform: translateY(-5px);
+        }
+        .impact-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .impact-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent-green);
+            margin: 1rem 0;
+        }
+        .comparison-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            transition: width 1s ease-out;
+        }
+        .stat-highlight {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .fact-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="wave-container">
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    <header>
+        <nav>
+            <div class="logo">
+                <div class="logo-icon">🌱</div>
+                Green Prompts Optimizer
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="impact.html">Impact</a>
+                <a href="stats.html">Stats</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="hero-section">
+            <h1>🌍 Environmental Impact</h1>
+            <p style="font-size: 1.2rem; color: var(--text-gray);">
+                The real-world effect of optimizing AI prompts
+            </p>
+        </div>
+
+        <div class="stat-highlight">
+            <h2 style="color: var(--accent-green); margin-bottom: 1rem;">Collective Impact So Far</h2>
+            <div class="impact-grid">
+                <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">15,234</div>
+                    <div style="color: var(--text-gray);">Tokens Saved</div>
+                </div>
+                <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">12.4 Wh</div>
+                    <div style="color: var(--text-gray);">Energy Saved</div>
+                </div>
+                <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">8.7g</div>
+                    <div style="color: var(--text-gray);">CO₂ Reduced</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-card">
+            <h2 style="color: var(--accent-green); margin-bottom: 1.5rem;">⚡ Energy Comparisons</h2>
+            <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                Our collective savings are equivalent to:
+            </p>
+            
+            <div class="comparison-item">
+                <div>
+                    <div style="font-weight: 600;">💡 LED Bulb Runtime</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">10W LED bulb for 1.24 hours</div>
+                </div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">1.24h</div>
+            </div>
+
+            <div class="comparison-item">
+                <div>
+                    <div style="font-weight: 600;">📱 Phone Charges</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">Full charges of an iPhone 15</div>
+                </div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">~1</div>
+            </div>
+
+            <div class="comparison-item">
+                <div>
+                    <div style="font-weight: 600;">🌳 Trees Planted Equivalent</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">CO₂ absorbed by trees in a year</div>
+                </div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">0.0004</div>
+            </div>
+        </div>
+
+        <div class="comparison-card">
+            <h2 style="color: var(--accent-green); margin-bottom: 1.5rem;">📊 AI Energy Facts</h2>
+            
+            <div class="fact-card">
+                <h3>🔥 Training vs. Usage</h3>
+                <p>While training GPT-3 consumed ~1,287 MWh (equal to 120 US homes for a year), 
+                the cumulative energy from billions of daily queries is now far greater.</p>
+            </div>
+
+            <div class="fact-card">
+                <h3>💻 Per-Query Impact</h3>
+                <p>A single ChatGPT query uses approximately 2.9 Wh, about 10x more than a Google search (0.3 Wh). 
+                With millions of queries daily, optimization makes a real difference.</p>
+            </div>
+
+            <div class="fact-card">
+                <h3>🌍 Global Scale</h3>
+                <p>Data centers (which power AI) already consume 1-2% of global electricity. 
+                This is projected to reach 3-8% by 2030 as AI adoption grows.</p>
+            </div>
+
+            <div class="fact-card">
+                <h3>♻️ Carbon Intensity</h3>
+                <p>AI's carbon footprint depends on where it runs. The same model query generates 
+                30% more CO₂ in coal-powered regions vs. renewable-powered data centers.</p>
+            </div>
+        </div>
+
+        <div class="comparison-card">
+            <h2 style="color: var(--accent-green); margin-bottom: 1.5rem;">🎯 Why Optimization Matters</h2>
+            
+            <div style="margin: 1rem 0;">
+                <h3 style="margin-bottom: 0.5rem;">Token Reduction = Direct Energy Savings</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 40%;"></div>
+                </div>
+                <p style="color: var(--text-gray); font-size: 0.9rem;">
+                    Average 40% token reduction means 40% less computation per query
+                </p>
+            </div>
+
+            <div style="margin: 2rem 0;">
+                <h3 style="margin-bottom: 0.5rem;">Scaling Effect</h3>
+                <p>If 10,000 users optimize just 10 prompts each:</p>
+                <ul style="list-style: none; margin-top: 1rem;">
+                    <li style="padding: 0.5rem 0;">✅ ~400,000 tokens saved</li>
+                    <li style="padding: 0.5rem 0;">✅ ~325 Wh energy saved</li>
+                    <li style="padding: 0.5rem 0;">✅ ~228g CO₂ prevented</li>
+                    <li style="padding: 0.5rem 0;">✅ Equivalent to 32 phone charges</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="stat-highlight">
+            <h2 style="color: var(--accent-green); margin-bottom: 1rem;">🚀 Your Personal Impact</h2>
+            <p style="margin-bottom: 1.5rem;">Start optimizing prompts today and watch your impact grow</p>
+            <a href="index.html#optimizer" style="display: inline-block; padding: 1rem 2rem; background: linear-gradient(135deg, #10b981, #3b82f6); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                Optimize Now →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Create floating bubbles
+        function createBubbles() {
+            const bg = document.querySelector('.background-animation');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 15 + 5; // Small bubbles: 5-20px
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = Math.random() * 100 + '%';
+                bubble.style.animationDelay = Math.random() * 5 + 's';
+                bubble.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                bg.appendChild(bubble);
+            }
+        }
+        createBubbles();
+    </script>
+</body>
+</html>
