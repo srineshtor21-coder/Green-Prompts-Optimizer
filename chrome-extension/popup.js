@@ -1,5 +1,5 @@
-// Chrome Extension Popup Logic
-const API_URL = 'http://localhost:3001/api'; // Change to your deployed URL
+
+const API_URL = 'https://srineshtor21-coder.github.io/Green-Prompts-Optimizer/';
 
 // Get elements
 const loginSection = document.getElementById('loginSection');
