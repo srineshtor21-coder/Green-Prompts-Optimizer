@@ -238,6 +238,10 @@
             transform: translateY(-8px);
             box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
         }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
         .stat-value {
             font-size: 2.5rem;
             font-weight: bold;
@@ -262,6 +266,7 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 3rem;
             font-weight: 700;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
         .features-grid {
             display: grid;
@@ -312,12 +317,156 @@
             margin-bottom: 2rem;
         }
         
-        .gradio-container {
+        /* Error/Success messages */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
+        }
+        
+        /* Input area */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            display: block;
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        textarea {
             width: 100%;
-            min-height: 600px;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+        
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            color: var(--text-gray);
+            cursor: pointer;
+        }
+        
+        /* Button */
+        .btn-optimize {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
             border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-optimize:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+        .btn-optimize:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        .loading-spinner {
+            border: 3px solid rgba(16, 185, 129, 0.1);
+            border-top: 3px solid var(--accent-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Results section */
+        .results {
+            display: none;
+            margin-top: 2rem;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .result-card {
+            background: rgba(16, 185, 129, 0.05);
+            padding: 1.5rem;
             border-radius: 12px;
-            overflow: hidden;
+            text-align: center;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .result-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+        
+        .optimized-output {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin-top: 1rem;
+        }
+        .optimized-output h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+        .output-text {
+            color: var(--text-light);
+            line-height: 1.6;
         }
         
         /* Footer */
@@ -430,18 +579,59 @@
         
         <div class="optimizer-section" id="optimizer">
             <h2>✨ Optimize Your Prompt</h2>
-            <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
-                Enter your prompt below and watch the magic happen!
-            </p>
             
-            <!-- Embed Gradio directly -->
-            <iframe 
-                src="https://sirenice-greenpromptsoptimizer.hf.space"
-                frameborder="0" 
-                width="100%" 
-                height="700px"
-                class="gradio-container"
-            ></iframe>
+            <div id="errorMessage" class="message error"></div>
+            <div id="successMessage" class="message success"></div>
+            
+            <div class="input-group">
+                <label for="promptInput">Enter your prompt:</label>
+                <textarea 
+                    id="promptInput" 
+                    placeholder="Type your prompt here..."
+                ></textarea>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="preserveMeaning" checked>
+                <label for="preserveMeaning">
+                    <strong>Preserve Meaning (Recommended)</strong> - Keeps more context, reduces less aggressively
+                </label>
+            </div>
+            
+            <button class="btn-optimize" id="optimizeBtn">
+                🚀 Optimize Prompt
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Optimizing your prompt...</p>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">Tokens Saved</div>
+                        <div class="result-value" id="tokensSaved">0</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Reduction</div>
+                        <div class="result-value" id="reduction">0%</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Energy Saved</div>
+                        <div class="result-value" id="energySaved">0 Wh</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">CO₂ Saved</div>
+                        <div class="result-value" id="co2Saved">0g</div>
+                    </div>
+                </div>
+                
+                <div class="optimized-output">
+                    <h3>Optimized Prompt:</h3>
+                    <div class="output-text" id="optimizedText"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -451,7 +641,10 @@
         <p>Making AI more sustainable, one prompt at a time 🌍</p>
     </footer>
 
-    <script>
+    <!-- Import Gradio Client -->
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.0.0/dist/index.min.js";
+
         // Create floating bubbles
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
@@ -470,7 +663,15 @@
         }
         createBubbles();
 
-        // Smooth scroll
+        // Highlight active navigation
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            }
+        });
+
+        // Smooth scroll for Get Started button
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -483,6 +684,98 @@
                 }
             });
         });
+
+        // Optimizer functionality
+        const optimizeBtn = document.getElementById('optimizeBtn');
+        const promptInput = document.getElementById('promptInput');
+        const preserveMeaning = document.getElementById('preserveMeaning');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        optimizeBtn.addEventListener('click', optimizePrompt);
+        
+        // Allow Enter key to optimize
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                optimizePrompt();
+            }
+        });
+
+        async function optimizePrompt() {
+            const prompt = promptInput.value.trim();
+            
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Validation
+            if (!prompt) {
+                showError('Please enter a prompt to optimize');
+                return;
+            }
+            
+            // Show loading
+            optimizeBtn.disabled = true;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            
+            try {
+                // Connect to your Hugging Face Space using Gradio Client
+                const client = await Client.connect("sirenice/GreenPromptsOptimizer");
+                
+                // Call the predict function
+                const result = await client.predict("/predict", {
+                    prompt: prompt,
+                    preserve_meaning: preserveMeaning.checked
+                });
+                
+                // Extract results from the response
+                // Result structure: [optimized_text, token_info, tokens_saved, reduction%, energy, co2]
+                const data = result.data;
+                
+                const optimizedText = data[0];
+                const tokenInfo = data[1];
+                const tokensSaved = data[2];
+                const reductionPercent = data[3];
+                const energySaved = data[4];
+                const co2Saved = data[5];
+                
+                // Display results
+                document.getElementById('tokensSaved').textContent = tokensSaved;
+                document.getElementById('reduction').textContent = reductionPercent;
+                document.getElementById('energySaved').textContent = energySaved;
+                document.getElementById('co2Saved').textContent = co2Saved;
+                document.getElementById('optimizedText').textContent = optimizedText;
+                
+                results.style.display = 'block';
+                showSuccess('✅ Prompt optimized successfully!');
+                
+            } catch (error) {
+                console.error('Optimization error:', error);
+                showError('Unable to connect to the optimization service. Please make sure your Hugging Face Space is running and try again.');
+            } finally {
+                optimizeBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
     </script>
 </body>
 </html>
