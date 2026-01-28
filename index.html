@@ -3,38 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green Prompts Optimizer | Energy Saver AI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <title>Home | 🌱 Green Prompts Optimizer</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary-color: #10b981;
-            --primary-dark: #059669;
-            --secondary-color: #3b82f6;
             --dark-bg: #0f172a;
             --card-bg: #1e293b;
             --text-light: #f1f5f9;
             --text-gray: #cbd5e1;
             --accent-green: #34d399;
-            --accent-blue: #60a5fa;
         }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--dark-bg);
             color: var(--text-light);
             line-height: 1.6;
         }
-
-        /* Animated Background */
+        
+        /* Background animations */
         .background-animation {
             position: fixed;
             top: 0;
@@ -45,7 +32,6 @@
             background: var(--dark-bg);
             overflow: hidden;
         }
-
         .background-animation::before {
             content: '';
             position: absolute;
@@ -57,13 +43,11 @@
                         radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
             animation: rotate 20s linear infinite;
         }
-
         @keyframes rotate {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Floating Bubbles */
+        
         .bubble {
             position: absolute;
             border-radius: 50%;
@@ -73,7 +57,6 @@
             pointer-events: none;
             opacity: 0.4;
         }
-
         @keyframes float-bubble {
             0%, 100% { 
                 transform: translateY(0) translateX(0) scale(1);
@@ -92,8 +75,7 @@
                 opacity: 0.75;
             }
         }
-
-        /* Waving effect */
+        
         .wave-container {
             position: fixed;
             bottom: 0;
@@ -103,7 +85,6 @@
             z-index: -1;
             overflow: hidden;
         }
-
         .wave {
             position: absolute;
             bottom: 0;
@@ -113,12 +94,10 @@
             background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
             animation: wave 15s ease-in-out infinite;
         }
-
         .wave:nth-child(2) {
             background: linear-gradient(to top, rgba(59, 130, 246, 0.08), transparent);
             animation: wave 20s ease-in-out infinite reverse;
         }
-
         @keyframes wave {
             0%, 100% {
                 transform: translateX(0) translateY(0);
@@ -127,19 +106,16 @@
                 transform: translateX(-25%) translateY(-10px);
             }
         }
-
-        /* Header with Enhanced Navigation */
+        
+        /* Header with navigation indicator */
         header {
             background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(10px);
             padding: 1rem 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
         }
-
         nav {
             display: flex;
             justify-content: space-between;
@@ -147,544 +123,320 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-
         .logo {
             font-size: 1.5rem;
-            font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
+            font-weight: bold;
             background: linear-gradient(135deg, #10b981, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            letter-spacing: -0.02em;
         }
-
         .logo-icon {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: linear-gradient(135deg, #10b981, #3b82f6);
-            border-radius: 10px;
+            border-radius: 8px;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
-
-        .nav-links {
-            display: flex;
-            gap: 0.5rem;
+        .nav-links { 
+            display: flex; 
+            gap: 2rem; 
         }
-
         .nav-links a {
             color: var(--text-gray);
             text-decoration: none;
-            transition: all 0.3s;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            transition: color 0.3s;
             position: relative;
-            font-size: 0.95rem;
+            padding-bottom: 5px;
         }
-
-        /* Active Navigation Indicator */
-        .nav-links a::after {
+        .nav-links a:hover { 
+            color: var(--accent-green); 
+        }
+        /* Active navigation indicator - green line */
+        .nav-links a.active::after {
             content: '';
             position: absolute;
-            bottom: -0.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
             height: 3px;
             background: linear-gradient(90deg, #10b981, #3b82f6);
             border-radius: 2px;
-            transition: width 0.3s ease;
         }
-
-        .nav-links a.active::after {
-            width: 80%;
-        }
-
-        .nav-links a.active {
-            color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        /* Hero Section */
-        .hero {
+        
+        /* Main content */
+        .container {
             max-width: 1400px;
-            margin: 4rem auto;
+            margin: 0 auto;
             padding: 0 2rem;
-            text-align: center;
         }
-
+        
+        /* Hero section */
+        .hero {
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+        }
         .hero h1 {
             font-size: 4rem;
-            font-family: 'Space Grotesk', sans-serif;
-            margin-bottom: 1rem;
             background: linear-gradient(135deg, #10b981, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: slideDown 0.8s ease-out;
+            margin-bottom: 1rem;
             font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
         }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero p {
-            font-size: 1.3rem;
+        .hero-subtitle {
+            font-size: 1.5rem;
             color: var(--text-gray);
-            margin-bottom: 2rem;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 3rem;
         }
-
-        button {
-            padding: 0.8rem 1.8rem;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-        }
-
-        /* Stats Grid */
+        
+        /* Stats cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
-            max-width: 1200px;
-            margin: 3rem auto;
-            padding: 0 2rem;
+            margin: 4rem 0;
         }
-
         .stat-card {
             background: var(--card-bg);
-            padding: 2.5rem 2rem;
-            border-radius: 20px;
+            padding: 2rem;
+            border-radius: 16px;
             text-align: center;
-            transition: all 0.3s;
             border: 1px solid rgba(16, 185, 129, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
-            transform: scaleX(0);
             transition: transform 0.3s;
         }
-
-        .stat-card:hover::before {
-            transform: scaleX(1);
-        }
-
         .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.25);
-            border-color: var(--accent-green);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
         }
-
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
         .stat-value {
-            font-size: 3rem;
-            font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
             background: linear-gradient(135deg, #10b981, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
         }
-
         .stat-label {
             color: var(--text-gray);
             margin-top: 0.5rem;
-            font-size: 0.95rem;
         }
-
-        /* Features Grid */
-        .features-section {
-            max-width: 1200px;
-            margin: 6rem auto;
-            padding: 0 2rem;
+        
+        /* Features section */
+        .features {
+            margin: 6rem 0;
         }
-
-        .section-title {
+        .features h2 {
             text-align: center;
             font-size: 2.5rem;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
+            color: var(--accent-green);
             margin-bottom: 3rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
-
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
         }
-
         .feature-card {
             background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 20px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: all 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1), transparent);
-            border-radius: 50%;
-            transform: translate(50%, -50%);
-            transition: all 0.4s;
-        }
-
-        .feature-card:hover::after {
-            width: 200px;
-            height: 200px;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.25);
-            border-color: var(--accent-green);
-        }
-
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
+            padding: 2rem;
             border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
-
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
         .feature-card h3 {
             color: var(--accent-green);
             margin-bottom: 1rem;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 600;
         }
-
-        .feature-card p {
-            color: var(--text-gray);
-            line-height: 1.7;
-        }
-
-        /* Optimizer Section */
-        .optimizer-container {
-            max-width: 1000px;
-            margin: 6rem auto;
-            padding: 0 2rem;
-        }
-
-        .optimizer-card {
+        
+        /* Optimizer section */
+        .optimizer-section {
             background: var(--card-bg);
-            border-radius: 24px;
             padding: 3rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin: 4rem 0;
             border: 1px solid rgba(16, 185, 129, 0.2);
         }
-
-        .optimizer-title {
+        .optimizer-section h2 {
             text-align: center;
-            font-size: 2rem;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            margin-bottom: 2rem;
+            font-size: 2.5rem;
             color: var(--accent-green);
-        }
-
-        .input-group {
             margin-bottom: 2rem;
         }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.8rem;
-            color: var(--accent-green);
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 2px solid rgba(16, 185, 129, 0.3);
-            background: rgba(15, 23, 42, 0.5);
-            color: var(--text-light);
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            resize: vertical;
-            transition: all 0.3s;
-            line-height: 1.6;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
-        }
-
-        .checkbox-group {
-            margin: 1.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
+        
+        /* Error/Success messages */
+        .message {
             padding: 1rem;
-            background: rgba(16, 185, 129, 0.05);
-            border-radius: 10px;
-            border: 1px solid rgba(16, 185, 129, 0.15);
-        }
-
-        .checkbox-group input {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--primary-color);
-            cursor: pointer;
-        }
-
-        .checkbox-group label {
-            margin: 0 !important;
-            font-weight: 500 !important;
-            cursor: pointer;
-            color: var(--text-light) !important;
-        }
-
-        .result-section {
-            margin-top: 2rem;
-            padding: 2.5rem;
-            background: rgba(16, 185, 129, 0.05);
-            border-radius: 16px;
-            border: 2px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            margin-bottom: 1rem;
             display: none;
         }
-
-        .result-section.active {
-            display: block;
-            animation: fadeIn 0.5s;
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-title {
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             color: var(--accent-green);
+        }
+        
+        /* Input area */
+        .input-group {
             margin-bottom: 1.5rem;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
+        }
+        .input-group label {
+            display: block;
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
             font-weight: 600;
         }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.2rem;
-            margin-top: 1.5rem;
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
         }
-
-        .metric {
-            text-align: center;
-            padding: 1.5rem;
-            background: rgba(30, 41, 59, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: all 0.3s;
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
         }
-
-        .metric:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
+        
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
         }
-
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
-            color: var(--accent-green);
-            margin-bottom: 0.3rem;
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
-
-        .metric-label {
-            font-size: 0.85rem;
+        .checkbox-group label {
             color: var(--text-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            cursor: pointer;
         }
-
+        
+        /* Button */
+        .btn-optimize {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-optimize:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+        .btn-optimize:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Loading indicator */
         .loading {
             display: none;
             text-align: center;
-            padding: 3rem;
+            padding: 2rem;
         }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid rgba(16, 185, 129, 0.1);
-            border-top: 4px solid var(--primary-color);
+        .loading-spinner {
+            border: 3px solid rgba(16, 185, 129, 0.1);
+            border-top: 3px solid var(--accent-green);
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 1rem;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .loading-text {
-            color: var(--text-gray);
-            font-size: 1.1rem;
-        }
-
-        .alert {
-            padding: 1.2rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
+        
+        /* Results section */
+        .results {
             display: none;
-            font-weight: 500;
+            margin-top: 2rem;
         }
-
-        .alert.active {
-            display: block;
-            animation: slideIn 0.3s;
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid var(--primary-color);
-            color: var(--accent-green);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid #ef4444;
-            color: #fca5a5;
-        }
-
-        footer {
+        .result-card {
+            background: rgba(16, 185, 129, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
             text-align: center;
-            padding: 4rem 2rem 3rem;
-            color: #64748b;
-            border-top: 1px solid rgba(16, 185, 129, 0.1);
-            margin-top: 6rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
-
-        footer p {
+        .result-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
             margin-bottom: 0.5rem;
         }
-
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+        
+        .optimized-output {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin-top: 1rem;
+        }
+        .optimized-output h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+        .output-text {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 { 
-                font-size: 2.5rem; 
+            .hero h1 {
+                font-size: 2.5rem;
             }
-            
-            .hero p {
-                font-size: 1.1rem;
+            .hero-subtitle {
+                font-size: 1.2rem;
             }
-            
-            .optimizer-card { 
-                padding: 2rem; 
-            }
-            
-            .metrics-grid { 
-                grid-template-columns: 1fr; 
-            }
-            
             .nav-links {
-                gap: 0.3rem;
-            }
-            
-            .nav-links a {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.85rem;
-            }
-            
-            .stat-value {
-                font-size: 2.2rem;
+                gap: 1rem;
             }
         }
     </style>
@@ -695,7 +447,7 @@
         <div class="wave"></div>
         <div class="wave"></div>
     </div>
-
+    
     <header>
         <nav>
             <div class="logo">
@@ -710,149 +462,121 @@
             </div>
         </nav>
     </header>
+    
+    <div class="container">
+        <section class="hero">
+            <h1>⚡ Energy Saver AI</h1>
+            <p>Optimize your AI prompts, reduce energy consumption, and save the planet—one token at a time.</p>
+            <button class="btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="document.getElementById('optimizer').scrollIntoView({behavior: 'smooth'})">
+                Get Started →
+            </button>
+        </section>
 
-    <section class="hero">
-        <h1>⚡ Energy Saver AI</h1>
-        <p>Optimize your AI prompts, reduce energy consumption, and save the planet—one token at a time.</p>
-        <button class="btn-primary" style="padding: 1.1rem 2.5rem; font-size: 1.1rem;" onclick="document.getElementById('optimizer').scrollIntoView({behavior: 'smooth'})">
-            Get Started →
-        </button>
-    </section>
-
-    <section class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" id="stat-prompts">2,547</div>
-            <div class="stat-label">Prompts Optimized</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-tokens">15,234</div>
-            <div class="stat-label">Tokens Saved</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-energy">12.4</div>
-            <div class="stat-label">Energy Saved (Wh)</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-co2">8.7</div>
-            <div class="stat-label">CO₂ Saved (g)</div>
-        </div>
-    </section>
-
-    <section class="features-section">
-        <h2 class="section-title">Why Choose Green Prompts?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>Smart Optimization</h3>
-                <p>T5 model trained on 127 prompt pairs to reduce token count while preserving meaning and context.</p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">30-50%</div>
+                <div class="stat-label">Token Reduction</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Energy Tracking</h3>
-                <p>Real-time calculation of energy savings and CO₂ reduction for every single optimization.</p>
+            <div class="stat-card">
+                <div class="stat-value">15,234</div>
+                <div class="stat-label">Tokens Saved</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <h3>Environmental Impact</h3>
-                <p>See the real-world environmental impact of your AI usage reduction in tangible metrics.</p>
+            <div class="stat-card">
+                <div class="stat-value">12.4 Wh</div>
+                <div class="stat-label">Energy Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8.7g</div>
+                <div class="stat-label">CO₂ Reduced</div>
             </div>
         </div>
-    </section>
 
-    <section class="optimizer-container" id="optimizer">
-        <div class="optimizer-card">
-            <h2 class="optimizer-title">✨ Optimize Your Prompt</h2>
+        <div class="features">
+            <h2>Why Choose Green Prompts?</h2>
+            <div class="features-grid">
+                <section class="features-grid">
+                    <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Optimization</h3>
+                    <p>T5 model trained on 127 prompt pairs to reduce token count while preserving meaning.</p>
+                    </div>
+                    <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Energy Tracking</h3>
+                    <p>Real-time calculation of energy savings and CO₂ reduction for every optimization.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3>Environmental Impact</h3>
+                        <p>See the real-world environmental impact of your AI usage reduction.</p>
+                    </div>
+                </section>
+        </div>
 
-            <div class="alert alert-success" id="alertSuccess"></div>
-            <div class="alert alert-error" id="alertError"></div>
-
+        
+        <div class="optimizer-section" id="optimizer">
+            <h2>✨ Optimize Your Prompt</h2>
+            
+            <div id="errorMessage" class="message error"></div>
+            <div id="successMessage" class="message success"></div>
+            
             <div class="input-group">
-                <label for="inputPrompt">Enter your prompt:</label>
+                <label for="promptInput">Enter your prompt:</label>
                 <textarea 
-                    id="inputPrompt" 
-                    rows="6" 
-                    placeholder="Type your prompt here..."
+                    id="promptInput" 
+                    placeholder="Type your prompt here...'"
                 ></textarea>
             </div>
-
+            
             <div class="checkbox-group">
                 <input type="checkbox" id="preserveMeaning" checked>
-                <label for="preserveMeaning">Preserve Meaning (Recommended) - Keeps more context, reduces less aggressively</label>
+                <label for="preserveMeaning">
+                    <strong>Preserve Meaning (Recommended)</strong> - Keeps more context, reduces less aggressively
+                </label>
             </div>
-
-            <button class="btn-primary" onclick="optimizePrompt()" style="width: 100%; padding: 1.2rem; font-size: 1.05rem;">
+            
+            <button class="btn-optimize" id="optimizeBtn">
                 🚀 Optimize Prompt
             </button>
-
+            
             <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p class="loading-text">Optimizing with your T5 model...</p>
+                <div class="loading-spinner"></div>
+                <p>Optimizing your prompt...</p>
             </div>
-
-            <div class="result-section" id="resultSection">
-                <h3 class="result-title">✅ Optimized Prompt</h3>
+            
+            <div class="results" id="results">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">Tokens Saved</div>
+                        <div class="result-value" id="tokensSaved">0</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Reduction</div>
+                        <div class="result-value" id="reduction">0%</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Energy Saved</div>
+                        <div class="result-value" id="energySaved">0 Wh</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">CO₂ Saved</div>
+                        <div class="result-value" id="co2Saved">0g</div>
+                    </div>
+                </div>
                 
-                <div class="input-group">
-                    <textarea id="outputPrompt" rows="4" readonly></textarea>
+                <div class="optimized-output">
+                    <h3>Optimized Prompt:</h3>
+                    <div class="output-text" id="optimizedText"></div>
                 </div>
-
-                <div class="metrics-grid">
-                    <div class="metric">
-                        <div class="metric-value" id="tokensSaved">0</div>
-                        <div class="metric-label">Tokens Saved</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="reduction">0%</div>
-                        <div class="metric-label">Reduction</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="energySaved">0.00</div>
-                        <div class="metric-label">Energy (Wh)</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="co2Saved">0.00</div>
-                        <div class="metric-label">CO₂ (g)</div>
-                    </div>
-                </div>
-
-                <button class="btn-primary" onclick="copyToClipboard()" style="width: 100%; margin-top: 1.5rem; padding: 1rem;">
-                    📋 Copy to Clipboard
-                </button>
             </div>
         </div>
-    </section>
-
-    <footer>
-        <p><strong>Created by Srinesh Toranala</strong> | ISM Original Work 2025-2026</p>
-        <p>Reducing AI's carbon footprint, one prompt at a time 🌍</p>
-    </footer>
+    </div>
 
     <script>
-        // IMPORTANT: Replace this with your actual Hugging Face Space URL
-        const API_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
-
-        // Set active navigation link based on current page
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-            const navLinks = document.querySelectorAll('.nav-links a');
-            
-            navLinks.forEach(link => {
-                const linkPage = link.getAttribute('href');
-                if (linkPage === currentPage) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-
-            // Load global stats
-            loadGlobalStats();
-        });
-
         // Create floating bubbles
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 20; i++) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('bubble');
                 const size = Math.random() * 15 + 5;
@@ -865,113 +589,116 @@
                 bg.appendChild(bubble);
             }
         }
-
         createBubbles();
 
-        function showAlert(message, type) {
-            const alertId = type === 'error' ? 'alertError' : 'alertSuccess';
-            const alert = document.getElementById(alertId);
-            
-            // Hide the other alert
-            const otherAlertId = type === 'error' ? 'alertSuccess' : 'alertError';
-            document.getElementById(otherAlertId).classList.remove('active');
-            
-            alert.textContent = message;
-            alert.classList.add('active');
-            setTimeout(() => alert.classList.remove('active'), 5000);
-        }
-
-        async function loadGlobalStats() {
-            // This will be populated from your backend - for now showing placeholder
-            // You can add a stats endpoint to your Gradio API if needed
-        }
-
-        async function optimizePrompt() {
-            const prompt = document.getElementById('inputPrompt').value.trim();
-            const preserveMeaning = document.getElementById('preserveMeaning').checked;
-            
-            if (!prompt) {
-                showAlert('⚠️ Please enter a prompt to optimize!', 'error');
-                return;
+        // Highlight active navigation
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
             }
+        });
 
-            if (prompt.length > 2000) {
-                showAlert('⚠️ Prompt is too long (max 2000 characters)', 'error');
-                return;
-            }
+        // Optimizer functionality
+        const API_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+        const optimizeBtn = document.getElementById('optimizeBtn');
+        const promptInput = document.getElementById('promptInput');
+        const preserveMeaning = document.getElementById('preserveMeaning');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
 
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('resultSection').classList.remove('active');
-
-            try {
-                const response = await fetch(`${API_URL}/api/predict`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        data: [prompt, preserveMeaning] 
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const result = await response.json();
-
-                if (result.data && result.data.length >= 6) {
-                    const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = result.data;
-                    
-                    document.getElementById('outputPrompt').value = optimized;
-                    document.getElementById('tokensSaved').textContent = tokensSaved;
-                    document.getElementById('reduction').textContent = reduction;
-                    document.getElementById('energySaved').textContent = energy;
-                    document.getElementById('co2Saved').textContent = co2;
-
-                    document.getElementById('resultSection').classList.add('active');
-                    showAlert('✅ Optimization complete!', 'success');
-                    
-                    // Scroll to results
-                    document.getElementById('resultSection').scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'nearest' 
-                    });
-                } else {
-                    throw new Error('Invalid response format from API');
-                }
-            } catch (error) {
-                console.error('Optimization error:', error);
-                
-                let errorMessage = 'Optimization failed. ';
-                if (error.message.includes('Failed to fetch')) {
-                    errorMessage += 'Unable to connect to server. Please check if the Hugging Face Space is running.';
-                } else if (error.message.includes('HTTP 503')) {
-                    errorMessage += 'The model is loading. Please wait a moment and try again.';
-                } else {
-                    errorMessage += error.message || 'Please try again.';
-                }
-                
-                showAlert('❌ ' + errorMessage, 'error');
-            } finally {
-                document.getElementById('loading').classList.remove('active');
-            }
-        }
-
-        function copyToClipboard() {
-            const text = document.getElementById('outputPrompt').value;
-            navigator.clipboard.writeText(text).then(() => {
-                showAlert('✅ Copied to clipboard!', 'success');
-            }).catch(() => {
-                showAlert('❌ Failed to copy', 'error');
-            });
-        }
-
-        // Allow Enter key to trigger optimization (with Shift+Enter for new line)
-        document.getElementById('inputPrompt').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
+        optimizeBtn.addEventListener('click', optimizePrompt);
+        
+        // Allow Enter key to optimize
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
                 optimizePrompt();
             }
         });
+
+        async function optimizePrompt() {
+            const prompt = promptInput.value.trim();
+            
+            // Hide previous messages and results
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            results.style.display = 'none';
+            
+            // Validation
+            if (!prompt) {
+                showError('Please enter a prompt to optimize');
+                return;
+            }
+            
+            if (prompt.length > 2000) {
+                showError('Prompt is too long. Please keep it under 2000 characters.');
+                return;
+            }
+            
+            // Show loading
+            optimizeBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: [prompt, preserveMeaning.checked]
+                    })
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 503) {
+                        throw new Error('The model is loading. Please wait 30 seconds and try again.');
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Extract results from Gradio response
+                const [
+                    optimized,
+                    tokenInfo,
+                    tokensSaved,
+                    reduction,
+                    energySaved,
+                    co2Saved
+                ] = data.data;
+                
+                // Display results
+                document.getElementById('tokensSaved').textContent = tokensSaved;
+                document.getElementById('reduction').textContent = reduction;
+                document.getElementById('energySaved').textContent = energySaved;
+                document.getElementById('co2Saved').textContent = co2Saved;
+                document.getElementById('optimizedText').textContent = optimized;
+                
+                results.style.display = 'block';
+                showSuccess('✅ Prompt optimized successfully!');
+                
+            } catch (error) {
+                console.error('Optimization error:', error);
+                showError(error.message || 'Unable to connect to the optimization service. Please try again later.');
+            } finally {
+                optimizeBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+        }
     </script>
 </body>
 </html>
