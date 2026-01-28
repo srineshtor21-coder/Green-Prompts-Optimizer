@@ -641,10 +641,7 @@
         <p>Making AI more sustainable, one prompt at a time 🌍</p>
     </footer>
 
-    <!-- Import Gradio Client -->
-    <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.0.0/dist/index.min.js";
-
+    <script>
         // Create floating bubbles
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
@@ -685,7 +682,8 @@
             });
         });
 
-        // Optimizer functionality
+        // Optimizer functionality - Using direct fetch approach
+        const API_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
         const optimizeBtn = document.getElementById('optimizeBtn');
         const promptInput = document.getElementById('promptInput');
         const preserveMeaning = document.getElementById('preserveMeaning');
@@ -694,7 +692,12 @@
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
 
-        optimizeBtn.addEventListener('click', optimizePrompt);
+        // Add click listener
+        console.log('Setting up button listener...');
+        optimizeBtn.addEventListener('click', function() {
+            console.log('Button clicked!');
+            optimizePrompt();
+        });
         
         // Allow Enter key to optimize
         promptInput.addEventListener('keydown', (e) => {
@@ -704,6 +707,7 @@
         });
 
         async function optimizePrompt() {
+            console.log('Optimize function called');
             const prompt = promptInput.value.trim();
             
             // Hide previous messages
@@ -722,17 +726,29 @@
             results.style.display = 'none';
             
             try {
-                // Connect to your Hugging Face Space using Gradio Client
-                const client = await Client.connect("sirenice/GreenPromptsOptimizer");
+                console.log('Sending request to:', API_URL);
                 
-                // Call the predict function
-                const result = await client.predict("/predict", {
-                    prompt: prompt,
-                    preserve_meaning: preserveMeaning.checked
+                // Use the Gradio API endpoint directly
+                const response = await fetch(`${API_URL}/api/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: [prompt, preserveMeaning.checked]
+                    })
                 });
                 
-                // Extract results from the response
-                // Result structure: [optimized_text, token_info, tokens_saved, reduction%, energy, co2]
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Result:', result);
+                
+                // Extract data - Gradio returns data in result.data array
                 const data = result.data;
                 
                 const optimizedText = data[0];
@@ -754,7 +770,7 @@
                 
             } catch (error) {
                 console.error('Optimization error:', error);
-                showError('Unable to connect to the optimization service. Please make sure your Hugging Face Space is running and try again.');
+                showError('Unable to connect to the optimization service. Error: ' + error.message);
             } finally {
                 optimizeBtn.disabled = false;
                 loading.style.display = 'none';
@@ -766,7 +782,7 @@
             errorMessage.style.display = 'block';
             setTimeout(() => {
                 errorMessage.style.display = 'none';
-            }, 5000);
+            }, 8000);
         }
 
         function showSuccess(message) {
@@ -776,6 +792,10 @@
                 successMessage.style.display = 'none';
             }, 5000);
         }
+
+        // Test button is clickable
+        console.log('Button element:', optimizeBtn);
+        console.log('Button is clickable');
     </script>
 </body>
 </html>
