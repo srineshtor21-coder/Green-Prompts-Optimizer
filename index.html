@@ -702,76 +702,63 @@
         });
 
         async function optimizePrompt() {
-            const prompt = promptInput.value.trim();
-            
-            // Hide previous messages and results
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            results.style.display = 'none';
-            
-            // Validation
-            if (!prompt) {
-                showError('Please enter a prompt to optimize');
-                return;
-            }
-            
-            if (prompt.length > 2000) {
-                showError('Prompt is too long. Please keep it under 2000 characters.');
-                return;
-            }
-            
-            // Show loading
-            optimizeBtn.disabled = true;
-            loading.style.display = 'block';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/predict`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        data: [prompt, preserveMeaning.checked]
-                    })
-                });
-                
-                if (!response.ok) {
-                    if (response.status === 503) {
-                        throw new Error('The model is loading. Please wait 30 seconds and try again.');
-                    }
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                
-                // Extract results from Gradio response
-                const [
-                    optimized,
-                    tokenInfo,
-                    tokensSaved,
-                    reduction,
-                    energySaved,
-                    co2Saved
-                ] = data.data;
-                
-                // Display results
-                document.getElementById('tokensSaved').textContent = tokensSaved;
-                document.getElementById('reduction').textContent = reduction;
-                document.getElementById('energySaved').textContent = energySaved;
-                document.getElementById('co2Saved').textContent = co2Saved;
-                document.getElementById('optimizedText').textContent = optimized;
-                
-                results.style.display = 'block';
-                showSuccess('✅ Prompt optimized successfully!');
-                
-            } catch (error) {
-                console.error('Optimization error:', error);
-                showError(error.message || 'Unable to connect to the optimization service. Please try again later.');
-            } finally {
-                optimizeBtn.disabled = false;
-                loading.style.display = 'none';
-            }
-        }
+    const prompt = promptInput.value.trim();
+    
+    // Validation
+    if (!prompt) {
+        showError('Please enter a prompt to optimize');
+        return;
+    }
+    
+    // Show loading
+    optimizeBtn.disabled = true;
+    loading.style.display = 'block';
+    
+    try {
+        // Step 1: Submit the job
+        const submitResponse = await fetch(`${API_URL}/call/predict`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                data: [prompt, preserveMeaning.checked]
+            })
+        });
+        
+        const submitData = await submitResponse.json();
+        const eventId = submitData.event_id;
+        
+        // Step 2: Get the result
+        const resultResponse = await fetch(`${API_URL}/call/predict/${eventId}`);
+        const resultData = await resultResponse.json();
+        
+        // Extract results
+        const [
+            optimized,
+            tokenInfo,
+            tokensSaved,
+            reduction,
+            energySaved,
+            co2Saved
+        ] = resultData.data;
+        
+        // Display results
+        document.getElementById('tokensSaved').textContent = tokensSaved;
+        document.getElementById('reduction').textContent = reduction;
+        document.getElementById('energySaved').textContent = energySaved;
+        document.getElementById('co2Saved').textContent = co2Saved;
+        document.getElementById('optimizedText').textContent = optimized;
+        
+        results.style.display = 'block';
+        showSuccess('✅ Prompt optimized successfully!');
+        
+    } catch (error) {
+        console.error('Optimization error:', error);
+        showError(error.message || 'Unable to connect to the optimization service.');
+    } finally {
+        optimizeBtn.disabled = false;
+        loading.style.display = 'none';
+    }
+}
 
         function showError(message) {
             errorMessage.textContent = '❌ ' + message;
