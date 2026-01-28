@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home | 🌱 Green Prompts Optimizer</title>
+    <title>🌱 Green Prompts Optimizer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -138,14 +138,14 @@
             height: 32px;
             background: linear-gradient(135deg, #10b981, #3b82f6);
             border-radius: 8px;
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.2rem;
         }
         .nav-links { 
             display: flex; 
-            gap: 2rem; 
+            gap: 2.5rem; 
         }
         .nav-links a {
             color: var(--text-gray);
@@ -153,6 +153,7 @@
             transition: color 0.3s;
             position: relative;
             padding-bottom: 5px;
+            font-size: 1.1rem;
         }
         .nav-links a:hover { 
             color: var(--accent-green); 
@@ -182,17 +183,40 @@
             padding: 6rem 2rem 4rem;
         }
         .hero h1 {
-            font-size: 4rem;
+            font-size: 4.5rem;
             background: linear-gradient(135deg, #10b981, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             font-weight: 700;
         }
         .hero-subtitle {
-            font-size: 1.5rem;
-            color: var(--text-gray);
-            margin-bottom: 3rem;
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+        .hero-subtitle .highlight {
+            display: block;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        .btn-primary {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
         }
         
         /* Stats cards */
@@ -208,11 +232,11 @@
             border-radius: 16px;
             text-align: center;
             border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: transform 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
         }
         .stat-icon {
             font-size: 2.5rem;
@@ -236,9 +260,13 @@
         }
         .features h2 {
             text-align: center;
-            font-size: 2.5rem;
-            color: var(--accent-green);
+            font-size: 3rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 3rem;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
         .features-grid {
             display: grid;
@@ -247,17 +275,31 @@
         }
         .feature-card {
             background: var(--card-bg);
-            padding: 2rem;
+            padding: 2.5rem;
             border-radius: 16px;
             border: 1px solid rgba(16, 185, 129, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
         }
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2));
+            border: 2px solid rgba(16, 185, 129, 0.3);
         }
         .feature-card h3 {
             color: var(--accent-green);
             margin-bottom: 1rem;
+            font-size: 1.4rem;
         }
         
         /* Optimizer section */
@@ -427,16 +469,36 @@
             line-height: 1.6;
         }
         
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        footer p {
+            color: var(--text-gray);
+            margin: 0.5rem 0;
+        }
+        footer .highlight {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
             }
             .hero-subtitle {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             .nav-links {
                 gap: 1rem;
+            }
+            .nav-links a {
+                font-size: 1rem;
             }
         }
     </style>
@@ -466,10 +528,13 @@
     <div class="container">
         <section class="hero">
             <h1>⚡ Energy Saver AI</h1>
-            <p>Optimize your AI prompts, reduce energy consumption, and save the planet—one token at a time.</p>
-            <button class="btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;" onclick="document.getElementById('optimizer').scrollIntoView({behavior: 'smooth'})">
+            <p class="hero-subtitle">
+                Optimize AI prompts to reduce energy use and protect the planet,
+                <span class="highlight">one token at a time.</span>
+            </p>
+            <a href="#optimizer" class="btn-primary">
                 Get Started →
-            </button>
+            </a>
         </section>
 
         <div class="stats-grid">
@@ -492,27 +557,25 @@
         </div>
 
         <div class="features">
-            <h2>Why Choose Green Prompts?</h2>
+            <h2>✨ Why Choose Green Prompts? ✨</h2>
             <div class="features-grid">
-                <section class="features-grid">
-                    <div class="feature-card">
+                <div class="feature-card">
                     <div class="feature-icon">🎯</div>
                     <h3>Smart Optimization</h3>
                     <p>T5 model trained on 127 prompt pairs to reduce token count while preserving meaning.</p>
-                    </div>
-                    <div class="feature-card">
+                </div>
+                <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <h3>Energy Tracking</h3>
                     <p>Real-time calculation of energy savings and CO₂ reduction for every optimization.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🌍</div>
-                        <h3>Environmental Impact</h3>
-                        <p>See the real-world environmental impact of your AI usage reduction.</p>
-                    </div>
-                </section>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Environmental Impact</h3>
+                    <p>See the real-world environmental impact of your AI usage reduction.</p>
+                </div>
+            </div>
         </div>
-
         
         <div class="optimizer-section" id="optimizer">
             <h2>✨ Optimize Your Prompt</h2>
@@ -524,7 +587,7 @@
                 <label for="promptInput">Enter your prompt:</label>
                 <textarea 
                     id="promptInput" 
-                    placeholder="Type your prompt here...'"
+                    placeholder="Type your prompt here..."
                 ></textarea>
             </div>
             
@@ -572,6 +635,12 @@
         </div>
     </div>
 
+    <footer>
+        <p>🌱 <span class="highlight">Green Prompts Optimizer</span></p>
+        <p>Created by Srinesh Toranala | ISM Original Work 2025-2026</p>
+        <p>Making AI more sustainable, one prompt at a time 🌍</p>
+    </footer>
+
     <script>
         // Create floating bubbles
         function createBubbles() {
@@ -597,6 +666,20 @@
             if (link.getAttribute('href') === currentPage) {
                 link.classList.add('active');
             }
+        });
+
+        // Smooth scroll for Get Started button
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
         });
 
         // Optimizer functionality
