@@ -15,7 +15,7 @@
             --accent-green: #34d399;
         }
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--dark-bg);
             color: var(--text-light);
             line-height: 1.6;
@@ -142,8 +142,20 @@
             color: var(--text-gray);
             text-decoration: none;
             transition: color 0.3s;
+            position: relative;
+            padding-bottom: 5px;
         }
         .nav-links a:hover { color: var(--accent-green); }
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 2px;
+        }
         .container {
             max-width: 1400px;
             margin: 4rem auto;
@@ -301,7 +313,7 @@
                 <a href="index.html">Home</a>
                 <a href="about.html">About</a>
                 <a href="impact.html">Impact</a>
-                <a href="stats.html">Stats</a>
+                <a href="stats.html" class="active">Stats</a>
             </div>
         </nav>
     </header>
@@ -512,13 +524,12 @@
     </div>
 
     <script>
-        // Create floating bubbles
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
             for (let i = 0; i < 20; i++) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('bubble');
-                const size = Math.random() * 15 + 5; // Small bubbles: 5-20px
+                const size = Math.random() * 15 + 5;
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
                 bubble.style.left = Math.random() * 100 + '%';
