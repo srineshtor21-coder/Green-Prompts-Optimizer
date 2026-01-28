@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About | Green Prompts Optimizer</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -16,7 +15,7 @@
             --accent-green: #34d399;
         }
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--dark-bg);
             color: var(--text-light);
             line-height: 1.6;
@@ -143,8 +142,20 @@
             color: var(--text-gray);
             text-decoration: none;
             transition: color 0.3s;
+            position: relative;
+            padding-bottom: 5px;
         }
         .nav-links a:hover { color: var(--accent-green); }
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 2px;
+        }
         .container {
             max-width: 1200px;
             margin: 4rem auto;
@@ -228,7 +239,7 @@
             </div>
             <div class="nav-links">
                 <a href="index.html">Home</a>
-                <a href="about.html">About</a>
+                <a href="about.html" class="active">About</a>
                 <a href="impact.html">Impact</a>
                 <a href="stats.html">Stats</a>
             </div>
@@ -278,7 +289,7 @@
                 </div>
                 <div class="timeline-item">
                     <h3>4. Web Deployment</h3>
-                    <p>Built Flask backend and deployed to Hugging Face Spaces with GitHub Pages frontend</p>
+                    <p>Built Gradio interface and deployed to Hugging Face Spaces with GitHub Pages frontend</p>
                 </div>
             </div>
         </div>
@@ -289,7 +300,7 @@
                 <div class="tech-item">🤖 T5 Transformer</div>
                 <div class="tech-item">🔥 PyTorch</div>
                 <div class="tech-item">🤗 Hugging Face</div>
-                <div class="tech-item">⚡ Flask</div>
+                <div class="tech-item">⚡ Gradio</div>
                 <div class="tech-item">📊 Zeus Energy</div>
                 <div class="tech-item">🌐 GitHub Pages</div>
             </div>
@@ -324,7 +335,7 @@
             for (let i = 0; i < 20; i++) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('bubble');
-                const size = Math.random() * 15 + 5; // Small bubbles: 5-20px
+                const size = Math.random() * 15 + 5;
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
                 bubble.style.left = Math.random() * 100 + '%';
