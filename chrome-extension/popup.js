@@ -1,284 +1,163 @@
+/**
+ * GREEN PROMPTS OPTIMIZER - Chrome Extension
+ * Popup script for extension functionality
+ */
 
-const API_URL = 'https://srineshtor21-coder.github.io/Green-Prompts-Optimizer/';
+const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+const API_ENDPOINT = `${HF_SPACE_URL}/api/predict`;
 
-// Get elements
-const loginSection = document.getElementById('loginSection');
-const registerSection = document.getElementById('registerSection');
-const appSection = document.getElementById('appSection');
-const loadingSection = document.getElementById('loadingSection');
-
-// Auth elements
-const loginEmail = document.getElementById('loginEmail');
-const loginPassword = document.getElementById('loginPassword');
-const loginBtn = document.getElementById('loginBtn');
-const regEmail = document.getElementById('regEmail');
-const regUsername = document.getElementById('regUsername');
-const regPassword = document.getElementById('regPassword');
-const registerBtn = document.getElementById('registerBtn');
-const showRegisterBtn = document.getElementById('showRegisterBtn');
-const showLoginBtn = document.getElementById('showLoginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-
-// App elements
-const promptInput = document.getElementById('promptInput');
-const optimizeBtn = document.getElementById('optimizeBtn');
-const result = document.getElementById('result');
-const optimizedText = document.getElementById('optimizedText');
-const copyBtn = document.getElementById('copyBtn');
-const tokensSaved = document.getElementById('tokensSaved');
-const energySaved = document.getElementById('energySaved');
-
-// User stats elements
-const userOptimizations = document.getElementById('userOptimizations');
-const userTokens = document.getElementById('userTokens');
-const userEnergy = document.getElementById('userEnergy');
-const userCO2 = document.getElementById('userCO2');
-
-// Error/success messages
-const errorMessage = document.getElementById('errorMessage');
-const regErrorMessage = document.getElementById('regErrorMessage');
-const successMessage = document.getElementById('successMessage');
-
-// Initialize
-document.addEventListener('DOMContentLoaded', init);
-
-async function init() {
-  const token = await getStoredToken();
-  if (token) {
-    showApp();
-    loadUserStats();
-  } else {
-    showLogin();
-  }
+// Show/hide elements
+function show(id) {
+    document.getElementById(id).style.display = 'block';
 }
 
-// Storage helpers
-async function getStoredToken() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['authToken'], (result) => {
-      resolve(result.authToken || null);
-    });
-  });
+function hide(id) {
+    document.getElementById(id).style.display = 'none';
 }
 
-async function setStoredToken(token) {
-  return new Promise((resolve) => {
-    chrome.storage.local.set({ authToken: token }, resolve);
-  });
+function addClass(id, className) {
+    document.getElementById(id).classList.add(className);
 }
 
-async function clearStoredToken() {
-  return new Promise((resolve) => {
-    chrome.storage.local.remove(['authToken'], resolve);
-  });
+function removeClass(id, className) {
+    document.getElementById(id).classList.remove(className);
 }
 
-// API helpers
-async function apiRequest(endpoint, options = {}) {
-  const token = await getStoredToken();
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Request failed');
-  }
-
-  return await response.json();
+// Show error
+function showError(message) {
+    const errorEl = document.getElementById('error-message');
+    errorEl.textContent = message;
+    addClass('error-message', 'active');
+    setTimeout(() => {
+        removeClass('error-message', 'active');
+    }, 5000);
 }
-
-// UI Navigation
-function showLogin() {
-  loginSection.classList.add('active');
-  registerSection.classList.remove('active');
-  appSection.classList.remove('active');
-  loadingSection.style.display = 'none';
-}
-
-function showRegister() {
-  loginSection.classList.remove('active');
-  registerSection.classList.add('active');
-  appSection.classList.remove('active');
-  loadingSection.style.display = 'none';
-}
-
-function showApp() {
-  loginSection.classList.remove('active');
-  registerSection.classList.remove('active');
-  appSection.classList.add('active');
-  loadingSection.style.display = 'none';
-}
-
-function showLoading() {
-  loginSection.classList.remove('active');
-  registerSection.classList.remove('active');
-  appSection.classList.remove('active');
-  loadingSection.style.display = 'block';
-}
-
-function showError(message, element = errorMessage) {
-  element.textContent = message;
-  element.style.display = 'block';
-  setTimeout(() => {
-    element.style.display = 'none';
-  }, 5000);
-}
-
-function showSuccess(message) {
-  successMessage.textContent = message;
-  successMessage.style.display = 'block';
-  setTimeout(() => {
-    successMessage.style.display = 'none';
-  }, 3000);
-}
-
-// Auth handlers
-loginBtn.addEventListener('click', async () => {
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
-
-  if (!email || !password) {
-    showError('Please enter email and password');
-    return;
-  }
-
-  try {
-    showLoading();
-    const data = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-
-    await setStoredToken(data.token);
-    showApp();
-    loadUserStats();
-    showSuccess('Login successful!');
-  } catch (error) {
-    showLogin();
-    showError(error.message);
-  }
-});
-
-registerBtn.addEventListener('click', async () => {
-  const email = regEmail.value.trim();
-  const password = regPassword.value;
-  const username = regUsername.value.trim();
-
-  if (!email || !password) {
-    showError('Please enter email and password', regErrorMessage);
-    return;
-  }
-
-  try {
-    showLoading();
-    const data = await apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, username }),
-    });
-
-    await setStoredToken(data.token);
-    showApp();
-    loadUserStats();
-    showSuccess('Account created successfully!');
-  } catch (error) {
-    showRegister();
-    showError(error.message, regErrorMessage);
-  }
-});
-
-showRegisterBtn.addEventListener('click', showRegister);
-showLoginBtn.addEventListener('click', showLogin);
-
-logoutBtn.addEventListener('click', async () => {
-  await clearStoredToken();
-  showLogin();
-  loginEmail.value = '';
-  loginPassword.value = '';
-});
 
 // Optimize prompt
-optimizeBtn.addEventListener('click', async () => {
-  const prompt = promptInput.value.trim();
-
-  if (!prompt) {
-    showError('Please enter a prompt to optimize', successMessage);
-    return;
-  }
-
-  try {
-    optimizeBtn.textContent = 'Optimizing...';
-    optimizeBtn.disabled = true;
-
-    const data = await apiRequest('/optimize', {
-      method: 'POST',
-      body: JSON.stringify({ prompt }),
-    });
-
-    // Show result
-    optimizedText.textContent = data.optimized;
-    tokensSaved.textContent = data.savings.tokens;
-    energySaved.textContent = parseFloat(data.savings.energy).toFixed(4);
-    result.classList.add('active');
-
-    // Reload user stats
-    loadUserStats();
-
-    showSuccess('Prompt optimized successfully! ✨');
-  } catch (error) {
-    showError(error.message, successMessage);
-  } finally {
-    optimizeBtn.textContent = '⚡ Optimize Prompt';
-    optimizeBtn.disabled = false;
-  }
-});
-
-// Copy to clipboard
-copyBtn.addEventListener('click', () => {
-  const text = optimizedText.textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    copyBtn.textContent = '✓ Copied!';
-    setTimeout(() => {
-      copyBtn.textContent = '📋 Copy to Clipboard';
-    }, 2000);
-  });
-});
-
-// Load user stats
-async function loadUserStats() {
-  try {
-    const stats = await apiRequest('/user/stats');
+async function optimizePrompt() {
+    const promptInput = document.getElementById('prompt-input');
+    const preserveMeaning = document.getElementById('preserve-meaning').checked;
+    const prompt = promptInput.value.trim();
     
-    userOptimizations.textContent = stats.total_optimizations || 0;
-    userTokens.textContent = (stats.total_tokens_saved || 0).toLocaleString();
-    userEnergy.textContent = parseFloat(stats.total_energy_saved || 0).toFixed(2);
-    userCO2.textContent = parseFloat(stats.total_co2_saved || 0).toFixed(2);
-  } catch (error) {
-    console.error('Failed to load user stats:', error);
-  }
+    if (!prompt) {
+        showError('Please enter a prompt to optimize');
+        return;
+    }
+    
+    if (prompt.length > 2000) {
+        showError('Prompt is too long (max 2000 characters)');
+        return;
+    }
+    
+    // Show loading
+    show('loading');
+    document.getElementById('optimize-btn').disabled = true;
+    removeClass('output-section', 'active');
+    removeClass('error-message', 'active');
+    
+    try {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: [prompt, preserveMeaning]
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (!result.data || result.data.length < 6) {
+            throw new Error('Invalid response from API');
+        }
+        
+        const [
+            optimizedPrompt,
+            tokenInfo,
+            tokensSaved,
+            reductionPct,
+            energySaved,
+            co2Saved
+        ] = result.data;
+        
+        // Update display
+        document.getElementById('optimized-output').value = optimizedPrompt;
+        document.getElementById('tokens-saved').textContent = tokensSaved;
+        document.getElementById('reduction-pct').textContent = reductionPct;
+        document.getElementById('energy-saved').textContent = energySaved + ' Wh';
+        document.getElementById('co2-saved').textContent = co2Saved + 'g';
+        
+        // Save stats to extension storage
+        chrome.storage.local.get(['totalOptimizations', 'totalTokensSaved', 'totalEnergySaved', 'totalCO2Saved'], (data) => {
+            chrome.storage.local.set({
+                totalOptimizations: (data.totalOptimizations || 0) + 1,
+                totalTokensSaved: (data.totalTokensSaved || 0) + parseInt(tokensSaved),
+                totalEnergySaved: (data.totalEnergySaved || 0) + parseFloat(energySaved),
+                totalCO2Saved: (data.totalCO2Saved || 0) + parseFloat(co2Saved)
+            });
+        });
+        
+        // Show results
+        addClass('output-section', 'active');
+        
+    } catch (error) {
+        console.error('Optimization error:', error);
+        
+        let errorMessage = 'Failed to optimize. ';
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage += 'Cannot connect to server. The Hugging Face Space may be sleeping.';
+        } else {
+            errorMessage += error.message;
+        }
+        
+        showError(errorMessage);
+        
+    } finally {
+        hide('loading');
+        document.getElementById('optimize-btn').disabled = false;
+    }
 }
 
-// Auto-fill from active page (if on ChatGPT/Claude)
-chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-  if (tabs[0]) {
-    const url = tabs[0].url;
-    if (url && (url.includes('chat.openai.com') || url.includes('claude.ai'))) {
-      // Send message to content script to get current prompt
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'getCurrentPrompt' }, (response) => {
-        if (response && response.prompt) {
-          promptInput.value = response.prompt;
-        }
-      });
+// Copy to clipboard
+async function copyToClipboard() {
+    const optimizedText = document.getElementById('optimized-output').value;
+    
+    try {
+        await navigator.clipboard.writeText(optimizedText);
+        
+        const copyBtn = document.getElementById('copy-btn');
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '✅ Copied!';
+        
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Copy failed:', error);
+        showError('Failed to copy to clipboard');
     }
-  }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    // Set up event listeners
+    document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
+    document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+    
+    // Try to get selected text from active tab
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {action: 'getSelectedText'}, (response) => {
+            if (response && response.text) {
+                document.getElementById('prompt-input').value = response.text;
+            }
+        });
+    });
+    
+    console.log('🌱 Green Prompts Extension initialized!');
 });
