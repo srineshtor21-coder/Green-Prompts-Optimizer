@@ -297,7 +297,7 @@
             font-size: 1.4rem;
         }
         
-        /* Optimizer section - CROPPED IFRAME */
+        /* Optimizer section */
         .optimizer-section {
             background: var(--card-bg);
             padding: 3rem;
@@ -318,54 +318,140 @@
             font-size: 1.1rem;
         }
         
-        /* HEAVILY CROPPED iframe to hide footer */
-        .gradio-container {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid rgba(16, 185, 129, 0.3);
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            position: relative;
-            height: 650px; /* Reduced even more */
+        .optimizer-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        .gradio-container iframe {
-            width: 100%;
-            height: 850px; /* Taller than container */
-            border: none;
+        .input-section {
+            margin-bottom: 2rem;
+        }
+        
+        .input-section label {
             display: block;
-            /* Crop from top and bottom to hide Gradio branding */
-            margin-top: -110px;
-            transform: scale(1.05);
+            color: var(--accent-green);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
         
-        /* Loading overlay */
-        .iframe-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
+        textarea, input[type="text"] {
             width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
         }
         
-        .iframe-loading.hidden {
-            display: none;
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .checkbox-container label {
+            margin: 0;
+            font-weight: normal;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        button {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .copy-btn {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--accent-green);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .metric-card {
+            background: rgba(16, 185, 129, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            text-align: center;
+        }
+        
+        .metric-label {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+        
+        .output-section {
+            margin-top: 2rem;
         }
         
         .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading-spinner.active {
+            display: block;
+        }
+        
+        .spinner {
             border: 4px solid rgba(16, 185, 129, 0.1);
             border-top: 4px solid var(--accent-green);
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
-            margin-bottom: 1.5rem;
+            margin: 0 auto;
         }
         
         @keyframes spin {
@@ -373,10 +459,18 @@
             100% { transform: rotate(360deg); }
         }
         
-        .loading-text {
-            color: var(--accent-green);
-            font-size: 1.2rem;
-            font-weight: 600;
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .error-message.active {
+            display: block;
         }
         
         /* Footer */
@@ -410,8 +504,8 @@
             .nav-links a {
                 font-size: 1rem;
             }
-            .gradio-container {
-                height: 750px;
+            .button-group {
+                flex-direction: column;
             }
         }
     </style>
@@ -434,6 +528,7 @@
                 <a href="about.html">About</a>
                 <a href="impact.html">Impact</a>
                 <a href="stats.html">Stats</a>
+                <a href="login.html" style="background: linear-gradient(135deg, #10b981, #3b82f6); padding: 0.5rem 1.2rem; border-radius: 8px; color: white;">Login</a>
             </div>
         </nav>
     </header>
@@ -456,15 +551,15 @@
                 <div class="stat-label">Token Reduction</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">15,234</div>
+                <div class="stat-value" id="global-tokens">0</div>
                 <div class="stat-label">Tokens Saved</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">12.4 Wh</div>
+                <div class="stat-value" id="global-energy">0 Wh</div>
                 <div class="stat-label">Energy Saved</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">8.7g</div>
+                <div class="stat-value" id="global-co2">0g</div>
                 <div class="stat-label">CO₂ Reduced</div>
             </div>
         </div>
@@ -494,18 +589,59 @@
             <h2>✨ Optimize Your Prompt</h2>
             <p class="optimizer-subtitle">Enter your prompt below and watch the magic happen!</p>
             
-            <div class="gradio-container">
-                <div class="iframe-loading" id="iframeLoading">
-                    <div class="loading-spinner"></div>
-                    <p class="loading-text">Loading optimizer...</p>
+            <div class="optimizer-container">
+                <div class="input-section">
+                    <label for="prompt-input">Enter Your Prompt</label>
+                    <textarea 
+                        id="prompt-input" 
+                        rows="6" 
+                        placeholder="Type your prompt here..."
+                    ></textarea>
                 </div>
-                <iframe 
-                    id="gradioFrame"
-                    src="https://sirenice-greenpromptsoptimizer.hf.space"
-                    frameborder="0"
-                    onload="hideLoading()"
-                    scrolling="no"
-                ></iframe>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="preserve-meaning" checked>
+                    <label for="preserve-meaning">✅ Preserve Meaning (Recommended)</label>
+                </div>
+                
+                <div class="button-group">
+                    <button id="optimize-btn">🚀 Optimize</button>
+                </div>
+                
+                <div class="error-message" id="error-message"></div>
+                
+                <div class="loading-spinner" id="loading-spinner">
+                    <div class="spinner"></div>
+                    <p style="color: var(--accent-green); margin-top: 1rem;">Optimizing your prompt...</p>
+                </div>
+                
+                <div class="output-section" id="output-section" style="display: none;">
+                    <label>✨ Optimized Prompt</label>
+                    <textarea id="optimized-output" rows="6" readonly></textarea>
+                    
+                    <div class="button-group">
+                        <button class="copy-btn" id="copy-btn">📋 Copy to Clipboard</button>
+                    </div>
+                    
+                    <div class="results-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">💎 Tokens Saved</div>
+                            <div class="metric-value" id="tokens-saved">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">📉 Reduction</div>
+                            <div class="metric-value" id="reduction-pct">0%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">⚡ Energy</div>
+                            <div class="metric-value" id="energy-saved">0 Wh</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">🌍 CO₂</div>
+                            <div class="metric-value" id="co2-saved">0g</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -516,6 +652,7 @@
         <p>Making AI more sustainable, one prompt at a time 🌍</p>
     </footer>
 
+    <script src="optimizer.js"></script>
     <script>
         // Create floating bubbles
         function createBubbles() {
@@ -556,18 +693,6 @@
                 }
             });
         });
-
-        // Hide loading
-        function hideLoading() {
-            const loading = document.getElementById('iframeLoading');
-            if (loading) {
-                loading.classList.add('hidden');
-            }
-        }
-
-        setTimeout(() => {
-            hideLoading();
-        }, 5000);
     </script>
 </body>
 </html>
