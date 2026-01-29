@@ -1,351 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Green Prompts Optimizer</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      width: 380px;
-      min-height: 500px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);
-      color: #fff;
-      padding: 0;
-    }
-
-    .container {
-      padding: 20px;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #4ade80, #22c55e);
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-      font-size: 24px;
-    }
-
-    h1 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .subtitle {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .auth-section {
-      display: none;
-    }
-
-    .auth-section.active {
-      display: block;
-    }
-
-    .input-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 5px;
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 14px;
-      font-family: inherit;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #4ade80, #22c55e);
-      color: #1e3a5f;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      margin-top: 10px;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .result {
-      margin-top: 15px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      display: none;
-    }
-
-    .result.active {
-      display: block;
-    }
-
-    .result-label {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 8px;
-    }
-
-    .result-text {
-      font-size: 14px;
-      line-height: 1.5;
-      margin-bottom: 15px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #4ade80;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .user-stats {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .user-stats h3 {
-      font-size: 14px;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 15px;
-    }
-
-    .success {
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.3);
-      color: #86efac;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 15px;
-    }
-
-    .link {
-      color: #4ade80;
-      text-decoration: none;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    .link:hover {
-      text-decoration: underline;
-    }
-
-    .copy-btn {
-      padding: 6px 12px;
-      background: rgba(74, 222, 128, 0.2);
-      border: 1px solid rgba(74, 222, 128, 0.3);
-      color: #4ade80;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
-    .copy-btn:hover {
-      background: rgba(74, 222, 128, 0.3);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Prompts Optimizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 400px;
+            min-height: 500px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #f1f5f9;
+            padding: 0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.3rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .container {
+            padding: 1.5rem;
+        }
+        
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            color: #34d399;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #34d399;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .copy-btn {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #34d399;
+            margin-top: 0.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-box {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34d399;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 1rem;
+            color: #34d399;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(16, 185, 129, 0.1);
+            border-top: 3px solid #34d399;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .error.active {
+            display: block;
+        }
+        
+        .output-section {
+            display: none;
+        }
+        
+        .output-section.active {
+            display: block;
+        }
+        
+        .footer {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
     <div class="header">
-      <div class="logo">⚡</div>
-      <h1>Green Prompts</h1>
-      <p class="subtitle">Optimize AI prompts, save energy</p>
+        <h1>🌱 Green Prompts</h1>
     </div>
-
-    <!-- Login Section -->
-    <div id="loginSection" class="auth-section active">
-      <div id="errorMessage" class="error" style="display: none;"></div>
-      
-      <div class="input-group">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="your@email.com">
-      </div>
-      
-      <div class="input-group">
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="••••••••">
-      </div>
-      
-      <button class="btn btn-primary" id="loginBtn">Sign In</button>
-      <button class="btn btn-secondary" id="showRegisterBtn">Create Account</button>
-    </div>
-
-    <!-- Register Section -->
-    <div id="registerSection" class="auth-section">
-      <div id="regErrorMessage" class="error" style="display: none;"></div>
-      
-      <div class="input-group">
-        <label>Email</label>
-        <input type="email" id="regEmail" placeholder="your@email.com">
-      </div>
-      
-      <div class="input-group">
-        <label>Username (optional)</label>
-        <input type="text" id="regUsername" placeholder="username">
-      </div>
-      
-      <div class="input-group">
-        <label>Password</label>
-        <input type="password" id="regPassword" placeholder="••••••••">
-      </div>
-      
-      <button class="btn btn-primary" id="registerBtn">Create Account</button>
-      <button class="btn btn-secondary" id="showLoginBtn">Back to Sign In</button>
-    </div>
-
-    <!-- Main App Section -->
-    <div id="appSection" class="auth-section">
-      <div id="successMessage" class="success" style="display: none;"></div>
-      
-      <div class="input-group">
-        <label>Paste your AI prompt</label>
-        <textarea id="promptInput" placeholder="Enter the prompt you want to optimize..."></textarea>
-      </div>
-      
-      <button class="btn btn-primary" id="optimizeBtn">⚡ Optimize Prompt</button>
-      
-      <div id="result" class="result">
-        <div class="result-label">Optimized Prompt:</div>
-        <div class="result-text" id="optimizedText"></div>
-        <button class="copy-btn" id="copyBtn">📋 Copy to Clipboard</button>
+    
+    <div class="container">
+        <div class="error" id="error-message"></div>
         
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="tokensSaved">0</div>
-            <div class="stat-label">Tokens Saved</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="energySaved">0</div>
-            <div class="stat-label">Wh Saved</div>
-          </div>
+        <div class="section">
+            <label for="prompt-input">📝 Your Prompt</label>
+            <textarea id="prompt-input" rows="5" placeholder="Paste your prompt here..."></textarea>
         </div>
-      </div>
-
-      <div class="user-stats">
-        <h3>Your Impact</h3>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="userOptimizations">0</div>
-            <div class="stat-label">Optimizations</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="userTokens">0</div>
-            <div class="stat-label">Total Tokens</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="userEnergy">0</div>
-            <div class="stat-label">Total Wh</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="userCO2">0</div>
-            <div class="stat-label">CO₂ Saved (g)</div>
-          </div>
+        
+        <div class="checkbox-container">
+            <input type="checkbox" id="preserve-meaning" checked>
+            <label for="preserve-meaning" style="margin: 0;">Preserve Meaning</label>
         </div>
-      </div>
-
-      <button class="btn btn-secondary" id="logoutBtn" style="margin-top: 20px;">Sign Out</button>
+        
+        <button id="optimize-btn">🚀 Optimize</button>
+        
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Optimizing...</p>
+        </div>
+        
+        <div class="output-section" id="output-section">
+            <div class="section" style="margin-top: 1.5rem;">
+                <label for="optimized-output">✨ Optimized</label>
+                <textarea id="optimized-output" rows="5" readonly></textarea>
+                <button class="copy-btn" id="copy-btn">📋 Copy</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Tokens Saved</div>
+                    <div class="stat-value" id="tokens-saved">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Reduction</div>
+                    <div class="stat-value" id="reduction-pct">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Energy Saved</div>
+                    <div class="stat-value" id="energy-saved">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">CO₂ Saved</div>
+                    <div class="stat-value" id="co2-saved">0</div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div id="loadingSection" class="loading" style="display: none;">
-      Loading...
+    
+    <div class="footer">
+        Making AI sustainable 🌍
     </div>
-  </div>
-
-  <script src="popup.js"></script>
+    
+    <script src="popup.js"></script>
 </body>
 </html>
