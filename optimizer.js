@@ -1,4 +1,9 @@
-const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+const HF_SPACE = 'sirenice/GreenPromptsOptimizer';
+
+// Import Gradio client from CDN
+const script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js';
+document.head.appendChild(script);
 
 async function optimizePrompt() {
     const promptInput = document.getElementById('prompt-input');
@@ -13,74 +18,53 @@ async function optimizePrompt() {
     showLoading();
     
     try {
-        // Use the working endpoint
-        const response = await fetch(`${HF_SPACE_URL}/gradio_api/call/predict`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                data: [prompt, preserveMeaning.checked]
-            })
+        // Wait for Gradio client to load
+        await new Promise(resolve => {
+            if (window.gradio) resolve();
+            else script.onload = resolve;
         });
         
-        const result = await response.json();
+        const app = await window.gradio.client(HF_SPACE);
+        const result = await app.predict("/predict", [prompt, preserveMeaning.checked]);
         
-        if (!result.event_id) {
-            throw new Error('No event ID received');
-        }
+        const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = result.data;
         
-        // Poll for result
-        let attempts = 0;
-        while (attempts < 30) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const statusResponse = await fetch(`${HF_SPACE_URL}/gradio_api/call/predict/${result.event_id}`);
-            const statusData = await statusResponse.json();
-            
-            if (statusData.status === 'complete' && statusData.data) {
-                const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = statusData.data;
-                
-                document.getElementById('optimized-output').value = optimized;
-                document.getElementById('tokens-saved').textContent = tokensSaved;
-                document.getElementById('reduction-pct').textContent = reduction;
-                document.getElementById('energy-saved').textContent = energy;
-                document.getElementById('co2-saved').textContent = co2;
-                
-                showResults();
-                return;
-            }
-            
-            attempts++;
-        }
+        document.getElementById('optimized-output').value = optimized;
+        document.getElementById('tokens-saved').textContent = tokensSaved;
+        document.getElementById('reduction-pct').textContent = reduction;
+        document.getElementById('energy-saved').textContent = energy;
+        document.getElementById('co2-saved').textContent = co2;
         
-        throw new Error('Timeout waiting for result');
+        showResults();
+        updateGlobalStats(parseInt(tokensSaved), parseFloat(energy), parseFloat(co2));
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Failed: ' + error.message);
+        showError('Optimization failed. The Space might be starting up. Try again in 30 seconds.');
     } finally {
         hideLoading();
     }
 }
 
 function showLoading() {
-    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading-spinner').classList.add('active');
     document.getElementById('optimize-btn').disabled = true;
+    document.getElementById('error-message').classList.remove('active');
 }
 
 function hideLoading() {
-    document.getElementById('loading').style.display = 'none';
+    document.getElementById('loading-spinner').classList.remove('active');
     document.getElementById('optimize-btn').disabled = false;
 }
 
 function showResults() {
-    document.getElementById('output-section').classList.add('active');
+    document.getElementById('output-section').style.display = 'block';
 }
 
 function showError(message) {
     const errorEl = document.getElementById('error-message');
     errorEl.textContent = message;
     errorEl.classList.add('active');
-    setTimeout(() => errorEl.classList.remove('active'), 5000);
 }
 
 async function copyToClipboard() {
@@ -93,8 +77,27 @@ async function copyToClipboard() {
     setTimeout(() => btn.textContent = original, 2000);
 }
 
-// CONNECT THE BUTTON - ADD THIS AT THE END
+function updateGlobalStats(tokens, energy, co2) {
+    const stats = JSON.parse(localStorage.getItem('greenPromptsStats') || '{"tokens":0,"energy":0,"co2":0}');
+    stats.tokens += tokens;
+    stats.energy += energy;
+    stats.co2 += co2;
+    localStorage.setItem('greenPromptsStats', JSON.stringify(stats));
+    
+    document.getElementById('global-tokens').textContent = stats.tokens;
+    document.getElementById('global-energy').textContent = stats.energy.toFixed(6) + ' Wh';
+    document.getElementById('global-co2').textContent = stats.co2.toFixed(6) + 'g';
+}
+
+function loadGlobalStats() {
+    const stats = JSON.parse(localStorage.getItem('greenPromptsStats') || '{"tokens":0,"energy":0,"co2":0}');
+    document.getElementById('global-tokens').textContent = stats.tokens;
+    document.getElementById('global-energy').textContent = stats.energy.toFixed(6) + ' Wh';
+    document.getElementById('global-co2').textContent = stats.co2.toFixed(6) + 'g';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
     document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+    loadGlobalStats();
 });
