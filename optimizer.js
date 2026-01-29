@@ -1,5 +1,4 @@
 const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
-const API_ENDPOINT = `${HF_SPACE_URL}/gradio_api/call/predict`; // CHANGED THIS LINE
 
 async function optimizePrompt() {
     const promptInput = document.getElementById('prompt-input');
@@ -14,8 +13,8 @@ async function optimizePrompt() {
     showLoading();
     
     try {
-        // Step 1: Start the job
-        const response = await fetch(API_ENDPOINT, {
+        // Use the working endpoint
+        const response = await fetch(`${HF_SPACE_URL}/gradio_api/call/predict`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -24,29 +23,40 @@ async function optimizePrompt() {
         });
         
         const result = await response.json();
-        const eventId = result.event_id;
         
-        // Step 2: Get the result
-        const resultResponse = await fetch(`${HF_SPACE_URL}/gradio_api/call/predict/${eventId}`);
-        const finalResult = await resultResponse.json();
-        
-        if (finalResult.data && finalResult.data.length >= 6) {
-            const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = finalResult.data;
-            
-            document.getElementById('optimized-output').value = optimized;
-            document.getElementById('tokens-saved').textContent = tokensSaved;
-            document.getElementById('reduction-pct').textContent = reduction;
-            document.getElementById('energy-saved').textContent = energy;
-            document.getElementById('co2-saved').textContent = co2;
-            
-            showResults();
-        } else {
-            throw new Error('Invalid response');
+        if (!result.event_id) {
+            throw new Error('No event ID received');
         }
+        
+        // Poll for result
+        let attempts = 0;
+        while (attempts < 30) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const statusResponse = await fetch(`${HF_SPACE_URL}/gradio_api/call/predict/${result.event_id}`);
+            const statusData = await statusResponse.json();
+            
+            if (statusData.status === 'complete' && statusData.data) {
+                const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = statusData.data;
+                
+                document.getElementById('optimized-output').value = optimized;
+                document.getElementById('tokens-saved').textContent = tokensSaved;
+                document.getElementById('reduction-pct').textContent = reduction;
+                document.getElementById('energy-saved').textContent = energy;
+                document.getElementById('co2-saved').textContent = co2;
+                
+                showResults();
+                return;
+            }
+            
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for result');
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Optimization failed: ' + error.message);
+        showError('Failed: ' + error.message);
     } finally {
         hideLoading();
     }
@@ -82,3 +92,9 @@ async function copyToClipboard() {
     btn.textContent = '✅ Copied!';
     setTimeout(() => btn.textContent = original, 2000);
 }
+
+// CONNECT THE BUTTON - ADD THIS AT THE END
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
+    document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+});
