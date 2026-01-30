@@ -1,6 +1,9 @@
+const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+
 async function optimizePrompt() {
-    const prompt = document.getElementById('prompt-input').value.trim();
-    const preserve = document.getElementById('preserve-meaning').checked;
+    const promptInput = document.getElementById('prompt-input');
+    const preserveMeaning = document.getElementById('preserve-meaning');
+    const prompt = promptInput.value.trim();
     
     if (!prompt) {
         showError('Please enter a prompt');
@@ -10,26 +13,55 @@ async function optimizePrompt() {
     showLoading();
     
     try {
-        const response = await fetch('https://sirenice-greenpromptsoptimizer.hf.space/api/predict', {
+        const response = await fetch(`${HF_SPACE_URL}/call/predict`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({data: [prompt, preserve]})
+            body: JSON.stringify({
+                data: [prompt, preserveMeaning.checked]
+            })
         });
         
         const result = await response.json();
-        const [optimized, info, saved, reduction, energy, co2] = result.data;
+        const eventId = result.event_id;
         
-        document.getElementById('optimized-output').value = optimized;
-        document.getElementById('tokens-saved').textContent = saved;
-        document.getElementById('reduction-pct').textContent = reduction;
-        document.getElementById('energy-saved').textContent = energy;
-        document.getElementById('co2-saved').textContent = co2;
+        // Poll for results
+        let attempts = 0;
+        const maxAttempts = 60;
         
-        showResults();
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const statusResponse = await fetch(`${HF_SPACE_URL}/call/predict/${eventId}`);
+            const statusText = await statusResponse.text();
+            
+            const lines = statusText.split('\n').filter(line => line.startsWith('data:'));
+            
+            for (const line of lines) {
+                const data = JSON.parse(line.substring(5));
+                
+                if (data.msg === 'process_completed') {
+                    const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = data.output.data;
+                    
+                    document.getElementById('optimized-output').value = optimized;
+                    document.getElementById('tokens-saved').textContent = tokensSaved;
+                    document.getElementById('reduction-pct').textContent = reduction;
+                    document.getElementById('energy-saved').textContent = energy;
+                    document.getElementById('co2-saved').textContent = co2;
+                    
+                    showResults();
+                    hideLoading();
+                    return;
+                }
+            }
+            
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for result');
         
     } catch (error) {
-        showError('Failed to optimize. Please try again.');
-    } finally {
+        console.error('Error:', error);
+        showError('Optimization failed. Please try again.');
         hideLoading();
     }
 }
@@ -37,6 +69,7 @@ async function optimizePrompt() {
 function showLoading() {
     document.getElementById('loading-spinner').classList.add('active');
     document.getElementById('optimize-btn').disabled = true;
+    document.getElementById('error-message').classList.remove('active');
 }
 
 function hideLoading() {
@@ -48,17 +81,20 @@ function showResults() {
     document.getElementById('output-section').style.display = 'block';
 }
 
-function showError(msg) {
-    const el = document.getElementById('error-message');
-    el.textContent = msg;
-    el.classList.add('active');
+function showError(message) {
+    const errorEl = document.getElementById('error-message');
+    errorEl.textContent = message;
+    errorEl.classList.add('active');
 }
 
 async function copyToClipboard() {
-    await navigator.clipboard.writeText(document.getElementById('optimized-output').value);
+    const text = document.getElementById('optimized-output').value;
+    await navigator.clipboard.writeText(text);
+    
     const btn = document.getElementById('copy-btn');
+    const original = btn.textContent;
     btn.textContent = '✅ Copied!';
-    setTimeout(() => btn.textContent = '📋 Copy to Clipboard', 2000);
+    setTimeout(() => btn.textContent = original, 2000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
