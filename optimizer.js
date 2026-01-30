@@ -1,10 +1,5 @@
 const HF_SPACE = 'sirenice/GreenPromptsOptimizer';
 
-// Import Gradio client from CDN
-const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js';
-document.head.appendChild(script);
-
 async function optimizePrompt() {
     const promptInput = document.getElementById('prompt-input');
     const preserveMeaning = document.getElementById('preserve-meaning');
@@ -18,30 +13,51 @@ async function optimizePrompt() {
     showLoading();
     
     try {
-        // Wait for Gradio client to load
-        await new Promise(resolve => {
-            if (window.gradio) resolve();
-            else script.onload = resolve;
+        // Direct fetch to Gradio API
+        const response = await fetch(`https://sirenice-greenpromptsoptimizer.hf.space/call/predict`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                data: [prompt, preserveMeaning.checked]
+            })
         });
         
-        const app = await window.gradio.client(HF_SPACE);
-        const result = await app.predict("/predict", [prompt, preserveMeaning.checked]);
+        if (!response.ok) throw new Error('API call failed');
         
-        const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = result.data;
+        const result = await response.json();
+        const eventId = result.event_id;
         
-        document.getElementById('optimized-output').value = optimized;
-        document.getElementById('tokens-saved').textContent = tokensSaved;
-        document.getElementById('reduction-pct').textContent = reduction;
-        document.getElementById('energy-saved').textContent = energy;
-        document.getElementById('co2-saved').textContent = co2;
+        // Poll for result using Server-Sent Events
+        const eventSource = new EventSource(`https://sirenice-greenpromptsoptimizer.hf.space/call/predict/${eventId}`);
         
-        showResults();
-        updateGlobalStats(parseInt(tokensSaved), parseFloat(energy), parseFloat(co2));
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.msg === 'process_completed') {
+                const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = data.output.data;
+                
+                document.getElementById('optimized-output').value = optimized;
+                document.getElementById('tokens-saved').textContent = tokensSaved;
+                document.getElementById('reduction-pct').textContent = reduction;
+                document.getElementById('energy-saved').textContent = energy;
+                document.getElementById('co2-saved').textContent = co2;
+                
+                showResults();
+                updateGlobalStats(parseInt(tokensSaved), parseFloat(energy), parseFloat(co2));
+                
+                eventSource.close();
+                hideLoading();
+            }
+        };
+        
+        eventSource.onerror = () => {
+            eventSource.close();
+            throw new Error('Connection failed');
+        };
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Optimization failed. The Space might be starting up. Try again in 30 seconds.');
-    } finally {
+        showError('Failed to optimize. Please try again.');
         hideLoading();
     }
 }
@@ -49,7 +65,6 @@ async function optimizePrompt() {
 function showLoading() {
     document.getElementById('loading-spinner').classList.add('active');
     document.getElementById('optimize-btn').disabled = true;
-    document.getElementById('error-message').classList.remove('active');
 }
 
 function hideLoading() {
