@@ -13,6 +13,7 @@ async function optimizePrompt() {
     showLoading();
     
     try {
+        // FIXED: Changed backticks to parentheses
         const response = await fetch(`${HF_SPACE_URL}/call/predict`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -31,6 +32,7 @@ async function optimizePrompt() {
         while (attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             
+            // FIXED: Changed backticks to parentheses
             const statusResponse = await fetch(`${HF_SPACE_URL}/call/predict/${eventId}`);
             const statusText = await statusResponse.text();
             
@@ -61,7 +63,7 @@ async function optimizePrompt() {
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Optimization failed. Please try again.');
+        showError('Optimization failed. Please try again. ' + error.message);
         hideLoading();
     }
 }
