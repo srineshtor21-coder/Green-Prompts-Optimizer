@@ -13,57 +13,39 @@ async function optimizePrompt() {
     showLoading();
     
     try {
-        // FIXED: Changed backticks to parentheses
-        const response = await fetch(`${HF_SPACE_URL}/call/predict`, {
+        // Use the standard Gradio API endpoint
+        const response = await fetch(`${HF_SPACE_URL}/api/predict`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({
                 data: [prompt, preserveMeaning.checked]
             })
         });
         
-        const result = await response.json();
-        const eventId = result.event_id;
-        
-        // Poll for results
-        let attempts = 0;
-        const maxAttempts = 60;
-        
-        while (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // FIXED: Changed backticks to parentheses
-            const statusResponse = await fetch(`${HF_SPACE_URL}/call/predict/${eventId}`);
-            const statusText = await statusResponse.text();
-            
-            const lines = statusText.split('\n').filter(line => line.startsWith('data:'));
-            
-            for (const line of lines) {
-                const data = JSON.parse(line.substring(5));
-                
-                if (data.msg === 'process_completed') {
-                    const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = data.output.data;
-                    
-                    document.getElementById('optimized-output').value = optimized;
-                    document.getElementById('tokens-saved').textContent = tokensSaved;
-                    document.getElementById('reduction-pct').textContent = reduction;
-                    document.getElementById('energy-saved').textContent = energy;
-                    document.getElementById('co2-saved').textContent = co2;
-                    
-                    showResults();
-                    hideLoading();
-                    return;
-                }
-            }
-            
-            attempts++;
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        throw new Error('Timeout waiting for result');
+        const result = await response.json();
+        
+        // Gradio returns: {data: [optimized, tokenInfo, tokensSaved, reduction, energy, co2]}
+        const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = result.data;
+        
+        // Display results
+        document.getElementById('optimized-output').value = optimized;
+        document.getElementById('tokens-saved').textContent = tokensSaved;
+        document.getElementById('reduction-pct').textContent = reduction;
+        document.getElementById('energy-saved').textContent = energy + ' Wh';
+        document.getElementById('co2-saved').textContent = co2 + 'g';
+        
+        showResults();
+        hideLoading();
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Optimization failed. Please try again. ' + error.message);
+        showError('Optimization failed: ' + error.message + '. The Hugging Face Space may be starting up (takes ~30 seconds on first load).');
         hideLoading();
     }
 }
@@ -85,21 +67,34 @@ function showResults() {
 
 function showError(message) {
     const errorEl = document.getElementById('error-message');
-    errorEl.textContent = message;
+    errorEl.textContent = '❌ ' + message;
     errorEl.classList.add('active');
 }
 
 async function copyToClipboard() {
     const text = document.getElementById('optimized-output').value;
-    await navigator.clipboard.writeText(text);
     
-    const btn = document.getElementById('copy-btn');
-    const original = btn.textContent;
-    btn.textContent = '✅ Copied!';
-    setTimeout(() => btn.textContent = original, 2000);
+    try {
+        await navigator.clipboard.writeText(text);
+        
+        const btn = document.getElementById('copy-btn');
+        const original = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = original, 2000);
+    } catch (err) {
+        console.error('Copy failed:', err);
+        showError('Failed to copy to clipboard');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
     document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+    
+    // Allow Ctrl+Enter to submit
+    document.getElementById('prompt-input').addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            optimizePrompt();
+        }
+    });
 });
