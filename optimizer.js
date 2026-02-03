@@ -13,39 +13,40 @@ async function optimizePrompt() {
     showLoading();
     
     try {
-        // Use the standard Gradio API endpoint
-        const response = await fetch(`${HF_SPACE_URL}/api/predict`, {
+        const response = await fetch(`${HF_SPACE_URL}/optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                data: [prompt, preserveMeaning.checked]
+                prompt: prompt,
+                preserve_meaning: preserveMeaning.checked
             })
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`HTTP ${response.status}`);
         }
         
         const result = await response.json();
         
-        // Gradio returns: {data: [optimized, tokenInfo, tokensSaved, reduction, energy, co2]}
-        const [optimized, tokenInfo, tokensSaved, reduction, energy, co2] = result.data;
+        if (result.success) {
+            document.getElementById('optimized-output').value = result.optimized;
+            document.getElementById('tokens-saved').textContent = result.tokens_saved;
+            document.getElementById('reduction-pct').textContent = result.reduction_percent + '%';
+            document.getElementById('energy-saved').textContent = result.energy_wh + ' Wh';
+            document.getElementById('co2-saved').textContent = result.co2_g + 'g';
+            
+            showResults();
+        } else {
+            throw new Error(result.error || 'Optimization failed');
+        }
         
-        // Display results
-        document.getElementById('optimized-output').value = optimized;
-        document.getElementById('tokens-saved').textContent = tokensSaved;
-        document.getElementById('reduction-pct').textContent = reduction;
-        document.getElementById('energy-saved').textContent = energy + ' Wh';
-        document.getElementById('co2-saved').textContent = co2 + 'g';
-        
-        showResults();
         hideLoading();
         
     } catch (error) {
         console.error('Error:', error);
-        showError('Optimization failed: ' + error.message + '. The Hugging Face Space may be starting up (takes ~30 seconds on first load).');
+        showError('Connection failed: ' + error.message + '. Make sure the Hugging Face Space is running.');
         hideLoading();
     }
 }
@@ -63,6 +64,7 @@ function hideLoading() {
 
 function showResults() {
     document.getElementById('output-section').style.display = 'block';
+    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showError(message) {
@@ -82,8 +84,7 @@ async function copyToClipboard() {
         btn.textContent = '✅ Copied!';
         setTimeout(() => btn.textContent = original, 2000);
     } catch (err) {
-        console.error('Copy failed:', err);
-        showError('Failed to copy to clipboard');
+        showError('Failed to copy');
     }
 }
 
@@ -91,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
     document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
     
-    // Allow Ctrl+Enter to submit
     document.getElementById('prompt-input').addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
             optimizePrompt();
