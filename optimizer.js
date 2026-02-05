@@ -4,7 +4,7 @@
  */
 
 // Your Hugging Face Space URL
-const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+const HF_SPACE_URL = 'https://huggingface.co/spaces/sirenice/GreenPromptsOptimizer';
 
 /**
  * Main optimization function - CALL THIS FROM YOUR BUTTON
