@@ -126,6 +126,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-decoration: none;
         }
         .logo-icon {
             width: 32px;
@@ -137,13 +138,14 @@
             align-items: center;
             justify-content: center;
         }
-        .nav-links { display: flex; gap: 2rem; }
+        .nav-links { display: flex; gap: 2.5rem; }
         .nav-links a {
             color: var(--text-gray);
             text-decoration: none;
             transition: color 0.3s;
             position: relative;
             padding-bottom: 5px;
+            font-size: 1.1rem;
         }
         .nav-links a:hover { color: var(--accent-green); }
         .nav-links a.active::after {
@@ -215,18 +217,12 @@
             background: rgba(16, 185, 129, 0.05);
             border-radius: 8px;
         }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(16, 185, 129, 0.2);
-            border-radius: 4px;
-            overflow: hidden;
+        .fact-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-color);
             margin: 1rem 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
-            transition: width 1s ease-out;
+            border-radius: 8px;
         }
         .stat-highlight {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
@@ -234,13 +230,6 @@
             border-radius: 16px;
             text-align: center;
             margin: 2rem 0;
-        }
-        .fact-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-left: 4px solid var(--primary-color);
-            margin: 1rem 0;
-            border-radius: 8px;
         }
     </style>
 </head>
@@ -252,15 +241,16 @@
     </div>
     <header>
         <nav>
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <div class="logo-icon">🌱</div>
                 Green Prompts Optimizer
-            </div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="about.html">About</a>
                 <a href="impact.html" class="active">Impact</a>
                 <a href="stats.html">Stats</a>
+                <a href="login.html" style="background: linear-gradient(135deg, #10b981, #3b82f6); padding: 0.5rem 1.2rem; border-radius: 8px; color: white;">Login</a>
             </div>
         </nav>
     </header>
@@ -277,15 +267,15 @@
             <h2 style="color: var(--accent-green); margin-bottom: 1rem;">Collective Impact So Far</h2>
             <div class="impact-grid">
                 <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px;">
-                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">15,234</div>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);" id="total-tokens">0</div>
                     <div style="color: var(--text-gray);">Tokens Saved</div>
                 </div>
                 <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px;">
-                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">12.4 Wh</div>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);" id="total-energy">0 Wh</div>
                     <div style="color: var(--text-gray);">Energy Saved</div>
                 </div>
                 <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px;">
-                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">8.7g</div>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);" id="total-co2">0g</div>
                     <div style="color: var(--text-gray);">CO₂ Reduced</div>
                 </div>
             </div>
@@ -300,9 +290,9 @@
             <div class="comparison-item">
                 <div>
                     <div style="font-weight: 600;">💡 LED Bulb Runtime</div>
-                    <div style="color: var(--text-gray); font-size: 0.9rem;">10W LED bulb for 1.24 hours</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">10W LED bulb runtime</div>
                 </div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">1.24h</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);" id="bulb-hours">0h</div>
             </div>
 
             <div class="comparison-item">
@@ -310,7 +300,7 @@
                     <div style="font-weight: 600;">📱 Phone Charges</div>
                     <div style="color: var(--text-gray); font-size: 0.9rem;">Full charges of an iPhone 15</div>
                 </div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">~1</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);" id="phone-charges">0</div>
             </div>
 
             <div class="comparison-item">
@@ -318,7 +308,7 @@
                     <div style="font-weight: 600;">🌳 Trees Planted Equivalent</div>
                     <div style="color: var(--text-gray); font-size: 0.9rem;">CO₂ absorbed by trees in a year</div>
                 </div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">0.0004</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);" id="trees-equivalent">0</div>
             </div>
         </div>
 
@@ -350,31 +340,6 @@
             </div>
         </div>
 
-        <div class="comparison-card">
-            <h2 style="color: var(--accent-green); margin-bottom: 1.5rem;">🎯 Why Optimization Matters</h2>
-            
-            <div style="margin: 1rem 0;">
-                <h3 style="margin-bottom: 0.5rem;">Token Reduction = Direct Energy Savings</h3>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 40%;"></div>
-                </div>
-                <p style="color: var(--text-gray); font-size: 0.9rem;">
-                    Average 40% token reduction means 40% less computation per query
-                </p>
-            </div>
-
-            <div style="margin: 2rem 0;">
-                <h3 style="margin-bottom: 0.5rem;">Scaling Effect</h3>
-                <p>If 10,000 users optimize just 10 prompts each:</p>
-                <ul style="list-style: none; margin-top: 1rem;">
-                    <li style="padding: 0.5rem 0;">✅ ~400,000 tokens saved</li>
-                    <li style="padding: 0.5rem 0;">✅ ~325 Wh energy saved</li>
-                    <li style="padding: 0.5rem 0;">✅ ~228g CO₂ prevented</li>
-                    <li style="padding: 0.5rem 0;">✅ Equivalent to 32 phone charges</li>
-                </ul>
-            </div>
-        </div>
-
         <div class="stat-highlight">
             <h2 style="color: var(--accent-green); margin-bottom: 1rem;">🚀 Your Personal Impact</h2>
             <p style="margin-bottom: 1.5rem;">Start optimizing prompts today and watch your impact grow</p>
@@ -384,6 +349,7 @@
         </div>
     </div>
 
+    <script src="stats-tracker.js"></script>
     <script>
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
