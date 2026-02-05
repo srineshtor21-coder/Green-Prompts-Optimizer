@@ -1,13 +1,13 @@
 /**
- * GREEN PROMPTS OPTIMIZER - GUARANTEED TO WORK
- * This connects directly to your Hugging Face Gradio Space
+ * GREEN PROMPTS OPTIMIZER - FIXED VERSION
+ * Connects to your Flask app on Hugging Face Space
  */
 
-// Your Hugging Face Space URL
-const HF_SPACE_URL = 'https://huggingface.co/spaces/sirenice/GreenPromptsOptimizer';
+// CORRECT Hugging Face Space URL (not the /spaces/ URL!)
+const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
 
 /**
- * Main optimization function - CALL THIS FROM YOUR BUTTON
+ * Main optimization function
  */
 async function optimizePrompt() {
     const promptInput = document.getElementById('prompt-input');
@@ -24,50 +24,47 @@ async function optimizePrompt() {
     showLoading();
 
     try {
-        // STEP 1: Call Hugging Face Gradio API
-        // This is the EXACT format Gradio expects
-        const response = await fetch(`${HF_SPACE_URL}/api/predict`, {
+        // Call YOUR Flask /optimize endpoint (not /api/predict!)
+        const response = await fetch(`${HF_SPACE_URL}/optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                data: [
-                    prompt,                          // Your prompt text
-                    preserveMeaning.checked          // true/false for preserve meaning
-                ]
+                prompt: prompt,
+                preserve_meaning: preserveMeaning.checked
             })
         });
 
-        // Check if request succeeded
+        // Check response
         if (!response.ok) {
             if (response.status === 503) {
-                showError('Model is starting up. Please wait 30 seconds and try again.');
+                showError('Model is starting up. Please wait 30-60 seconds and try again.');
             } else {
-                showError(`Error: ${response.status}. Please try again.`);
+                const errorData = await response.json().catch(() => ({}));
+                showError(errorData.error || `Error ${response.status}. Please try again.`);
             }
             hideLoading();
             return;
         }
 
-        // STEP 2: Parse the response
+        // Parse result from YOUR Flask format
         const result = await response.json();
         
-        // Gradio returns: { data: [optimized, info, tokens, %, energy, co2] }
-        if (!result.data || result.data.length < 6) {
-            showError('Invalid response from model. Please try again.');
+        if (!result.success) {
+            showError(result.error || 'Optimization failed');
             hideLoading();
             return;
         }
 
-        // STEP 3: Extract the data
-        const optimizedPrompt = result.data[0];
-        const tokensSaved = result.data[2];
-        const reductionPercent = result.data[3];
-        const energySaved = result.data[4];
-        const co2Saved = result.data[5];
+        // Extract data from YOUR Flask response format
+        const optimizedPrompt = result.optimized;
+        const tokensSaved = result.tokens_saved;
+        const reductionPercent = result.reduction_percent;
+        const energySaved = result.energy_wh;
+        const co2Saved = result.co2_g;
 
-        // STEP 4: Display results
+        // Display results
         document.getElementById('optimized-output').value = optimizedPrompt;
         document.getElementById('tokens-saved').textContent = tokensSaved;
         document.getElementById('reduction-pct').textContent = reductionPercent + '%';
@@ -75,20 +72,22 @@ async function optimizePrompt() {
         document.getElementById('co2-saved').textContent = co2Saved + 'g';
 
         // Show output section
-        document.getElementById('output-section').style.display = 'block';
-        document.getElementById('output-section').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'nearest' 
-        });
+        const outputSection = document.getElementById('output-section');
+        if (outputSection) {
+            outputSection.style.display = 'block';
+            outputSection.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }
 
-        // Save stats (if stats tracker is loaded)
+        // Update stats if stats tracker is loaded
         if (typeof window.GreenPromptsStats !== 'undefined') {
             window.GreenPromptsStats.addOptimization(
                 parseInt(tokensSaved) || 0,
                 parseFloat(energySaved) || 0,
                 parseFloat(co2Saved) || 0
             );
-            // Update display immediately
             window.GreenPromptsStats.updateStatsDisplay();
         }
 
@@ -96,7 +95,7 @@ async function optimizePrompt() {
 
     } catch (error) {
         console.error('Error:', error);
-        showError('Connection failed. Make sure the Hugging Face Space is running.');
+        showError('Connection failed. Is the Hugging Face Space running?');
         hideLoading();
     }
 }
@@ -114,7 +113,7 @@ async function copyToClipboard() {
         btn.textContent = '✅ Copied!';
         setTimeout(() => btn.textContent = original, 2000);
     } catch (err) {
-        showError('Failed to copy');
+        showError('Failed to copy to clipboard');
     }
 }
 
@@ -148,6 +147,9 @@ function showError(message) {
             errorEl.classList.remove('active');
             errorEl.style.display = 'none';
         }, 5000);
+    } else {
+        // Fallback if error element doesn't exist
+        alert(message);
     }
 }
 
@@ -155,7 +157,7 @@ function showError(message) {
  * Initialize when page loads
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // Connect button
+    // Connect optimize button
     const optimizeBtn = document.getElementById('optimize-btn');
     if (optimizeBtn) {
         optimizeBtn.addEventListener('click', optimizePrompt);
@@ -167,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.addEventListener('click', copyToClipboard);
     }
 
-    // Keyboard shortcut: Ctrl+Enter
+    // Keyboard shortcut: Ctrl+Enter to optimize
     const promptInput = document.getElementById('prompt-input');
     if (promptInput) {
         promptInput.addEventListener('keydown', (e) => {
@@ -179,4 +181,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     console.log('🌱 Green Prompts Optimizer ready!');
+    console.log('📡 Connected to:', HF_SPACE_URL);
 });
