@@ -1,9 +1,9 @@
 /**
- * GREEN PROMPTS OPTIMIZER - FIXED VERSION
- * Connects to your Flask app on Hugging Face Space
+ * GREEN PROMPTS OPTIMIZER - GRADIO VERSION
+ * Connects to your Gradio app on Hugging Face Space
  */
 
-// CORRECT Hugging Face Space URL (not the /spaces/ URL!)
+// Your Hugging Face Space URL
 const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
 
 /**
@@ -24,15 +24,18 @@ async function optimizePrompt() {
     showLoading();
 
     try {
-        // Call YOUR Flask /optimize endpoint (not /api/predict!)
-        const response = await fetch(`${HF_SPACE_URL}/optimize`, {
+        // Call Gradio's /api/predict endpoint
+        // Gradio format: { data: [input1, input2, ...] }
+        const response = await fetch(`${HF_SPACE_URL}/api/predict`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                prompt: prompt,
-                preserve_meaning: preserveMeaning.checked
+                data: [
+                    prompt,                          // First input: prompt text
+                    preserveMeaning.checked          // Second input: preserve meaning checkbox
+                ]
             })
         });
 
@@ -41,47 +44,49 @@ async function optimizePrompt() {
             if (response.status === 503) {
                 showError('Model is starting up. Please wait 30-60 seconds and try again.');
             } else {
-                const errorData = await response.json().catch(() => ({}));
-                showError(errorData.error || `Error ${response.status}. Please try again.`);
+                showError(`Error ${response.status}. Please try again.`);
             }
             hideLoading();
             return;
         }
 
-        // Parse result from YOUR Flask format
+        // Parse Gradio response
         const result = await response.json();
         
-        if (!result.success) {
-            showError(result.error || 'Optimization failed');
+        // Gradio returns: { data: [output1, output2, output3, ...] }
+        // Our function returns: [optimized, info, tokens_saved, reduction_pct, energy_wh, co2_g]
+        if (!result.data || result.data.length < 6) {
+            showError('Invalid response from model. Please try again.');
             hideLoading();
             return;
         }
 
-        // Extract data from YOUR Flask response format
-        const optimizedPrompt = result.optimized;
-        const tokensSaved = result.tokens_saved;
-        const reductionPercent = result.reduction_percent;
-        const energySaved = result.energy_wh;
-        const co2Saved = result.co2_g;
+        // Extract results
+        const optimizedPrompt = result.data[0];  // Optimized text
+        const info = result.data[1];              // Token info
+        const tokensSaved = result.data[2];       // Tokens saved (number)
+        const reductionPercent = result.data[3];  // Reduction percentage (string with %)
+        const energySaved = result.data[4];       // Energy in Wh (string with unit)
+        const co2Saved = result.data[5];          // CO2 in g (string with unit)
 
         // Display results
         document.getElementById('optimized-output').value = optimizedPrompt;
         document.getElementById('tokens-saved').textContent = tokensSaved;
-        document.getElementById('reduction-pct').textContent = reductionPercent + '%';
-        document.getElementById('energy-saved').textContent = energySaved + ' Wh';
-        document.getElementById('co2-saved').textContent = co2Saved + 'g';
+        document.getElementById('reduction-pct').textContent = reductionPercent;
+        document.getElementById('energy-saved').textContent = energySaved;
+        document.getElementById('co2-saved').textContent = co2Saved;
 
         // Show output section
         const outputSection = document.getElementById('output-section');
         if (outputSection) {
-            outputSection.style.display = 'block';
+            outputSection.classList.add('active');
             outputSection.scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'nearest' 
             });
         }
 
-        // Update stats if stats tracker is loaded
+        // Update global stats if stats tracker is loaded
         if (typeof window.GreenPromptsStats !== 'undefined') {
             window.GreenPromptsStats.addOptimization(
                 parseInt(tokensSaved) || 0,
@@ -95,7 +100,7 @@ async function optimizePrompt() {
 
     } catch (error) {
         console.error('Error:', error);
-        showError('Connection failed. Is the Hugging Face Space running?');
+        showError('Connection failed. Make sure the Hugging Face Space is running.');
         hideLoading();
     }
 }
@@ -141,11 +146,9 @@ function showError(message) {
     if (errorEl) {
         errorEl.textContent = '❌ ' + message;
         errorEl.classList.add('active');
-        errorEl.style.display = 'block';
         
         setTimeout(() => {
             errorEl.classList.remove('active');
-            errorEl.style.display = 'none';
         }, 5000);
     } else {
         // Fallback if error element doesn't exist
