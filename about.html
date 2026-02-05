@@ -126,6 +126,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-decoration: none;
         }
         .logo-icon {
             width: 32px;
@@ -234,15 +235,16 @@
     </div>
     <header>
         <nav>
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <div class="logo-icon">🌱</div>
                 Green Prompts Optimizer
-            </div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="about.html" class="active">About</a>
                 <a href="impact.html">Impact</a>
                 <a href="stats.html">Stats</a>
+                <a href="login.html" style="background: linear-gradient(135deg, #10b981, #3b82f6); padding: 0.5rem 1.2rem; border-radius: 8px; color: white;">Login</a>
             </div>
         </nav>
     </header>
@@ -330,7 +332,6 @@
     </div>
 
     <script>
-        // Create floating bubbles
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
             for (let i = 0; i < 20; i++) {
