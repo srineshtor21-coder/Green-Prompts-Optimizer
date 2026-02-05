@@ -126,6 +126,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-decoration: none;
         }
         .logo-icon {
             width: 32px;
@@ -137,13 +138,14 @@
             align-items: center;
             justify-content: center;
         }
-        .nav-links { display: flex; gap: 2rem; }
+        .nav-links { display: flex; gap: 2.5rem; }
         .nav-links a {
             color: var(--text-gray);
             text-decoration: none;
             transition: color 0.3s;
             position: relative;
             padding-bottom: 5px;
+            font-size: 1.1rem;
         }
         .nav-links a:hover { color: var(--accent-green); }
         .nav-links a.active::after {
@@ -238,34 +240,6 @@
             font-weight: bold;
             font-size: 0.85rem;
         }
-        .leaderboard {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
-            margin: 2rem 0;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background: rgba(16, 185, 129, 0.05);
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-        .leaderboard-item:hover {
-            background: rgba(16, 185, 129, 0.1);
-        }
-        .rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            width: 50px;
-        }
-        .rank.gold { color: #fbbf24; }
-        .rank.silver { color: #d1d5db; }
-        .rank.bronze { color: #f97316; }
         .milestone-card {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
             padding: 2rem;
@@ -273,9 +247,6 @@
             text-align: center;
             margin: 2rem 0;
             border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        .milestone-progress {
-            margin: 2rem 0;
         }
         .progress-bar {
             width: 100%;
@@ -305,15 +276,16 @@
     </div>
     <header>
         <nav>
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <div class="logo-icon">🌱</div>
                 Green Prompts Optimizer
-            </div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="about.html">About</a>
                 <a href="impact.html">Impact</a>
                 <a href="stats.html" class="active">Stats</a>
+                <a href="login.html" style="background: linear-gradient(135deg, #10b981, #3b82f6); padding: 0.5rem 1.2rem; border-radius: 8px; color: white;">Login</a>
             </div>
         </nav>
     </header>
@@ -329,22 +301,22 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
-                <div class="stat-value">2,547</div>
+                <div class="stat-value" id="total-optimizations">0</div>
                 <div style="color: var(--text-gray);">Total Optimizations</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🎯</div>
-                <div class="stat-value">15,234</div>
+                <div class="stat-value" id="total-tokens-stat">0</div>
                 <div style="color: var(--text-gray);">Tokens Saved</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">⚡</div>
-                <div class="stat-value">12.4</div>
+                <div class="stat-value" id="total-energy-stat">0</div>
                 <div style="color: var(--text-gray);">Watt-hours Saved</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🌍</div>
-                <div class="stat-value">8.7</div>
+                <div class="stat-value" id="total-co2-stat">0</div>
                 <div style="color: var(--text-gray);">Grams CO₂ Reduced</div>
             </div>
         </div>
@@ -381,117 +353,16 @@
             </div>
         </div>
 
-        <div class="chart-card">
-            <h2 style="color: var(--accent-green); margin-bottom: 2rem;">📉 Average Token Reduction</h2>
-            
-            <div class="chart-bar">
-                <div class="chart-label">Week 1</div>
-                <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" style="width: 35%;">35%</div>
-                </div>
-            </div>
-
-            <div class="chart-bar">
-                <div class="chart-label">Week 2</div>
-                <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" style="width: 38%;">38%</div>
-                </div>
-            </div>
-
-            <div class="chart-bar">
-                <div class="chart-label">Week 3</div>
-                <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" style="width: 42%;">42%</div>
-                </div>
-            </div>
-
-            <div class="chart-bar">
-                <div class="chart-label">Week 4</div>
-                <div class="chart-bar-bg">
-                    <div class="chart-bar-fill" style="width: 40%;">40%</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="leaderboard">
-            <h2 style="color: var(--accent-green); margin-bottom: 2rem;">🏆 Top Energy Savers</h2>
-            
-            <div class="leaderboard-item">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="rank gold">🥇</div>
-                    <div>
-                        <div style="font-weight: 600;">EcoWarrior</div>
-                        <div style="color: var(--text-gray); font-size: 0.9rem;">127 optimizations</div>
-                    </div>
-                </div>
-                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
-                    0.98 Wh saved
-                </div>
-            </div>
-
-            <div class="leaderboard-item">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="rank silver">🥈</div>
-                    <div>
-                        <div style="font-weight: 600;">GreenCoder</div>
-                        <div style="color: var(--text-gray); font-size: 0.9rem;">98 optimizations</div>
-                    </div>
-                </div>
-                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
-                    0.76 Wh saved
-                </div>
-            </div>
-
-            <div class="leaderboard-item">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="rank bronze">🥉</div>
-                    <div>
-                        <div style="font-weight: 600;">PromptMaster</div>
-                        <div style="color: var(--text-gray); font-size: 0.9rem;">84 optimizations</div>
-                    </div>
-                </div>
-                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
-                    0.65 Wh saved
-                </div>
-            </div>
-
-            <div class="leaderboard-item">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="rank">4</div>
-                    <div>
-                        <div style="font-weight: 600;">TokenSaver</div>
-                        <div style="color: var(--text-gray); font-size: 0.9rem;">72 optimizations</div>
-                    </div>
-                </div>
-                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
-                    0.56 Wh saved
-                </div>
-            </div>
-
-            <div class="leaderboard-item">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="rank">5</div>
-                    <div>
-                        <div style="font-weight: 600;">AIOptimizer</div>
-                        <div style="color: var(--text-gray); font-size: 0.9rem;">65 optimizations</div>
-                    </div>
-                </div>
-                <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent-green);">
-                    0.51 Wh saved
-                </div>
-            </div>
-        </div>
-
         <div class="milestone-card">
             <h2 style="color: var(--accent-green); margin-bottom: 1rem;">🎯 Community Milestone Progress</h2>
             <p style="color: var(--text-gray); margin-bottom: 2rem;">
-                Next Goal: 20,000 tokens saved
+                Next Goal: 50,000 tokens saved
             </p>
             
-            <div class="milestone-progress">
+            <div style="margin: 2rem 0;">
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 76.17%;">
-                        15,234 / 20,000
+                    <div class="progress-fill" id="milestone-progress" style="width: 0%;">
+                        <span id="milestone-text">0 / 50,000</span>
                     </div>
                 </div>
             </div>
@@ -502,12 +373,12 @@
                     <div style="color: var(--text-gray); font-size: 0.9rem;">10K Milestone</div>
                 </div>
                 <div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-green);">✅</div>
-                    <div style="color: var(--text-gray); font-size: 0.9rem;">15K Milestone</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-gray);" id="milestone-25k">⏳</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">25K Milestone</div>
                 </div>
                 <div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-gray);">⏳</div>
-                    <div style="color: var(--text-gray); font-size: 0.9rem;">20K Goal</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-gray);" id="milestone-50k">⏳</div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem;">50K Goal</div>
                 </div>
             </div>
         </div>
@@ -523,6 +394,7 @@
         </div>
     </div>
 
+    <script src="stats-tracker.js"></script>
     <script>
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
