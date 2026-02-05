@@ -107,7 +107,7 @@
             }
         }
         
-        /* Header */
+        /* Header - EXACTLY as in your design */
         header {
             background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(10px);
@@ -176,7 +176,7 @@
             padding: 0 2rem;
         }
         
-        /* Hero section */
+        /* Hero section - EXACTLY as in your design */
         .hero {
             text-align: center;
             padding: 6rem 2rem 4rem;
@@ -218,7 +218,7 @@
             box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
         }
         
-        /* Stats cards */
+        /* Stats cards - EXACTLY as in your design */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -261,7 +261,6 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 3rem;
             font-weight: 700;
-            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
         .features-grid {
             display: grid;
@@ -335,7 +334,7 @@
             font-size: 1.1rem;
         }
         
-        textarea, input[type="text"] {
+        textarea {
             width: 100%;
             padding: 1rem;
             background: rgba(15, 23, 42, 0.5);
@@ -347,7 +346,7 @@
             resize: vertical;
         }
         
-        textarea:focus, input:focus {
+        textarea:focus {
             outline: none;
             border-color: var(--accent-green);
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -652,7 +651,6 @@
         <p>Making AI more sustainable, one prompt at a time 🌍</p>
     </footer>
 
-    <script src="optimizer.js"></script>
     <script>
         // Create floating bubbles
         function createBubbles() {
@@ -672,14 +670,6 @@
         }
         createBubbles();
 
-        // Highlight active navigation
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            if (link.getAttribute('href') === currentPage) {
-                link.classList.add('active');
-            }
-        });
-
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -694,5 +684,10 @@
             });
         });
     </script>
+    
+    <!-- CRITICAL: Load stats tracker first -->
+    <script src="stats-tracker.js"></script>
+    <!-- Then load the optimizer script that connects to Hugging Face -->
+    <script src="optimizer-WORKING.js"></script>
 </body>
 </html>
