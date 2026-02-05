@@ -4,7 +4,7 @@
  */
 
 // Your Hugging Face Space URL
-const HF_SPACE_URL = 'https://huggingface.co/spaces/sirenice/GreenPromptsOptimizer';
+const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
 
 /**
  * Main optimization function - CALL THIS FROM YOUR BUTTON
@@ -80,6 +80,17 @@ async function optimizePrompt() {
             behavior: 'smooth', 
             block: 'nearest' 
         });
+
+        // Save stats (if stats tracker is loaded)
+        if (typeof window.GreenPromptsStats !== 'undefined') {
+            window.GreenPromptsStats.addOptimization(
+                parseInt(tokensSaved) || 0,
+                parseFloat(energySaved) || 0,
+                parseFloat(co2Saved) || 0
+            );
+            // Update display immediately
+            window.GreenPromptsStats.updateStatsDisplay();
+        }
 
         hideLoading();
 
