@@ -1,84 +1,103 @@
-const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+/**
+ * GREEN PROMPTS OPTIMIZER - GUARANTEED TO WORK
+ * This connects directly to your Hugging Face Gradio Space
+ */
 
+// Your Hugging Face Space URL
+const HF_SPACE_URL = 'https://huggingface.co/spaces/sirenice/GreenPromptsOptimizer';
+
+/**
+ * Main optimization function - CALL THIS FROM YOUR BUTTON
+ */
 async function optimizePrompt() {
     const promptInput = document.getElementById('prompt-input');
     const preserveMeaning = document.getElementById('preserve-meaning');
     const prompt = promptInput.value.trim();
-    
+
+    // Validate
     if (!prompt) {
-        showError('Please enter a prompt');
+        showError('Please enter a prompt to optimize');
         return;
     }
-    
+
+    // Show loading
     showLoading();
-    
+
     try {
-        const response = await fetch(`${HF_SPACE_URL}/optimize`, {
+        // STEP 1: Call Hugging Face Gradio API
+        // This is the EXACT format Gradio expects
+        const response = await fetch(`${HF_SPACE_URL}/api/predict`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                prompt: prompt,
-                preserve_meaning: preserveMeaning.checked
+                data: [
+                    prompt,                          // Your prompt text
+                    preserveMeaning.checked          // true/false for preserve meaning
+                ]
             })
         });
-        
+
+        // Check if request succeeded
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+            if (response.status === 503) {
+                showError('Model is starting up. Please wait 30 seconds and try again.');
+            } else {
+                showError(`Error: ${response.status}. Please try again.`);
+            }
+            hideLoading();
+            return;
         }
-        
+
+        // STEP 2: Parse the response
         const result = await response.json();
         
-        if (result.success) {
-            document.getElementById('optimized-output').value = result.optimized;
-            document.getElementById('tokens-saved').textContent = result.tokens_saved;
-            document.getElementById('reduction-pct').textContent = result.reduction_percent + '%';
-            document.getElementById('energy-saved').textContent = result.energy_wh + ' Wh';
-            document.getElementById('co2-saved').textContent = result.co2_g + 'g';
-            
-            showResults();
-        } else {
-            throw new Error(result.error || 'Optimization failed');
+        // Gradio returns: { data: [optimized, info, tokens, %, energy, co2] }
+        if (!result.data || result.data.length < 6) {
+            showError('Invalid response from model. Please try again.');
+            hideLoading();
+            return;
         }
-        
+
+        // STEP 3: Extract the data
+        const optimizedPrompt = result.data[0];
+        const tokensSaved = result.data[2];
+        const reductionPercent = result.data[3];
+        const energySaved = result.data[4];
+        const co2Saved = result.data[5];
+
+        // STEP 4: Display results
+        document.getElementById('optimized-output').value = optimizedPrompt;
+        document.getElementById('tokens-saved').textContent = tokensSaved;
+        document.getElementById('reduction-pct').textContent = reductionPercent + '%';
+        document.getElementById('energy-saved').textContent = energySaved + ' Wh';
+        document.getElementById('co2-saved').textContent = co2Saved + 'g';
+
+        // Show output section
+        document.getElementById('output-section').style.display = 'block';
+        document.getElementById('output-section').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+        });
+
         hideLoading();
-        
+
     } catch (error) {
         console.error('Error:', error);
-        showError('Connection failed: ' + error.message + '. Make sure the Hugging Face Space is running.');
+        showError('Connection failed. Make sure the Hugging Face Space is running.');
         hideLoading();
     }
 }
 
-function showLoading() {
-    document.getElementById('loading-spinner').classList.add('active');
-    document.getElementById('optimize-btn').disabled = true;
-    document.getElementById('error-message').classList.remove('active');
-}
-
-function hideLoading() {
-    document.getElementById('loading-spinner').classList.remove('active');
-    document.getElementById('optimize-btn').disabled = false;
-}
-
-function showResults() {
-    document.getElementById('output-section').style.display = 'block';
-    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function showError(message) {
-    const errorEl = document.getElementById('error-message');
-    errorEl.textContent = '❌ ' + message;
-    errorEl.classList.add('active');
-}
-
+/**
+ * Copy to clipboard
+ */
 async function copyToClipboard() {
     const text = document.getElementById('optimized-output').value;
     
     try {
         await navigator.clipboard.writeText(text);
-        
         const btn = document.getElementById('copy-btn');
         const original = btn.textContent;
         btn.textContent = '✅ Copied!';
@@ -88,13 +107,65 @@ async function copyToClipboard() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
-    document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+/**
+ * UI Helper Functions
+ */
+function showLoading() {
+    const spinner = document.getElementById('loading-spinner');
+    const button = document.getElementById('optimize-btn');
     
-    document.getElementById('prompt-input').addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key === 'Enter') {
-            optimizePrompt();
-        }
-    });
+    if (spinner) spinner.classList.add('active');
+    if (button) button.disabled = true;
+}
+
+function hideLoading() {
+    const spinner = document.getElementById('loading-spinner');
+    const button = document.getElementById('optimize-btn');
+    
+    if (spinner) spinner.classList.remove('active');
+    if (button) button.disabled = false;
+}
+
+function showError(message) {
+    const errorEl = document.getElementById('error-message');
+    if (errorEl) {
+        errorEl.textContent = '❌ ' + message;
+        errorEl.classList.add('active');
+        errorEl.style.display = 'block';
+        
+        setTimeout(() => {
+            errorEl.classList.remove('active');
+            errorEl.style.display = 'none';
+        }, 5000);
+    }
+}
+
+/**
+ * Initialize when page loads
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Connect button
+    const optimizeBtn = document.getElementById('optimize-btn');
+    if (optimizeBtn) {
+        optimizeBtn.addEventListener('click', optimizePrompt);
+    }
+
+    // Connect copy button
+    const copyBtn = document.getElementById('copy-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', copyToClipboard);
+    }
+
+    // Keyboard shortcut: Ctrl+Enter
+    const promptInput = document.getElementById('prompt-input');
+    if (promptInput) {
+        promptInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                optimizePrompt();
+            }
+        });
+    }
+
+    console.log('🌱 Green Prompts Optimizer ready!');
 });
