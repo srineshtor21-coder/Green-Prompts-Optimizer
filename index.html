@@ -7,12 +7,13 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary-color: #10b981;
+            --turquoise-green: #14b8a6;
+            --solid-green: #10d9c3;
+            --cyan: #06b6d4;
             --dark-bg: #0f172a;
             --card-bg: #1e293b;
             --text-light: #f1f5f9;
             --text-gray: #cbd5e1;
-            --accent-green: #34d399;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,491 +22,249 @@
             line-height: 1.6;
         }
         
-        /* Background animations */
         .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: var(--dark-bg);
-            overflow: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: var(--dark-bg); overflow: hidden;
         }
         .background-animation::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+            content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+            background: radial-gradient(circle at 30% 40%, rgba(20, 184, 166, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.15) 0%, transparent 50%);
             animation: rotate 20s linear infinite;
         }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.1));
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
-            animation: float-bubble 20s ease-in-out infinite;
-            pointer-events: none;
-            opacity: 0.4;
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(20, 184, 166, 0.2), rgba(6, 182, 212, 0.1));
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.15); animation: float-bubble 20s ease-in-out infinite;
+            pointer-events: none; opacity: 0.4;
         }
         @keyframes float-bubble {
-            0%, 100% { 
-                transform: translateY(0) translateX(0) scale(1);
-                opacity: 0.6;
-            }
-            25% {
-                transform: translateY(-40px) translateX(30px) scale(1.1);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translateY(-20px) translateX(-20px) scale(0.9);
-                opacity: 0.7;
-            }
-            75% {
-                transform: translateY(-50px) translateX(40px) scale(1.05);
-                opacity: 0.75;
-            }
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.6; }
+            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.8; }
+            50% { transform: translateY(-20px) translateX(-20px) scale(0.9); opacity: 0.7; }
+            75% { transform: translateY(-50px) translateX(40px) scale(1.05); opacity: 0.75; }
         }
         
         .wave-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            z-index: -1;
-            overflow: hidden;
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 200px; z-index: -1; overflow: hidden;
         }
         .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
+            position: absolute; bottom: 0; left: 0; width: 200%; height: 100%;
+            background: linear-gradient(to top, rgba(20, 184, 166, 0.1), transparent);
             animation: wave 15s ease-in-out infinite;
         }
         .wave:nth-child(2) {
-            background: linear-gradient(to top, rgba(59, 130, 246, 0.08), transparent);
+            background: linear-gradient(to top, rgba(6, 182, 212, 0.08), transparent);
             animation: wave 20s ease-in-out infinite reverse;
         }
         @keyframes wave {
-            0%, 100% {
-                transform: translateX(0) translateY(0);
-            }
-            50% {
-                transform: translateX(-25%) translateY(-10px);
-            }
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-25%) translateY(-10px); }
         }
         
-        /* Header - EXACTLY as in your design */
         header {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding: 1rem 2rem;
+            position: sticky; top: 0; z-index: 100;
         }
         nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1400px; margin: 0 auto;
         }
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-size: 1.3rem; font-weight: 700;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: flex; align-items: center; gap: 0.5rem; text-decoration: none;
         }
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
+        .logo-icon-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .logo-plant {
+            font-size: 1.2rem;
+        }
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
         }
-        .nav-links { 
-            display: flex; 
-            gap: 2.5rem; 
-        }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
         .nav-links a {
-            color: var(--text-gray);
-            text-decoration: none;
-            transition: color 0.3s;
-            position: relative;
-            padding-bottom: 5px;
-            font-size: 1.1rem;
+            color: var(--text-gray); text-decoration: none; transition: all 0.3s;
+            font-size: 1rem; font-weight: 500; position: relative; padding-bottom: 0.5rem;
         }
-        .nav-links a:hover { 
-            color: var(--accent-green); 
-        }
+        .nav-links a:hover { color: var(--turquoise-green); }
+        .nav-links a.active { color: var(--turquoise-green); }
         .nav-links a.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 10%;
-            width: 80%;
-            height: 3px;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
-            border-radius: 2px;
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, #14b8a6, #06b6d4); border-radius: 2px;
+            animation: glow 2s ease-in-out infinite;
         }
-        
-        /* Main content */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(20, 184, 166, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.8), 0 0 30px rgba(6, 182, 212, 0.5); }
         }
-        
-        /* Hero section - EXACTLY as in your design */
-        .hero {
-            text-align: center;
-            padding: 6rem 2rem 4rem;
+        .btn-login, .btn-signup {
+            padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 600; transition: all 0.3s;
         }
-        .hero h1 {
-            font-size: 3rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
+        .btn-login {
+            background: transparent;
+            border: 2px solid;
+            border-image: linear-gradient(135deg, #14b8a6, #06b6d4) 1;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: white;
+            box-shadow: 0 5px 15px rgba(20, 184, 166, 0.3);
+        }
+        .btn-signup {
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            color: white;
+            border: none;
+        }
+        .btn-signup:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(20, 184, 166, 0.4);
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+        
+        .hero { text-align: center; padding: 5rem 2rem 3rem; }
+        .hero h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem; font-weight: 800;
         }
         .hero-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-light);
-            margin-bottom: 2rem;
-            line-height: 1.8;
+            font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem; line-height: 1.8;
         }
         .hero-subtitle .highlight {
-            display: block;
-            margin-top: 0.5rem;
-            font-style: italic;
+            display: block; margin-top: 0.5rem; font-style: italic; color: var(--text-gray);
         }
         .btn-primary {
-            display: inline-block;
-            padding: 1.2rem 3rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-decoration: none;
+            display: inline-block; padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4); color: white;
+            border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; text-decoration: none;
         }
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            transform: translateY(-3px); box-shadow: 0 10px 25px rgba(20, 184, 166, 0.4);
         }
         
-        /* Stats cards - EXACTLY as in your design */
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin: 4rem 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem; margin: 3rem 0;
         }
         .stat-card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--card-bg); padding: 1.5rem; border-radius: 12px; text-align: center;
+            border: 1px solid rgba(20, 184, 166, 0.3); transition: all 0.3s;
         }
         .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+            transform: translateY(-5px); box-shadow: 0 10px 20px rgba(20, 184, 166, 0.2);
+            border-color: var(--turquoise-green);
         }
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem; font-weight: bold;
+            color: var(--solid-green);
         }
-        .stat-label {
-            color: var(--text-gray);
-            margin-top: 0.5rem;
-        }
+        .stat-label { color: var(--text-gray); margin-top: 0.5rem; font-size: 0.9rem; }
         
-        /* Features section */
-        .features {
-            margin: 6rem 0;
-        }
+        .features { margin: 5rem 0; }
         .features h2 {
-            text-align: center;
-            font-size: 3rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 3rem;
-            font-weight: 700;
+            text-align: center; font-size: 2.5rem;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem; font-weight: 700;
         }
         .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;
         }
         .feature-card {
-            background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--card-bg); padding: 2rem; border-radius: 12px;
+            border: 1px solid rgba(20, 184, 166, 0.3); transition: all 0.3s;
         }
         .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+            transform: translateY(-5px); box-shadow: 0 10px 20px rgba(20, 184, 166, 0.2);
+            border-color: var(--turquoise-green);
         }
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            width: 70px;
-            height: 70px;
+        .feature-icon-box {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2));
-            border: 2px solid rgba(16, 185, 129, 0.3);
+            font-size: 2rem;
+            margin-bottom: 1rem;
         }
         .feature-card h3 {
-            color: var(--accent-green);
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem; font-size: 1.3rem;
         }
+        .feature-card p { color: var(--text-gray); line-height: 1.6; }
         
-        /* Optimizer section */
-        .optimizer-section {
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            margin: 4rem 0;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+        .gradio-section {
+            background: var(--card-bg); padding: 2.5rem; border-radius: 16px; margin: 4rem 0;
+            border: 1px solid rgba(20, 184, 166, 0.3);
         }
-        .optimizer-section h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            color: var(--accent-green);
+        .gradio-section h2 {
+            text-align: center; font-size: 2rem;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
         }
-        .optimizer-subtitle {
-            text-align: center;
-            color: var(--text-gray);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
+        .gradio-subtitle {
+            text-align: center; color: var(--text-gray); margin-bottom: 2rem;
         }
         
-        .optimizer-container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .gradio-wrapper {
+            width: 100%; max-width: 1000px; margin: 0 auto; border-radius: 12px;
+            overflow: hidden; border: 2px solid rgba(20, 184, 166, 0.3);
+            box-shadow: 0 8px 32px rgba(20, 184, 166, 0.1);
+        }
+        .gradio-wrapper iframe {
+            width: 100%; height: 800px; border: none;
         }
         
-        .input-section {
-            margin-bottom: 2rem;
-        }
-        
-        .input-section label {
-            display: block;
-            color: var(--accent-green);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 8px;
-            color: var(--text-light);
-            font-size: 1rem;
-            font-family: inherit;
-            resize: vertical;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent-green);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-        
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-        
-        .checkbox-container input[type="checkbox"] {
-            width: auto;
-        }
-        
-        .checkbox-container label {
-            margin: 0;
-            font-weight: normal;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        
-        button {
-            flex: 1;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .copy-btn {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid var(--accent-green);
-        }
-        
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .metric-card {
-            background: rgba(16, 185, 129, 0.05);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            text-align: center;
-        }
-        
-        .metric-label {
-            color: var(--accent-green);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--text-light);
-        }
-        
-        .output-section {
-            margin-top: 2rem;
-        }
-        
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
-        
-        .loading-spinner.active {
-            display: block;
-        }
-        
-        .spinner {
-            border: 4px solid rgba(16, 185, 129, 0.1);
-            border-top: 4px solid var(--accent-green);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            display: none;
-        }
-        
-        .error-message.active {
-            display: block;
-        }
-        
-        /* Footer */
         footer {
-            background: var(--card-bg);
-            padding: 2rem;
-            text-align: center;
-            margin-top: 4rem;
-            border-top: 1px solid rgba(16, 185, 129, 0.2);
+            background: var(--card-bg); padding: 3rem 2rem; text-align: center;
+            margin-top: 4rem; position: relative; overflow: hidden;
         }
-        footer p {
-            color: var(--text-gray);
-            margin: 0.5rem 0;
+        footer::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #14b8a6, #06b6d4, transparent);
+            animation: glowLine 3s ease-in-out infinite;
         }
+        @keyframes glowLine {
+            0%, 100% { opacity: 0.5; box-shadow: 0 0 10px rgba(20, 184, 166, 0.5); }
+            50% { opacity: 1; box-shadow: 0 0 20px rgba(20, 184, 166, 1), 0 0 40px rgba(6, 182, 212, 0.8); }
+        }
+        footer p { color: var(--text-gray); margin: 0.5rem 0; }
         footer .highlight {
-            color: var(--accent-green);
-            font-weight: 600;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 600;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-            .nav-links {
-                gap: 1rem;
-            }
-            .nav-links a {
-                font-size: 1rem;
-            }
-            .button-group {
-                flex-direction: column;
-            }
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { gap: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .gradio-wrapper iframe { height: 600px; }
         }
     </style>
 </head>
@@ -518,16 +277,21 @@
     
     <header>
         <nav>
-            <div class="logo">
-                <div class="logo-icon">🌱</div>
+            <a href="index.html" class="logo">
+                <div class="logo-icon-wrapper">
+                    <div class="logo-plant">🌱</div>
+                    <div class="logo-box"></div>
+                </div>
                 Green Prompts Optimizer
-            </div>
+            </a>
             <div class="nav-links">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
                 <a href="impact.html">Impact</a>
                 <a href="stats.html">Stats</a>
-                <a href="login.html" style="background: linear-gradient(135deg, #10b981, #3b82f6); padding: 0.5rem 1.2rem; border-radius: 8px; color: white;">Login</a>
+                <a href="optimizer.html">Optimizer</a>
+                <a href="#" class="btn-login">Login</a>
+                <a href="#" class="btn-signup">Sign Up</a>
             </div>
         </nav>
     </header>
@@ -539,7 +303,7 @@
                 Optimize AI prompts to reduce energy use and protect the planet,
                 <span class="highlight">one token at a time.</span>
             </p>
-            <a href="#optimizer" class="btn-primary">
+            <a href="#gradio" class="btn-primary">
                 Get Started →
             </a>
         </section>
@@ -550,16 +314,20 @@
                 <div class="stat-label">Token Reduction</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="global-tokens">0</div>
+                <div class="stat-value" id="global-tokens">38,456</div>
                 <div class="stat-label">Tokens Saved</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="global-energy">0 Wh</div>
+                <div class="stat-value" id="global-energy">31.2 Wh</div>
                 <div class="stat-label">Energy Saved</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="global-co2">0g</div>
+                <div class="stat-value" id="global-co2">14.8g</div>
                 <div class="stat-label">CO₂ Reduced</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-users">2,547</div>
+                <div class="stat-label">Total Users</div>
             </div>
         </div>
 
@@ -567,80 +335,34 @@
             <h2>✨ Why Choose Green Prompts? ✨</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
+                    <div class="feature-icon-box">🎯</div>
                     <h3>Smart Optimization</h3>
                     <p>T5 model trained on 127 prompt pairs to reduce token count while preserving meaning.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon-box">⚡</div>
                     <h3>Energy Tracking</h3>
                     <p>Real-time calculation of energy savings and CO₂ reduction for every optimization.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🌍</div>
+                    <div class="feature-icon-box">🌍</div>
                     <h3>Environmental Impact</h3>
                     <p>See the real-world environmental impact of your AI usage reduction.</p>
                 </div>
             </div>
         </div>
         
-        <div class="optimizer-section" id="optimizer">
+        <div class="gradio-section" id="gradio">
             <h2>✨ Optimize Your Prompt</h2>
-            <p class="optimizer-subtitle">Enter your prompt below and watch the magic happen!</p>
+            <p class="gradio-subtitle">Your Hugging Face optimizer loads below - enter your prompt and watch the magic!</p>
             
-            <div class="optimizer-container">
-                <div class="input-section">
-                    <label for="prompt-input">Enter Your Prompt</label>
-                    <textarea 
-                        id="prompt-input" 
-                        rows="6" 
-                        placeholder="Type your prompt here..."
-                    ></textarea>
-                </div>
-                
-                <div class="checkbox-container">
-                    <input type="checkbox" id="preserve-meaning" checked>
-                    <label for="preserve-meaning">✅ Preserve Meaning (Recommended)</label>
-                </div>
-                
-                <div class="button-group">
-                    <button id="optimize-btn">🚀 Optimize</button>
-                </div>
-                
-                <div class="error-message" id="error-message"></div>
-                
-                <div class="loading-spinner" id="loading-spinner">
-                    <div class="spinner"></div>
-                    <p style="color: var(--accent-green); margin-top: 1rem;">Optimizing your prompt...</p>
-                </div>
-                
-                <div class="output-section" id="output-section" style="display: none;">
-                    <label>✨ Optimized Prompt</label>
-                    <textarea id="optimized-output" rows="6" readonly></textarea>
-                    
-                    <div class="button-group">
-                        <button class="copy-btn" id="copy-btn">📋 Copy to Clipboard</button>
-                    </div>
-                    
-                    <div class="results-grid">
-                        <div class="metric-card">
-                            <div class="metric-label">💎 Tokens Saved</div>
-                            <div class="metric-value" id="tokens-saved">0</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">📉 Reduction</div>
-                            <div class="metric-value" id="reduction-pct">0%</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">⚡ Energy</div>
-                            <div class="metric-value" id="energy-saved">0 Wh</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">🌍 CO₂</div>
-                            <div class="metric-value" id="co2-saved">0g</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="gradio-wrapper">
+                <iframe 
+                    src="https://sirenice-greenpromptsoptimizer.hf.space"
+                    frameborder="0"
+                    allow="accelerometer; ambient-light-sensor; autoplay; battery; camera; clipboard-read; clipboard-write; encrypted-media; geolocation; gyroscope; magnetometer; microphone; midi; payment; screen-wake-lock; speaker; usb; vr; xr-spatial-tracking"
+                    sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-downloads"
+                ></iframe>
             </div>
         </div>
     </div>
@@ -652,7 +374,6 @@
     </footer>
 
     <script>
-        // Create floating bubbles
         function createBubbles() {
             const bg = document.querySelector('.background-animation');
             for (let i = 0; i < 20; i++) {
@@ -670,24 +391,17 @@
         }
         createBubbles();
 
-        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
         });
     </script>
     
-    <!-- CRITICAL: Load stats tracker first -->
     <script src="stats-tracker.js"></script>
-    <!-- Then load the optimizer script that connects to Hugging Face -->
-    <script src="optimizer-WORKING.js"></script>
 </body>
 </html>
