@@ -3,416 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌱 Green Prompts Optimizer</title>
+    <title>Home | Green Prompts Optimizer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary-color: #10b981;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-light: #f1f5f9;
-            --text-gray: #cbd5e1;
-            --accent-green: #34d399;
-        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--dark-bg);
-            color: var(--text-light);
+            background: #0d1b2a;
+            color: #f1f5f9;
             line-height: 1.6;
+            overflow-x: hidden;
         }
         
-        /* Enhanced Background animations with more bubbles */
+        /* Animated Background with gradient overlay */
         .background-animation {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            background: var(--dark-bg);
+            z-index: -2;
+            background: #0d1b2a;
             overflow: hidden;
         }
-        .background-animation::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.18) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.18) 0%, transparent 50%);
-            animation: rotate 20s linear infinite;
+        
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
+            animation: gradientMove 15s ease-in-out infinite;
+            pointer-events: none;
         }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        @keyframes gradientMove {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
         }
         
         .bubble {
             position: absolute;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.15));
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-            animation: float-bubble 20s ease-in-out infinite;
+            background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.08), rgba(59, 130, 246, 0.05));
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
+            animation: float-bubble 30s ease-in-out infinite;
             pointer-events: none;
-            opacity: 0.5;
         }
+        
         @keyframes float-bubble {
-            0%, 100% { 
-                transform: translateY(0) translateX(0) scale(1);
-                opacity: 0.7;
-            }
-            25% {
-                transform: translateY(-50px) translateX(40px) scale(1.15);
-                opacity: 0.9;
-            }
-            50% {
-                transform: translateY(-30px) translateX(-30px) scale(0.95);
-                opacity: 0.8;
-            }
-            75% {
-                transform: translateY(-60px) translateX(50px) scale(1.1);
-                opacity: 0.85;
-            }
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.5; }
+            50% { transform: translateY(-25px) translateX(-25px) scale(0.95); opacity: 0.45; }
+            75% { transform: translateY(-45px) translateX(35px) scale(1.05); opacity: 0.48; }
         }
         
-        .wave-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            z-index: -1;
-            overflow: hidden;
-        }
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(to top, rgba(16, 185, 129, 0.1), transparent);
-            animation: wave 15s ease-in-out infinite;
-        }
-        .wave:nth-child(2) {
-            background: linear-gradient(to top, rgba(59, 130, 246, 0.08), transparent);
-            animation: wave 20s ease-in-out infinite reverse;
-        }
-        @keyframes wave {
-            0%, 100% {
-                transform: translateX(0) translateY(0);
-            }
-            50% {
-                transform: translateX(-25%) translateY(-10px);
-            }
-        }
-        
-        /* Better Header spacing */
+        /* Header */
         header {
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(15, 27, 42, 0.95);
             backdrop-filter: blur(12px);
-            padding: 1.3rem 3rem;
+            padding: 1rem 3rem;
             position: sticky;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
         }
+        
         nav {
+            max-width: 1500px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1500px;
-            margin: 0 auto;
         }
+        
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            text-decoration: none;
+            color: #34d399;
+            font-size: 1.3rem;
+            font-weight: 600;
         }
+        
         .logo-icon {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            border-radius: 10px;
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
         }
-        .nav-links { 
-            display: flex; 
-            gap: 3rem;
+        
+        .nav-center {
+            display: flex;
+            gap: 1.8rem;
             align-items: center;
         }
-        .nav-links a {
-            color: var(--text-gray);
+        
+        .nav-center a {
+            color: #cbd5e1;
             text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
             transition: color 0.3s;
             position: relative;
-            padding-bottom: 8px;
-            font-size: 1.05rem;
-            font-weight: 500;
+            padding-bottom: 0.3rem;
         }
-        .nav-links a:hover { 
-            color: var(--accent-green); 
-        }
-        .nav-links a.active::after {
+        
+        .nav-center a:hover { color: #34d399; }
+        .nav-center a.active { color: #34d399; }
+        
+        .nav-center a.active::after {
             content: '';
             position: absolute;
-            bottom: -12px;
+            bottom: -1.2rem;
             left: 0;
             width: 100%;
             height: 3px;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
+            background: linear-gradient(90deg, #34d399, #3b82f6);
             border-radius: 2px;
         }
         
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
         .btn-login {
-            background: transparent !important;
-            border: 2px solid #10b981;
-            padding: 0.65rem 1.6rem !important;
+            padding: 0.55rem 1.4rem;
+            background: transparent;
+            border: 2px solid #34d399;
             border-radius: 8px;
-            color: #10b981 !important;
+            color: #34d399;
             font-weight: 600;
-            transition: all 0.3s;
             cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
         }
-        .btn-login:hover {
-            background: rgba(16, 185, 129, 0.1) !important;
-        }
+        
+        .btn-login:hover { background: rgba(52, 211, 153, 0.1); }
         
         .btn-signup {
-            background: linear-gradient(135deg, #10b981, #3b82f6) !important;
-            padding: 0.65rem 1.6rem !important;
-            border-radius: 8px;
-            color: white !important;
-            font-weight: 600;
-            transition: all 0.3s;
+            padding: 0.55rem 1.4rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
             border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-        }
-        .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
         }
         
-        /* Main content */
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
+        }
+        
+        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 3rem 2rem;
         }
         
-        /* Hero section */
+        /* Hero */
         .hero {
             text-align: center;
-            padding: 6rem 2rem 4rem;
+            padding: 4rem 2rem;
         }
+        
         .hero h1 {
             font-size: 3.5rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #34d399;
             margin-bottom: 1.5rem;
             font-weight: 700;
         }
-        .hero-subtitle {
-            font-size: 1.3rem;
-            color: var(--text-light);
-            margin-bottom: 2.5rem;
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin: 0 auto 2rem;
             line-height: 1.8;
         }
-        .hero-subtitle .highlight {
+        
+        .hero em {
             display: block;
             margin-top: 0.5rem;
             font-style: italic;
         }
+        
         .btn-primary {
             display: inline-block;
-            padding: 1.5rem 4rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
             text-decoration: none;
+            transition: all 0.3s;
         }
+        
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
+            box-shadow: 0 8px 20px rgba(52, 211, 153, 0.4);
         }
         
-        /* Stats cards - with CYAN numbers like in image */
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin: 4rem 0;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
-        }
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stat-label {
-            color: var(--text-gray);
-            margin-top: 0.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
         }
         
-        /* Features section */
-        .features {
-            margin: 6rem 0;
-        }
-        .features h2 {
+        .stat-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
             text-align: center;
-            font-size: 3rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 3rem;
-            font-weight: 700;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            transition: all 0.3s;
         }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3);
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #34d399;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+        
+        /* Section */
+        .section {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 16px;
+            margin: 3rem 0;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+        
+        .section h2 {
+            font-size: 2.5rem;
+            color: #34d399;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Optimizer iframe */
+        .optimizer-frame {
+            width: 100%;
+            height: 700px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            margin-top: 1rem;
+        }
+        
+        /* Features Grid */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
         }
+        
         .feature-card {
-            background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
-        }
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: rgba(30, 41, 59, 0.6);
+            padding: 2rem;
             border-radius: 12px;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2));
-            border: 2px solid rgba(16, 185, 129, 0.3);
-        }
-        .feature-card h3 {
-            color: var(--accent-green);
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            transition: all 0.3s;
         }
         
-        /* Optimizer section */
-        .optimizer-section {
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            margin: 4rem 0;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(52, 211, 153, 0.3);
         }
-        .optimizer-section h2 {
-            text-align: center;
+        
+        .feature-icon {
             font-size: 2.5rem;
-            color: var(--accent-green);
             margin-bottom: 1rem;
         }
-        .optimizer-subtitle {
-            text-align: center;
-            color: var(--text-gray);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
+        
+        .feature-card h3 {
+            color: #34d399;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .feature-card p {
+            color: #cbd5e1;
+            line-height: 1.7;
         }
         
         /* Footer */
         footer {
-            background: var(--card-bg);
+            background: rgba(15, 27, 42, 0.95);
             padding: 2rem;
             text-align: center;
             margin-top: 4rem;
-            border-top: 1px solid rgba(16, 185, 129, 0.2);
+            border-top: 1px solid rgba(52, 211, 153, 0.2);
         }
+        
         footer p {
-            color: var(--text-gray);
+            color: #cbd5e1;
             margin: 0.5rem 0;
-        }
-        footer .highlight {
-            color: var(--accent-green);
-            font-weight: 600;
         }
         
         /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-            .nav-links {
-                gap: 1.2rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .nav-links a {
-                font-size: 0.95rem;
-            }
-            header {
-                padding: 1rem 1.5rem;
-            }
-            nav {
-                flex-direction: column;
-                gap: 1.2rem;
-            }
+            header { padding: 1rem 1.5rem; }
+            nav { flex-direction: column; gap: 1.5rem; }
+            .nav-center { gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+            .hero h1 { font-size: 2.5rem; }
+            .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="background-animation"></div>
-    <div class="wave-container">
-        <div class="wave"></div>
-        <div class="wave"></div>
-    </div>
+    <div class="background-animation" id="bg-animation"></div>
+    <div class="gradient-overlay"></div>
     
     <header>
         <nav>
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <div class="logo-icon">🌱</div>
                 Green Prompts Optimizer
-            </div>
-            <div class="nav-links">
+            </a>
+            <div class="nav-center">
                 <a href="index.html" class="active">Home</a>
                 <a href="about.html">About</a>
                 <a href="optimizer.html">Optimizer</a>
                 <a href="impact.html">Impact</a>
                 <a href="stats.html">Stats</a>
-                <a href="#" class="btn-login">Login</a>
-                <a href="#" class="btn-signup">Sign Up</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn-login">Login</a>
+                <a href="signup.html" class="btn-signup">Sign Up</a>
             </div>
         </nav>
     </header>
@@ -420,15 +379,13 @@
     <div class="container">
         <section class="hero">
             <h1>⚡ Energy Saver AI</h1>
-            <p class="hero-subtitle">
+            <p>
                 Optimize AI prompts to reduce energy use and protect the planet,
-                <span class="highlight">one token at a time.</span>
+                <em>one token at a time.</em>
             </p>
-            <a href="#features" class="btn-primary">
-                Get Started →
-            </a>
+            <a href="#optimizer" class="btn-primary">Get Started →</a>
         </section>
-
+        
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value">30-50%</div>
@@ -451,8 +408,8 @@
                 <div class="stat-label">Total Users</div>
             </div>
         </div>
-
-        <div class="features" id="features">
+        
+        <div class="section">
             <h2>✨ Why Choose Green Prompts? ✨</h2>
             <div class="features-grid">
                 <div class="feature-card">
@@ -473,55 +430,40 @@
             </div>
         </div>
         
-        <div class="optimizer-section" id="optimizer">
+        <div class="section" id="optimizer">
             <h2>✨ Optimize Your Prompt</h2>
-            <p class="optimizer-subtitle">This optimizer will be available on the Optimizer page!</p>
-            <p style="text-align: center; margin-top: 1rem;">
-                <a href="optimizer.html" class="btn-primary" style="font-size: 1.2rem; padding: 1rem 2.5rem;">
-                    Go to Optimizer →
-                </a>
-            </p>
+            <p class="section-subtitle">Enter your prompt below and watch the magic happen!</p>
+            <iframe 
+                class="optimizer-frame" 
+                src="https://vansh2101-green-prompts-optimizer.hf.space"
+                title="Green Prompts Optimizer"
+            ></iframe>
         </div>
     </div>
-
+    
     <footer>
-        <p>🌱 <span class="highlight">Green Prompts Optimizer</span></p>
+        <p>🌱 <strong style="color: #34d399;">Green Prompts Optimizer</strong></p>
         <p>Created by Srinesh Toranala | ISM Original Work 2025-2026</p>
         <p>Making AI more sustainable, one prompt at a time 🌍</p>
     </footer>
-
+    
     <script>
-        // Create LOTS of floating bubbles
         function createBubbles() {
-            const bg = document.querySelector('.background-animation');
-            for (let i = 0; i < 30; i++) {
+            const bg = document.getElementById('bg-animation');
+            for (let i = 0; i < 25; i++) {
                 const bubble = document.createElement('div');
-                bubble.classList.add('bubble');
-                const size = Math.random() * 20 + 8;
+                bubble.className = 'bubble';
+                const size = Math.random() * 12 + 6;
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
                 bubble.style.left = Math.random() * 100 + '%';
                 bubble.style.top = Math.random() * 100 + '%';
-                bubble.style.animationDelay = Math.random() * 8 + 's';
-                bubble.style.animationDuration = (Math.random() * 12 + 15) + 's';
+                bubble.style.animationDelay = Math.random() * 15 + 's';
+                bubble.style.animationDuration = (Math.random() * 20 + 25) + 's';
                 bg.appendChild(bubble);
             }
         }
         createBubbles();
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
     </script>
     
     <script src="stats-tracker.js"></script>
