@@ -6,336 +6,419 @@
     <title>Dashboard | Green Prompts Optimizer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary-color: #10b981;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-light: #f1f5f9;
-            --text-gray: #cbd5e1;
-            --accent-green: #34d399;
-        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--dark-bg);
-            color: var(--text-light);
+            background: #0d1b2a;
+            color: #f1f5f9;
             line-height: 1.6;
+            overflow-x: hidden;
         }
         
+        /* Animated Background with gradient overlay */
         .background-animation {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            background: var(--dark-bg);
+            z-index: -2;
+            background: #0d1b2a;
             overflow: hidden;
         }
-        .background-animation::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
-            animation: rotate 20s linear infinite;
-        }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
+            animation: gradientMove 15s ease-in-out infinite;
+            pointer-events: none;
         }
         
+        @keyframes gradientMove {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.08), rgba(59, 130, 246, 0.05));
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
+            animation: float-bubble 30s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes float-bubble {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.5; }
+            50% { transform: translateY(-25px) translateX(-25px) scale(0.95); opacity: 0.45; }
+            75% { transform: translateY(-45px) translateX(35px) scale(1.05); opacity: 0.48; }
+        }
+        
+        /* Header - matching other pages */
         header {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+            background: rgba(15, 27, 42, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 0.9rem 3rem;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
         }
+        
         nav {
+            max-width: 1500px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
         }
+        
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #34d399;
+            font-size: 1.3rem;
+            font-weight: 600;
         }
+        
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        .user-name {
-            color: var(--accent-green);
-            font-weight: 600;
-        }
-        .logout-btn {
-            padding: 0.5rem 1.5rem;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
+            font-size: 1.4rem;
         }
         
+        .nav-center {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        
+        .nav-center a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 0.2rem;
+        }
+        
+        .nav-center a:hover { color: #34d399; }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-name {
+            color: #34d399;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .btn-logout {
+            padding: 0.55rem 1.4rem;
+            background: transparent;
+            border: 2px solid rgba(239, 68, 68, 0.6);
+            border-radius: 8px;
+            color: #fca5a5;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+        
+        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 3rem 2rem;
         }
         
+        /* Welcome Section */
         .welcome-section {
             text-align: center;
-            padding: 3rem 0;
+            margin-bottom: 3rem;
         }
+        
         .welcome-section h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 3rem;
+            color: #34d399;
             margin-bottom: 0.5rem;
         }
         
+        .welcome-section p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
             margin: 3rem 0;
         }
+        
         .stat-card {
-            background: var(--card-bg);
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
             padding: 2rem;
-            border-radius: 16px;
+            border-radius: 12px;
             text-align: center;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            transition: all 0.3s;
         }
+        
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3);
+            border-color: rgba(52, 211, 153, 0.4);
         }
+        
         .stat-icon {
             font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .stat-label {
-            color: var(--text-gray);
-            margin-top: 0.5rem;
-        }
-        
-        .optimizer-card {
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            margin: 2rem 0;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .optimizer-card h2 {
-            text-align: center;
-            font-size: 2rem;
-            color: var(--accent-green);
-            margin-bottom: 2rem;
-        }
-        
-        .input-section {
-            margin-bottom: 2rem;
-        }
-        .input-section label {
-            display: block;
-            color: var(--accent-green);
-            font-weight: 600;
             margin-bottom: 0.5rem;
         }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #34d399;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+        
+        /* Section */
+        .section {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+        
+        .section h2 {
+            font-size: 2rem;
+            color: #34d399;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        /* Optimizer */
+        .optimizer-section {
+            margin: 2rem 0;
+        }
+        
+        label {
+            display: block;
+            color: #34d399;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
         textarea {
             width: 100%;
             padding: 1rem;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(15, 27, 42, 0.7);
+            border: 1px solid rgba(52, 211, 153, 0.3);
             border-radius: 8px;
-            color: var(--text-light);
+            color: #f1f5f9;
             font-size: 1rem;
             font-family: inherit;
             resize: vertical;
+            margin-bottom: 1rem;
         }
+        
         textarea:focus {
             outline: none;
-            border-color: var(--accent-green);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            border-color: #34d399;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
         }
         
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-        
-        button {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
-            color: white;
+        .btn-primary {
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
             border: none;
             border-radius: 8px;
+            color: white;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s;
+            display: inline-block;
         }
-        button:hover:not(:disabled) {
+        
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 6px 16px rgba(52, 211, 153, 0.4);
         }
-        button:disabled {
+        
+        .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
         
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        .copy-btn {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid var(--accent-green);
+        .btn-secondary {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 2px solid #34d399;
+            border-radius: 8px;
+            color: #34d399;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-left: 1rem;
         }
         
+        .btn-secondary:hover {
+            background: rgba(52, 211, 153, 0.1);
+        }
+        
+        /* Results */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
             margin: 2rem 0;
         }
+        
         .metric-card {
-            background: rgba(16, 185, 129, 0.05);
+            background: rgba(52, 211, 153, 0.1);
             padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(52, 211, 153, 0.3);
             text-align: center;
         }
+        
         .metric-label {
-            color: var(--accent-green);
+            color: #cbd5e1;
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
         }
+        
         .metric-value {
             font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--text-light);
+            font-weight: 700;
+            color: #34d399;
         }
         
-        .output-section {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .history-section {
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            margin: 2rem 0;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .history-section h2 {
-            color: var(--accent-green);
-            margin-bottom: 2rem;
-        }
-        
+        /* History */
         .history-item {
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 27, 42, 0.6);
             padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(52, 211, 153, 0.2);
             margin-bottom: 1rem;
+            transition: all 0.3s;
         }
+        
+        .history-item:hover {
+            border-color: rgba(52, 211, 153, 0.4);
+            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.2);
+        }
+        
         .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
+        
         .history-time {
-            color: var(--text-gray);
+            color: #cbd5e1;
             font-size: 0.9rem;
         }
+        
         .history-stats {
             display: flex;
             gap: 1.5rem;
             font-size: 0.9rem;
+            color: #34d399;
         }
-        .history-stats span {
-            color: var(--accent-green);
-        }
-        .history-content {
+        
+        .history-prompts {
             display: grid;
             gap: 1rem;
         }
+        
         .history-prompt {
+            background: rgba(52, 211, 153, 0.05);
             padding: 1rem;
-            background: rgba(16, 185, 129, 0.05);
             border-radius: 8px;
-            font-size: 0.95rem;
+            border-left: 3px solid #34d399;
         }
+        
         .prompt-label {
-            color: var(--accent-green);
+            color: #34d399;
             font-weight: 600;
+            font-size: 0.85rem;
             margin-bottom: 0.5rem;
         }
         
-        .loading-spinner {
-            display: none;
+        .prompt-text {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        /* Loading */
+        .loading {
             text-align: center;
             padding: 2rem;
+            display: none;
         }
-        .loading-spinner.active {
+        
+        .loading.active {
             display: block;
         }
+        
         .spinner {
-            border: 4px solid rgba(16, 185, 129, 0.1);
-            border-top: 4px solid var(--accent-green);
+            border: 4px solid rgba(52, 211, 153, 0.2);
+            border-top: 4px solid #34d399;
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 0 auto 1rem;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
+        /* Error */
         .error-message {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -345,42 +428,83 @@
             margin: 1rem 0;
             display: none;
         }
+        
         .error-message.active {
             display: block;
         }
         
+        /* Success */
+        .success-message {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .success-message.active {
+            display: block;
+        }
+        
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Footer */
+        footer {
+            background: rgba(15, 27, 42, 0.95);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        
+        footer p {
+            color: #cbd5e1;
+            margin: 0.5rem 0;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .button-group {
-                flex-direction: column;
-            }
-            .history-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
+            header { padding: 0.8rem 1.5rem; }
+            nav { flex-direction: column; gap: 1rem; }
+            .welcome-section h1 { font-size: 2rem; }
+            .btn-secondary { margin-left: 0; margin-top: 0.5rem; }
+            .history-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="background-animation"></div>
+    <div class="background-animation" id="bg-animation"></div>
+    <div class="gradient-overlay"></div>
     
     <header>
         <nav>
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <div class="logo-icon">🌱</div>
                 Green Prompts Optimizer
+            </a>
+            <div class="nav-center">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="optimizer.html">Optimizer</a>
+                <a href="impact.html">Impact</a>
+                <a href="stats.html">Stats</a>
             </div>
-            <div class="user-menu">
+            <div class="user-info">
                 <span class="user-name" id="user-name">Loading...</span>
-                <button class="logout-btn" id="logout-btn">Logout</button>
+                <button class="btn-logout" id="logout-btn">Logout</button>
             </div>
         </nav>
     </header>
     
     <div class="container">
         <section class="welcome-section">
-            <h1>Welcome, <span id="welcome-name"></span>! 🌱</h1>
-            <p style="color: var(--text-gray); font-size: 1.1rem;">Track your environmental impact and optimize your prompts</p>
+            <h1>Welcome back, <span id="welcome-name">User</span>! 🌱</h1>
+            <p>Track your environmental impact and optimize your AI prompts</p>
         </section>
         
         <div class="stats-grid">
@@ -396,47 +520,37 @@
             </div>
             <div class="stat-card">
                 <div class="stat-icon">⚡</div>
-                <div class="stat-value" id="total-energy">0 Wh</div>
-                <div class="stat-label">Energy Saved</div>
+                <div class="stat-value" id="total-energy">0</div>
+                <div class="stat-label">Energy Saved (Wh)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🌍</div>
-                <div class="stat-value" id="total-co2">0g</div>
-                <div class="stat-label">CO₂ Reduced</div>
+                <div class="stat-value" id="total-co2">0</div>
+                <div class="stat-label">CO₂ Reduced (g)</div>
             </div>
         </div>
         
-        <div class="optimizer-card">
+        <div class="section optimizer-section">
             <h2>✨ Optimize Your Prompt</h2>
             
-            <div class="input-section">
-                <label for="prompt-input">📝 Enter Your Prompt</label>
-                <textarea id="prompt-input" rows="6" placeholder="Type your prompt here..."></textarea>
-            </div>
+            <label for="prompt-input">Enter Your Prompt</label>
+            <textarea id="prompt-input" rows="6" placeholder="Type or paste your AI prompt here..."></textarea>
             
-            <div class="checkbox-container">
-                <input type="checkbox" id="preserve-meaning" checked>
-                <label for="preserve-meaning">✅ Preserve Meaning (Recommended)</label>
-            </div>
-            
-            <div class="button-group">
-                <button id="optimize-btn">🚀 Optimize</button>
-            </div>
+            <button class="btn-primary" id="optimize-btn">🚀 Optimize Prompt</button>
             
             <div class="error-message" id="error-message"></div>
+            <div class="success-message" id="success-message"></div>
             
-            <div class="loading-spinner" id="loading-spinner">
+            <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="color: var(--accent-green); margin-top: 1rem;">Optimizing your prompt...</p>
+                <p style="color: #34d399;">Optimizing your prompt...</p>
             </div>
             
-            <div class="output-section" id="output-section">
-                <label>✨ Optimized Prompt</label>
+            <div class="hidden" id="results-section">
+                <label for="optimized-output" style="margin-top: 2rem;">Optimized Prompt</label>
                 <textarea id="optimized-output" rows="6" readonly></textarea>
                 
-                <div class="button-group">
-                    <button class="copy-btn" id="copy-btn">📋 Copy to Clipboard</button>
-                </div>
+                <button class="btn-secondary" id="copy-btn">📋 Copy to Clipboard</button>
                 
                 <div class="results-grid">
                     <div class="metric-card">
@@ -449,24 +563,302 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">⚡ Energy</div>
-                        <div class="metric-value" id="energy-saved">0 Wh</div>
+                        <div class="metric-value" id="energy-saved">0</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">🌍 CO₂</div>
-                        <div class="metric-value" id="co2-saved">0g</div>
+                        <div class="metric-value" id="co2-saved">0</div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="history-section">
+        <div class="section">
             <h2>📜 Your Optimization History</h2>
             <div id="history-container">
-                <p style="color: var(--text-gray); text-align: center;">No optimizations yet. Start optimizing to see your history!</p>
+                <p style="color: #cbd5e1; text-align: center; padding: 2rem;">No optimizations yet. Start optimizing to build your history!</p>
             </div>
         </div>
     </div>
     
-    <script src="dashboard.js"></script>
+    <footer>
+        <p>🌱 <strong style="color: #34d399;">Green Prompts Optimizer</strong></p>
+        <p>Created by Srinesh Toranala | ISM Original Work 2025-2026</p>
+        <p>Making AI more sustainable, one prompt at a time 🌍</p>
+    </footer>
+    
+    <script>
+        // Hugging Face Space URL
+        const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
+        const API_ENDPOINT = `${HF_SPACE_URL}/api/predict`;
+        
+        let currentUser = null;
+        
+        // Check authentication
+        function checkAuth() {
+            const session = localStorage.getItem('greenPromptsSession');
+            if (!session) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            const { email, loginTime } = JSON.parse(session);
+            const dayInMs = 24 * 60 * 60 * 1000;
+            
+            if (Date.now() - loginTime > 7 * dayInMs) {
+                localStorage.removeItem('greenPromptsSession');
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            return JSON.parse(session);
+        }
+        
+        // Get current user
+        function getCurrentUser() {
+            const session = checkAuth();
+            if (!session) return null;
+            
+            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
+            return users[session.email];
+        }
+        
+        // Save user data
+        function saveUserData(user) {
+            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
+            users[user.email] = user;
+            localStorage.setItem('greenPromptsUsers', JSON.stringify(users));
+        }
+        
+        // Load user info
+        function loadUserInfo() {
+            currentUser = getCurrentUser();
+            if (!currentUser) return;
+            
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('welcome-name').textContent = currentUser.name;
+            
+            const stats = currentUser.stats || {
+                totalOptimizations: 0,
+                totalTokensSaved: 0,
+                totalEnergySaved: 0,
+                totalCO2Saved: 0
+            };
+            
+            document.getElementById('total-optimizations').textContent = stats.totalOptimizations;
+            document.getElementById('total-tokens').textContent = stats.totalTokensSaved.toLocaleString();
+            document.getElementById('total-energy').textContent = stats.totalEnergySaved.toFixed(4);
+            document.getElementById('total-co2').textContent = stats.totalCO2Saved.toFixed(4);
+            
+            loadHistory();
+        }
+        
+        // Load history
+        function loadHistory() {
+            if (!currentUser || !currentUser.history || currentUser.history.length === 0) {
+                return;
+            }
+            
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+            
+            const sortedHistory = [...currentUser.history].reverse().slice(0, 10);
+            
+            sortedHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const date = new Date(item.timestamp);
+                const timeStr = date.toLocaleString();
+                
+                historyItem.innerHTML = `
+                    <div class="history-header">
+                        <div class="history-time">${timeStr}</div>
+                        <div class="history-stats">
+                            <span>${item.tokensSaved} tokens</span>
+                            <span>${item.reductionPct} reduction</span>
+                        </div>
+                    </div>
+                    <div class="history-prompts">
+                        <div class="history-prompt">
+                            <div class="prompt-label">ORIGINAL</div>
+                            <div class="prompt-text">${item.original}</div>
+                        </div>
+                        <div class="history-prompt">
+                            <div class="prompt-label">OPTIMIZED</div>
+                            <div class="prompt-text">${item.optimized}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(historyItem);
+            });
+        }
+        
+        // Show/hide/toggle classes
+        function show(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hide(id) { document.getElementById(id).classList.add('hidden'); }
+        function addClass(id, cls) { document.getElementById(id).classList.add(cls); }
+        function removeClass(id, cls) { document.getElementById(id).classList.remove(cls); }
+        
+        // Show messages
+        function showError(msg) {
+            const el = document.getElementById('error-message');
+            el.textContent = msg;
+            addClass('error-message', 'active');
+            setTimeout(() => removeClass('error-message', 'active'), 5000);
+        }
+        
+        function showSuccess(msg) {
+            const el = document.getElementById('success-message');
+            el.textContent = msg;
+            addClass('success-message', 'active');
+            setTimeout(() => removeClass('success-message', 'active'), 3000);
+        }
+        
+        // Optimize prompt
+        async function optimizePrompt() {
+            const promptInput = document.getElementById('prompt-input');
+            const prompt = promptInput.value.trim();
+            
+            if (!prompt) {
+                showError('Please enter a prompt to optimize');
+                return;
+            }
+            
+            if (prompt.length > 2000) {
+                showError('Prompt is too long (max 2000 characters)');
+                return;
+            }
+            
+            addClass('loading', 'active');
+            document.getElementById('optimize-btn').disabled = true;
+            hide('results-section');
+            removeClass('error-message', 'active');
+            removeClass('success-message', 'active');
+            
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: [prompt, true] })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (!result.data || result.data.length < 6) {
+                    throw new Error('Invalid response from API');
+                }
+                
+                const [optimizedPrompt, tokenInfo, tokensSaved, reductionPct, energySaved, co2Saved] = result.data;
+                
+                document.getElementById('optimized-output').value = optimizedPrompt;
+                document.getElementById('tokens-saved').textContent = tokensSaved;
+                document.getElementById('reduction-pct').textContent = reductionPct;
+                document.getElementById('energy-saved').textContent = energySaved + ' Wh';
+                document.getElementById('co2-saved').textContent = co2Saved + 'g';
+                
+                currentUser.stats = currentUser.stats || {
+                    totalOptimizations: 0,
+                    totalTokensSaved: 0,
+                    totalEnergySaved: 0,
+                    totalCO2Saved: 0
+                };
+                
+                currentUser.stats.totalOptimizations++;
+                currentUser.stats.totalTokensSaved += parseInt(tokensSaved) || 0;
+                currentUser.stats.totalEnergySaved += parseFloat(energySaved) || 0;
+                currentUser.stats.totalCO2Saved += parseFloat(co2Saved) || 0;
+                
+                currentUser.history = currentUser.history || [];
+                currentUser.history.push({
+                    timestamp: Date.now(),
+                    original: prompt,
+                    optimized: optimizedPrompt,
+                    tokensSaved: parseInt(tokensSaved),
+                    reductionPct: reductionPct,
+                    energySaved: parseFloat(energySaved),
+                    co2Saved: parseFloat(co2Saved)
+                });
+                
+                saveUserData(currentUser);
+                loadUserInfo();
+                show('results-section');
+                showSuccess('✅ Prompt optimized successfully!');
+                
+            } catch (error) {
+                console.error('Optimization error:', error);
+                let errorMsg = 'Failed to optimize prompt. ';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMsg += 'Cannot connect to server. The Hugging Face Space may be sleeping - please try again.';
+                } else {
+                    errorMsg += error.message;
+                }
+                showError(errorMsg);
+            } finally {
+                removeClass('loading', 'active');
+                document.getElementById('optimize-btn').disabled = false;
+            }
+        }
+        
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const text = document.getElementById('optimized-output').value;
+            try {
+                await navigator.clipboard.writeText(text);
+                const btn = document.getElementById('copy-btn');
+                const original = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = original, 2000);
+            } catch (error) {
+                showError('Failed to copy to clipboard');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('greenPromptsSession');
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // Create bubbles
+        function createBubbles() {
+            const bg = document.getElementById('bg-animation');
+            for (let i = 0; i < 25; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = Math.random() * 12 + 6;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = Math.random() * 100 + '%';
+                bubble.style.animationDelay = Math.random() * 15 + 's';
+                bubble.style.animationDuration = (Math.random() * 20 + 25) + 's';
+                bg.appendChild(bubble);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createBubbles();
+            loadUserInfo();
+            
+            document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
+            document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            
+            document.getElementById('prompt-input').addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    optimizePrompt();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
