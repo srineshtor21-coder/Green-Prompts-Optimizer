@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Green Prompts Optimizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1b2a;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
+            animation: gradientMove 15s ease-in-out infinite;
+        }
+        @keyframes gradientMove {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        .signup-container {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 3rem;
+            border-radius: 16px;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem;
+        }
+        h1 {
+            color: #34d399;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+        }
+        label {
+            display: block;
+            text-align: left;
+            color: #34d399;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.9rem;
+            margin-bottom: 1.5rem;
+            background: rgba(15, 27, 42, 0.7);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: #34d399;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 211, 153, 0.4);
+        }
+        .links {
+            margin-top: 1.5rem;
+            color: #cbd5e1;
+        }
+        .links a {
+            color: #34d399;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .back-link a {
+            color: #34d399;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <div class="signup-container">
+        <div class="logo-icon">🌱</div>
+        <h1>Join Green Prompts</h1>
+        <p class="subtitle">Start tracking your environmental impact today</p>
+        
+        <form action="/api/signup" method="POST">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="johndoe" required>
+            
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" required>
+            
+            <button type="submit">Create Account</button>
+        </form>
+        
+        <div class="links">
+            Already have an account? <a href="login.html">Sign in</a>
+        </div>
+        <div class="back-link">
+            ← <a href="index.html">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
