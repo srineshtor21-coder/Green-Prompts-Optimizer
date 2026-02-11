@@ -3,264 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimizer | Green Prompts Optimizer</title>
+    <title>How It Works | Green Prompts Optimizer</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
-            --secondary-gradient: linear-gradient(135deg, #34d399 0%, #60a5fa 100%);
-            --green: #10b981;
-            --bright-green: #10d9c3;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--dark-bg);
-            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1b2a;
+            color: #f1f5f9;
             line-height: 1.6;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
-
-        /* Header Styles */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: #0d1b2a;
+            overflow: hidden;
+        }
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
+            animation: gradientMove 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes gradientMove {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.08), rgba(59, 130, 246, 0.05));
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
+            animation: float-bubble 30s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes float-bubble {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.5; }
+            50% { transform: translateY(-25px) translateX(-25px) scale(0.95); opacity: 0.45; }
+            75% { transform: translateY(-45px) translateX(35px) scale(1.05); opacity: 0.48; }
+        }
         header {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+            background: rgba(15, 27, 42, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 0.9rem 3rem;
             position: sticky;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
         }
-
         nav {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
         }
-
         .logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
             text-decoration: none;
-            color: var(--text-primary);
+            color: #34d399;
+            font-size: 1.3rem;
+            font-weight: 600;
         }
-
         .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.4rem;
         }
-
-        .logo-emoji {
-            font-size: 2rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .nav-links {
+        .nav-center {
             display: flex;
-            gap: 0.5rem;
+            gap: 1.5rem;
             align-items: center;
-            flex-wrap: wrap;
         }
-
-        .nav-links a, .nav-links button {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
+        .nav-center a {
+            color: #cbd5e1;
             text-decoration: none;
-            color: var(--text-primary);
+            font-size: 1.05rem;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 0.2rem;
+        }
+        .nav-center a:hover { color: #34d399; }
+        .nav-center a.active { color: #34d399; }
+        .nav-center a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.95rem;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #34d399, #3b82f6);
+            border-radius: 2px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .btn-login {
+            padding: 0.55rem 1.4rem;
             background: transparent;
-            border: 1px solid transparent;
+            border: 2px solid #34d399;
+            border-radius: 8px;
+            color: #34d399;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
         }
-
-        .nav-links a:hover {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--green);
+        .btn-login:hover { background: rgba(52, 211, 153, 0.1); }
+        .btn-signup {
+            padding: 0.55rem 1.4rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
         }
-
-        .btn-primary {
-            background: var(--primary-gradient) !important;
-            color: white !important;
-            border: none !important;
-        }
-
-        .btn-primary:hover {
+        .btn-signup:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
         }
-
-        /* Main Content */
-        main {
-            max-width: 1200px;
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 3rem 2rem;
         }
-
         .page-header {
             text-align: center;
             margin-bottom: 3rem;
-            padding: 2rem 0;
         }
-
         .page-header h1 {
             font-size: 3rem;
+            color: #34d399;
             margin-bottom: 1rem;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
-
         .page-header p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            max-width: 800px;
-            margin: 0 auto;
+            font-size: 1.1rem;
+            color: #cbd5e1;
         }
-
-        /* Content Sections */
-        .content-section {
-            background: var(--card-bg);
-            border-radius: 16px;
+        .section {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
             padding: 2.5rem;
+            border-radius: 16px;
             margin-bottom: 2rem;
-            border: 1px solid rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.25);
         }
-
-        .content-section h2 {
+        .section h2 {
             font-size: 2rem;
+            color: #34d399;
             margin-bottom: 1.5rem;
-            color: var(--green);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
-
-        .content-section h3 {
-            font-size: 1.5rem;
-            margin: 2rem 0 1rem 0;
-            color: var(--bright-green);
+        .section h3 {
+            font-size: 1.4rem;
+            color: #34d399;
+            margin: 2rem 0 1rem;
         }
-
-        .content-section p {
-            color: var(--text-secondary);
+        .section p {
+            color: #cbd5e1;
             line-height: 1.8;
             margin-bottom: 1rem;
         }
-
-        .metric-card {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--green);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-        }
-
-        .metric-card h4 {
-            font-size: 1.3rem;
-            color: var(--bright-green);
-            margin-bottom: 0.5rem;
-        }
-
-        .metric-card .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--bright-green);
-            margin: 0.5rem 0;
-        }
-
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .comparison-item {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .comparison-item .icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .comparison-item h4 {
-            color: var(--green);
-            margin-bottom: 0.5rem;
-        }
-
-        .comparison-item p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .highlight-box {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin: 2rem 0;
-        }
-
-        .highlight-box h3 {
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .highlight-box p {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .process-steps {
-            counter-reset: step-counter;
+        .step-list {
             list-style: none;
-            padding: 0;
+            counter-reset: step-counter;
         }
-
-        .process-steps li {
+        .step-list li {
             counter-increment: step-counter;
+            margin: 1.5rem 0;
             padding-left: 3rem;
             position: relative;
-            margin-bottom: 2rem;
         }
-
-        .process-steps li::before {
+        .step-list li::before {
             content: counter(step-counter);
             position: absolute;
             left: 0;
             top: 0;
             width: 2rem;
             height: 2rem;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #34d399, #3b82f6);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -268,128 +213,110 @@
             font-weight: 700;
             color: white;
         }
-
-        /* Footer */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .comparison-item {
+            background: rgba(52, 211, 153, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            text-align: center;
+        }
+        .comparison-item .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .comparison-item h4 {
+            color: #34d399;
+            margin-bottom: 0.5rem;
+        }
+        .comparison-item p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
         footer {
-            background: var(--card-bg);
+            background: rgba(15, 27, 42, 0.95);
             padding: 2rem;
             text-align: center;
             margin-top: 4rem;
-            border-top: 1px solid rgba(16, 185, 129, 0.1);
+            border-top: 1px solid rgba(52, 211, 153, 0.2);
         }
-
         footer p {
-            color: var(--text-secondary);
+            color: #cbd5e1;
+            margin: 0.5rem 0;
         }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .page-header h1 {
-                font-size: 2rem;
-            }
-
-            .content-section {
-                padding: 1.5rem;
-            }
-
-            .comparison-grid {
-                grid-template-columns: 1fr;
-            }
+            header { padding: 0.8rem 1.5rem; }
+            nav { flex-direction: column; gap: 1.5rem; }
+            .nav-center { gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+            .page-header h1 { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
+    <div class="background-animation" id="bg-animation"></div>
+    <div class="gradient-overlay"></div>
     <header>
         <nav>
             <a href="index.html" class="logo">
-                <div class="logo-icon">
-                    <span class="logo-emoji">🌱</span>
-                </div>
-                <span>Green Prompts Optimizer</span>
+                <div class="logo-icon">🌱</div>
+                Green Prompts Optimizer
             </a>
-            <div class="nav-links">
+            <div class="nav-center">
                 <a href="index.html">Home</a>
-                <a href="optimizer.html">Optimizer</a>
                 <a href="about.html">About</a>
-                <a href="stats.html">Stats</a>
+                <a href="optimizer.html" class="active">Optimizer</a>
                 <a href="impact.html">Impact</a>
-                <button class="btn-primary" onclick="alert('Sign up coming soon! 🌱')">Sign Up</button>
-                <button class="btn-primary" onclick="alert('Login coming soon! 🔐')">Login</button>
+                <a href="stats.html">Stats</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn-login">Login</a>
+                <a href="signup.html" class="btn-signup">Sign Up</a>
             </div>
         </nav>
     </header>
-
-    <main>
+    <div class="container">
         <div class="page-header">
             <h1>🚀 How the Optimizer Works</h1>
             <p>Understanding the technology behind Green Prompts and what those numbers really mean</p>
         </div>
-
-        <div class="content-section">
+        <div class="section">
             <h2>🤖 The Technology</h2>
             <p>Our optimizer uses a fine-tuned T5 (Text-to-Text Transfer Transformer) model specifically trained to reduce prompt length while maintaining semantic meaning and clarity. T5 is a powerful language model developed by Google that excels at text transformation tasks.</p>
-            
             <h3>How It Works:</h3>
-            <ol class="process-steps">
-                <li>
-                    <strong>Input Analysis</strong>
-                    <p>The model analyzes your prompt to identify redundant words, filler phrases, and unnecessary verbosity.</p>
-                </li>
-                <li>
-                    <strong>Semantic Preservation</strong>
-                    <p>Using advanced NLP techniques, it ensures the core meaning and intent remain intact during optimization.</p>
-                </li>
-                <li>
-                    <strong>Token Reduction</strong>
-                    <p>Removes unnecessary tokens while maintaining grammatical correctness and clarity.</p>
-                </li>
-                <li>
-                    <strong>Output Generation</strong>
-                    <p>Delivers an optimized prompt that achieves the same results with fewer tokens.</p>
-                </li>
+            <ol class="step-list">
+                <li><strong>Input Analysis</strong><br>The model analyzes your prompt to identify redundant words, filler phrases, and unnecessary verbosity.</li>
+                <li><strong>Semantic Preservation</strong><br>Using advanced NLP techniques, it ensures the core meaning and intent remain intact during optimization.</li>
+                <li><strong>Token Reduction</strong><br>Removes unnecessary tokens while maintaining grammatical correctness and clarity.</li>
+                <li><strong>Output Generation</strong><br>Delivers an optimized prompt that achieves the same results with fewer tokens.</li>
             </ol>
         </div>
-
-        <div class="content-section">
+        <div class="section">
             <h2>📊 Understanding the Metrics</h2>
-            
-            <div class="metric-card">
-                <h4>📉 Token Reduction %</h4>
-                <p><strong>What it measures:</strong> The percentage decrease in the number of tokens from your original prompt to the optimized version.</p>
-                <p><strong>Why it matters:</strong> Fewer tokens mean less computational resources needed for AI processing. Our average reduction is around 28.5%, meaning we cut nearly a third of unnecessary tokens!</p>
-                <p><strong>Example:</strong> A 100-token prompt reduced to 72 tokens = 28% reduction</p>
-            </div>
-
-            <div class="metric-card">
-                <h4>💾 Tokens Saved</h4>
-                <p><strong>What it measures:</strong> The total number of tokens eliminated across all optimizations performed by our community.</p>
-                <p><strong>Why it matters:</strong> Each token requires computational processing. By saving tokens, we directly reduce the workload on AI servers worldwide.</p>
-                <p><strong>Current total:</strong> Over 18,000 tokens saved and growing every day!</p>
-            </div>
-
-            <div class="metric-card">
-                <h4>⚡ Energy Saved (kWh)</h4>
-                <p><strong>What it measures:</strong> The kilowatt-hours of electricity saved by processing fewer tokens.</p>
-                <p><strong>The calculation:</strong> On average, processing 1,000 AI tokens uses approximately 0.2 kWh of electricity when accounting for data center operations, cooling, and networking.</p>
-                <p><strong>Why it matters:</strong> Data centers consume massive amounts of electricity. Small efficiencies add up to significant energy savings across millions of prompts.</p>
-            </div>
-
-            <div class="metric-card">
-                <h4>🌍 CO₂ Reduced (kg)</h4>
-                <p><strong>What it measures:</strong> The carbon dioxide emissions prevented by reducing energy consumption.</p>
-                <p><strong>The calculation:</strong> Based on the global average grid emissions factor of approximately 0.5 kg CO₂ per kWh. The exact number varies by region and energy source.</p>
-                <p><strong>Why it matters:</strong> Every kilogram of CO₂ we prevent from entering the atmosphere helps combat climate change.</p>
-            </div>
+            <h3>📉 Token Reduction %</h3>
+            <p><strong>What it measures:</strong> The percentage decrease in the number of tokens from your original prompt to the optimized version.</p>
+            <p><strong>Why it matters:</strong> Fewer tokens mean less computational resources needed for AI processing. Our average reduction is around 28.5%, meaning we cut nearly a third of unnecessary tokens!</p>
+            <p><strong>Example:</strong> A 100-token prompt reduced to 72 tokens = 28% reduction</p>
+            <h3>💾 Tokens Saved</h3>
+            <p><strong>What it measures:</strong> The total number of tokens eliminated across all optimizations performed by our community.</p>
+            <p><strong>Why it matters:</strong> Each token requires computational processing. By saving tokens, we directly reduce the workload on AI servers worldwide.</p>
+            <p><strong>Current total:</strong> Over 18,000 tokens saved and growing every day!</p>
+            <h3>⚡ Energy Saved (kWh)</h3>
+            <p><strong>What it measures:</strong> The kilowatt-hours of electricity saved by processing fewer tokens.</p>
+            <p><strong>The calculation:</strong> On average, processing 1,000 AI tokens uses approximately 0.2 kWh of electricity when accounting for data center operations, cooling, and networking.</p>
+            <p><strong>Why it matters:</strong> Data centers consume massive amounts of electricity. Small efficiencies add up to significant energy savings across millions of prompts.</p>
+            <h3>🌍 CO₂ Reduced (kg)</h3>
+            <p><strong>What it measures:</strong> The carbon dioxide emissions prevented by reducing energy consumption.</p>
+            <p><strong>The calculation:</strong> Based on the global average grid emissions factor of approximately 0.5 kg CO₂ per kWh. The exact number varies by region and energy source.</p>
+            <p><strong>Why it matters:</strong> Every kilogram of CO₂ we prevent from entering the atmosphere helps combat climate change.</p>
         </div>
-
-        <div class="content-section">
+        <div class="section">
             <h2>🌍 Real-World Impact</h2>
-            
-            <div class="highlight-box">
-                <h3>Did You Know?</h3>
-                <p>If just 1% of AI users optimized their prompts, we could save enough energy annually to power over 500 homes for a year!</p>
-            </div>
-
+            <p style="background: rgba(52, 211, 153, 0.15); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #34d399;"><strong>Did You Know?</strong><br>If just 1% of AI users optimized their prompts, we could save enough energy annually to power over 500 homes for a year!</p>
             <h3>Energy Saved Comparisons:</h3>
             <div class="comparison-grid">
                 <div class="comparison-item">
@@ -413,7 +340,6 @@
                     <p>1 kWh = 100 full phone charges</p>
                 </div>
             </div>
-
             <h3>CO₂ Reduction Comparisons:</h3>
             <div class="comparison-grid">
                 <div class="comparison-item">
@@ -438,35 +364,50 @@
                 </div>
             </div>
         </div>
-
-        <div class="content-section">
+        <div class="section">
             <h2>🎯 Why This Matters</h2>
             <p>AI is revolutionizing our world, but it comes with an environmental cost. As AI adoption grows exponentially, so does its energy consumption. By 2030, data centers could account for 8% of global electricity demand.</p>
-            
-            <p>But here's the good news: we can make AI more sustainable without sacrificing capability. Optimizing prompts is one of the easiest ways individuals can reduce AI's environmental footprint. It's like turning off lights when you leave a room – a small action that creates meaningful impact when done by millions.</p>
-
-            <div class="highlight-box">
-                <h3>🌱 Join the Movement</h3>
-                <p>Every optimized prompt contributes to a more sustainable future. Together, we're proving that efficiency and environmental responsibility can go hand in hand with technological innovation.</p>
-            </div>
+            <p style="margin-top: 1rem;">But here's the good news: we can make AI more sustainable without sacrificing capability. Optimizing prompts is one of the easiest ways individuals can reduce AI's environmental footprint. It's like turning off lights when you leave a room – a small action that creates meaningful impact when done by millions.</p>
         </div>
-
-        <div class="content-section">
+        <div class="section">
+            <h2>🌱 Join the Movement</h2>
+            <p style="font-size: 1.1rem;">Every optimized prompt contributes to a more sustainable future. Together, we're proving that efficiency and environmental responsibility can go hand in hand with technological innovation.</p>
+        </div>
+        <div class="section">
             <h2>📈 Community Impact</h2>
-            <p>Our community has already made a significant difference:</p>
-            <ul style="list-style: none; padding: 1rem 0;">
-                <li style="margin: 0.5rem 0; color: var(--bright-green);">✅ Over 2,500 users optimizing their prompts</li>
-                <li style="margin: 0.5rem 0; color: var(--bright-green);">✅ Nearly 1,900 optimizations completed</li>
-                <li style="margin: 0.5rem 0; color: var(--bright-green);">✅ 18,500+ tokens saved from processing</li>
-                <li style="margin: 0.5rem 0; color: var(--bright-green);">✅ 4+ kWh of energy conserved</li>
-                <li style="margin: 0.5rem 0; color: var(--bright-green);">✅ 2.6+ kg of CO₂ emissions prevented</li>
+            <p style="margin-bottom: 1.5rem;">Our community has already made a significant difference:</p>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 0.5rem 0; color: #34d399;">✅ Over 2,500 users optimizing their prompts</li>
+                <li style="padding: 0.5rem 0; color: #34d399;">✅ Nearly 1,900 optimizations completed</li>
+                <li style="padding: 0.5rem 0; color: #34d399;">✅ 18,500+ tokens saved from processing</li>
+                <li style="padding: 0.5rem 0; color: #34d399;">✅ 4+ kWh of energy conserved</li>
+                <li style="padding: 0.5rem 0; color: #34d399;">✅ 2.6+ kg of CO₂ emissions prevented</li>
             </ul>
-            <p style="margin-top: 1.5rem;"><strong>And these numbers grow every single day!</strong></p>
+            <p style="margin-top: 1.5rem; font-weight: 600;">And these numbers grow every single day!</p>
         </div>
-    </main>
-
+    </div>
     <footer>
-        <p>&copy; 2024 Green Prompts Optimizer. Making AI more sustainable, one prompt at a time. 🌱</p>
+        <p>🌱 <strong style="color: #34d399;">Green Prompts Optimizer</strong></p>
+        <p>Created by Srinesh Toranala | ISM Original Work 2025-2026</p>
+        <p>Making AI more sustainable, one prompt at a time 🌍</p>
     </footer>
+    <script>
+        function createBubbles() {
+            const bg = document.getElementById('bg-animation');
+            for (let i = 0; i < 25; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = Math.random() * 12 + 6;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = Math.random() * 100 + '%';
+                bubble.style.animationDelay = Math.random() * 15 + 's';
+                bubble.style.animationDuration = (Math.random() * 20 + 25) + 's';
+                bg.appendChild(bubble);
+            }
+        }
+        createBubbles();
+    </script>
 </body>
 </html>
