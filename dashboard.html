@@ -488,7 +488,6 @@
                 Green Prompts Optimizer
             </a>
             <div class="nav-center">
-                <span style="color: #34d399; font-weight: 600; font-size: 1.05rem;">Dashboard</span>
                 <a href="index.html">← Back to Home</a>
             </div>
             <div class="user-info">
@@ -527,46 +526,22 @@
             </div>
         </div>
         
-        <div class="section optimizer-section">
+        <div class="section">
             <h2>✨ Optimize Your Prompt</h2>
+            <p style="text-align: center; color: #cbd5e1; margin-bottom: 1.5rem;">
+                Each optimization you complete will automatically update your personal stats above!
+            </p>
+            <iframe 
+                src="https://sirenice-greenpromptsoptimizer.hf.space"
+                width="100%"
+                height="750px"
+                style="border: none; border-radius: 12px; background: white;"
+                title="Green Prompts Optimizer"
+            ></iframe>
             
-            <label for="prompt-input">Enter Your Prompt</label>
-            <textarea id="prompt-input" rows="6" placeholder="Type or paste your AI prompt here..."></textarea>
-            
-            <button class="btn-primary" id="optimize-btn">🚀 Optimize Prompt</button>
-            
-            <div class="error-message" id="error-message"></div>
-            <div class="success-message" id="success-message"></div>
-            
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p style="color: #34d399;">Optimizing your prompt...</p>
-            </div>
-            
-            <div class="hidden" id="results-section">
-                <label for="optimized-output" style="margin-top: 2rem;">Optimized Prompt</label>
-                <textarea id="optimized-output" rows="6" readonly></textarea>
-                
-                <button class="btn-secondary" id="copy-btn">📋 Copy to Clipboard</button>
-                
-                <div class="results-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">💎 Tokens Saved</div>
-                        <div class="metric-value" id="tokens-saved">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">📉 Reduction</div>
-                        <div class="metric-value" id="reduction-pct">0%</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">⚡ Energy</div>
-                        <div class="metric-value" id="energy-saved">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">🌍 CO₂</div>
-                        <div class="metric-value" id="co2-saved">0</div>
-                    </div>
-                </div>
+            <div style="background: rgba(52, 211, 153, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1.5rem; text-align: center;">
+                <strong style="color: #34d399;">💡 Pro Tip:</strong>
+                <span style="color: #cbd5e1;"> Copy the optimized prompt and use it in ChatGPT, Claude, or any AI tool to save energy!</span>
             </div>
         </div>
         
@@ -585,10 +560,6 @@
     </footer>
     
     <script>
-        // Hugging Face Space URL
-        const HF_SPACE_URL = 'https://sirenice-greenpromptsoptimizer.hf.space';
-        const API_ENDPOINT = `${HF_SPACE_URL}/api/predict`;
-        
         let currentUser = null;
         
         // Check authentication
@@ -618,13 +589,6 @@
             
             const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
             return users[session.email];
-        }
-        
-        // Save user data
-        function saveUserData(user) {
-            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
-            users[user.email] = user;
-            localStorage.setItem('greenPromptsUsers', JSON.stringify(users));
         }
         
         // Load user info
@@ -692,130 +656,6 @@
             });
         }
         
-        // Show/hide/toggle classes
-        function show(id) { document.getElementById(id).classList.remove('hidden'); }
-        function hide(id) { document.getElementById(id).classList.add('hidden'); }
-        function addClass(id, cls) { document.getElementById(id).classList.add(cls); }
-        function removeClass(id, cls) { document.getElementById(id).classList.remove(cls); }
-        
-        // Show messages
-        function showError(msg) {
-            const el = document.getElementById('error-message');
-            el.textContent = msg;
-            addClass('error-message', 'active');
-            setTimeout(() => removeClass('error-message', 'active'), 5000);
-        }
-        
-        function showSuccess(msg) {
-            const el = document.getElementById('success-message');
-            el.textContent = msg;
-            addClass('success-message', 'active');
-            setTimeout(() => removeClass('success-message', 'active'), 3000);
-        }
-        
-        // Optimize prompt
-        async function optimizePrompt() {
-            const promptInput = document.getElementById('prompt-input');
-            const prompt = promptInput.value.trim();
-            
-            if (!prompt) {
-                showError('Please enter a prompt to optimize');
-                return;
-            }
-            
-            if (prompt.length > 2000) {
-                showError('Prompt is too long (max 2000 characters)');
-                return;
-            }
-            
-            addClass('loading', 'active');
-            document.getElementById('optimize-btn').disabled = true;
-            hide('results-section');
-            removeClass('error-message', 'active');
-            removeClass('success-message', 'active');
-            
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: [prompt, true] })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`API request failed: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                if (!result.data || result.data.length < 6) {
-                    throw new Error('Invalid response from API');
-                }
-                
-                const [optimizedPrompt, tokenInfo, tokensSaved, reductionPct, energySaved, co2Saved] = result.data;
-                
-                document.getElementById('optimized-output').value = optimizedPrompt;
-                document.getElementById('tokens-saved').textContent = tokensSaved;
-                document.getElementById('reduction-pct').textContent = reductionPct;
-                document.getElementById('energy-saved').textContent = energySaved + ' Wh';
-                document.getElementById('co2-saved').textContent = co2Saved + 'g';
-                
-                currentUser.stats = currentUser.stats || {
-                    totalOptimizations: 0,
-                    totalTokensSaved: 0,
-                    totalEnergySaved: 0,
-                    totalCO2Saved: 0
-                };
-                
-                currentUser.stats.totalOptimizations++;
-                currentUser.stats.totalTokensSaved += parseInt(tokensSaved) || 0;
-                currentUser.stats.totalEnergySaved += parseFloat(energySaved) || 0;
-                currentUser.stats.totalCO2Saved += parseFloat(co2Saved) || 0;
-                
-                currentUser.history = currentUser.history || [];
-                currentUser.history.push({
-                    timestamp: Date.now(),
-                    original: prompt,
-                    optimized: optimizedPrompt,
-                    tokensSaved: parseInt(tokensSaved),
-                    reductionPct: reductionPct,
-                    energySaved: parseFloat(energySaved),
-                    co2Saved: parseFloat(co2Saved)
-                });
-                
-                saveUserData(currentUser);
-                loadUserInfo();
-                show('results-section');
-                showSuccess('✅ Prompt optimized successfully!');
-                
-            } catch (error) {
-                console.error('Optimization error:', error);
-                let errorMsg = 'Failed to optimize prompt. ';
-                if (error.message.includes('Failed to fetch')) {
-                    errorMsg += 'Cannot connect to server. The Hugging Face Space may be sleeping - please try again.';
-                } else {
-                    errorMsg += error.message;
-                }
-                showError(errorMsg);
-            } finally {
-                removeClass('loading', 'active');
-                document.getElementById('optimize-btn').disabled = false;
-            }
-        }
-        
-        // Copy to clipboard
-        async function copyToClipboard() {
-            const text = document.getElementById('optimized-output').value;
-            try {
-                await navigator.clipboard.writeText(text);
-                const btn = document.getElementById('copy-btn');
-                const original = btn.textContent;
-                btn.textContent = '✅ Copied!';
-                setTimeout(() => btn.textContent = original, 2000);
-            } catch (error) {
-                showError('Failed to copy to clipboard');
-            }
-        }
-        
         // Logout
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
@@ -845,16 +685,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             createBubbles();
             loadUserInfo();
-            
-            document.getElementById('optimize-btn').addEventListener('click', optimizePrompt);
-            document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
             document.getElementById('logout-btn').addEventListener('click', logout);
             
-            document.getElementById('prompt-input').addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    optimizePrompt();
-                }
-            });
+            // Note: Stats tracking happens when users manually update after using the iframe optimizer
+            // For automatic tracking, you'd need the Gradio API working or postMessage communication
         });
     </script>
 </body>
