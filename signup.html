@@ -129,7 +129,7 @@
         <h1>Join Green Prompts</h1>
         <p class="subtitle">Start tracking your environmental impact today</p>
         
-        <form action="/api/signup" method="POST">
+        <form id="signup-form">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" placeholder="johndoe" required>
             
@@ -149,5 +149,50 @@
             ← <a href="index.html">Back to Home</a>
         </div>
     </div>
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Get existing users
+            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
+            
+            // Check if email already exists
+            if (users[email]) {
+                alert('This email is already registered. Please login instead.');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Create new user
+            users[email] = {
+                name: username,
+                email: email,
+                password: password, // In production, hash this!
+                createdAt: Date.now(),
+                stats: {
+                    totalOptimizations: 0,
+                    totalTokensSaved: 0,
+                    totalEnergySaved: 0,
+                    totalCO2Saved: 0
+                },
+                history: []
+            };
+            
+            localStorage.setItem('greenPromptsUsers', JSON.stringify(users));
+            
+            // Create session
+            localStorage.setItem('greenPromptsSession', JSON.stringify({
+                email: email,
+                loginTime: Date.now()
+            }));
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        });
+    </script>
 </body>
 </html>
