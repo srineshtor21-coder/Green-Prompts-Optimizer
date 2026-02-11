@@ -128,7 +128,7 @@
         <h1>Welcome Back</h1>
         <p class="subtitle">Sign in to track your environmental impact</p>
         
-        <form action="/api/login" method="POST">
+        <form id="login-form">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
             
@@ -145,5 +145,37 @@
             ← <a href="index.html">Back to Home</a>
         </div>
     </div>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Get existing users
+            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
+            
+            // Check if user exists
+            if (!users[email]) {
+                alert('No account found with this email. Please sign up first.');
+                return;
+            }
+            
+            // Check password
+            if (users[email].password !== password) {
+                alert('Incorrect password. Please try again.');
+                return;
+            }
+            
+            // Create session
+            localStorage.setItem('greenPromptsSession', JSON.stringify({
+                email: email,
+                loginTime: Date.now()
+            }));
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        });
+    </script>
 </body>
 </html>
