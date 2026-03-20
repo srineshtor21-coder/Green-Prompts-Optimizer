@@ -4,441 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Green Prompts Optimizer</title>
+    <link rel="icon" type="image/svg+xml" href="gpo-icon.svg">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1b2a; color: #f1f5f9; line-height: 1.6; overflow-x: hidden;
-        }
-        .bg-wrap { position: fixed; inset: 0; z-index: -2; background: #0d1b2a; overflow: hidden; }
-        .gradient-overlay {
-            position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            background: radial-gradient(circle at 25% 35%, rgba(16,185,129,.12) 0%, transparent 55%),
-                        radial-gradient(circle at 75% 65%, rgba(59,130,246,.12) 0%, transparent 55%);
-            animation: gm 18s ease-in-out infinite;
-        }
-        @keyframes gm { 0%,100%{opacity:.6;transform:scale(1)} 50%{opacity:.9;transform:scale(1.08)} }
-        .bubble {
-            position: absolute; border-radius: 50%; pointer-events: none;
-            background: radial-gradient(circle at 30% 30%, rgba(52,211,153,.07), rgba(59,130,246,.04));
-            animation: fb 30s ease-in-out infinite;
-        }
-        @keyframes fb {
-            0%,100%{transform:translateY(0) translateX(0) scale(1);opacity:.4}
-            25%{transform:translateY(-40px) translateX(30px) scale(1.1);opacity:.5}
-            50%{transform:translateY(-25px) translateX(-25px) scale(.95);opacity:.45}
-            75%{transform:translateY(-45px) translateX(35px) scale(1.05);opacity:.48}
-        }
-        header {
-            background: rgba(13,23,38,.97); backdrop-filter: blur(14px);
-            padding: .9rem 3rem; position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(52,211,153,.15);
-        }
-        nav {
-            max-width: 1400px; margin: 0 auto;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo {
-            display: flex; align-items: center; gap: .7rem;
-            text-decoration: none; color: #34d399;
-            font-size: 1.2rem; font-weight: 700;
-        }
-        .logo-icon {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, #34d399, #3b82f6);
-            border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
-        }
-        .nav-center { display: flex; gap: 1.5rem; }
-        .nav-center a { color: #94a3b8; text-decoration: none; font-size: .95rem; font-weight: 500; transition: color .25s; }
-        .nav-center a:hover { color: #34d399; }
-        .user-area { display: flex; align-items: center; gap: 1rem; }
-        .user-chip {
-            background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3);
-            color: #34d399; font-weight: 600; font-size: .9rem;
-            padding: .4rem 1rem; border-radius: 99px;
-        }
-        .btn-logout {
-            padding: .45rem 1.1rem; background: transparent;
-            border: 1.5px solid rgba(239,68,68,.5); border-radius: 8px;
-            color: #fca5a5; font-weight: 600; font-size: .88rem;
-            cursor: pointer; transition: all .25s;
-        }
-        .btn-logout:hover { background: rgba(239,68,68,.1); border-color: #ef4444; }
-
-        .container { max-width: 1300px; margin: 0 auto; padding: 3rem 2rem; }
-
-        /* Welcome */
-        .welcome { text-align: center; margin-bottom: 2.5rem; }
-        .welcome h1 { font-size: 2.8rem; font-weight: 800; color: #34d399; margin-bottom: .4rem; }
-        .welcome p  { color: #64748b; font-size: 1.05rem; }
-
-        /* Personal stats */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 2.5rem;
-        }
-        .stat-card {
-            background: rgba(22,34,51,.8); backdrop-filter: blur(8px);
-            padding: 1.8rem 1.2rem; border-radius: 16px; text-align: center;
-            border: 1px solid rgba(52,211,153,.2); transition: all .3s;
-        }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(52,211,153,.2); border-color: rgba(52,211,153,.4); }
-        .stat-icon { font-size: 2rem; margin-bottom: .5rem; }
-        .stat-val  { font-size: 2.2rem; font-weight: 800; color: #34d399; margin-bottom: .3rem; }
-        .stat-lbl  { color: #64748b; font-size: .82rem; }
-
-        /* Section */
-        .section {
-            background: rgba(22,34,51,.8); backdrop-filter: blur(8px);
-            padding: 2.5rem; border-radius: 18px; margin-bottom: 2rem;
-            border: 1px solid rgba(52,211,153,.18);
-        }
-        .section h2 { font-size: 1.6rem; color: #34d399; margin-bottom: 1.5rem; }
-
-        /* Optimizer */
-        .field-label { display: block; color: #34d399; font-weight: 700; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; margin-bottom: .5rem; }
-        .prompt-input {
-            width: 100%; min-height: 110px;
-            padding: .9rem 1rem;
-            background: rgba(13,23,38,.85);
-            border: 1.5px solid rgba(52,211,153,.25);
-            border-radius: 10px; color: #f1f5f9;
-            font-size: .98rem; font-family: inherit; resize: vertical;
-            transition: border-color .25s, box-shadow .25s; margin-bottom: 1rem;
-        }
-        .prompt-input:focus { outline: none; border-color: #34d399; box-shadow: 0 0 0 3px rgba(52,211,153,.1); }
-        .prompt-input::placeholder { color: #475569; }
-
-        .btn-optimize {
-            width: 100%; padding: .95rem;
-            background: linear-gradient(135deg, #34d399, #3b82f6);
-            border: none; border-radius: 10px; color: #fff;
-            font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all .3s;
-            display: flex; align-items: center; justify-content: center; gap: .6rem;
-        }
-        .btn-optimize:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(52,211,153,.4); }
-        .btn-optimize:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-        .btn-spinner {
-            width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3);
-            border-top-color: #fff; border-radius: 50%; animation: spin .75s linear infinite; display: none;
-        }
-        .btn-optimize.loading .btn-spinner { display: block; }
-        .btn-optimize.loading .btn-text    { display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .result-box {
-            margin-top: 1.8rem;
-            background: rgba(13,23,38,.7);
-            border: 1.5px solid rgba(52,211,153,.3);
-            border-radius: 14px; padding: 1.8rem;
-            display: none; animation: fadeUp .4s ease;
-        }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-        .result-header { display: flex; align-items: center; gap: .6rem; color: #34d399; font-weight: 700; font-size: 1rem; margin-bottom: 1.2rem; }
-        .optimized-textarea {
-            width: 100%; min-height: 80px; padding: .85rem 1rem;
-            background: rgba(52,211,153,.05); border: 1px solid rgba(52,211,153,.2);
-            border-radius: 8px; color: #e2e8f0; font-size: .95rem;
-            font-family: inherit; resize: none; margin-bottom: 1.2rem; line-height: 1.6;
-        }
-        .metrics-row { display: grid; grid-template-columns: repeat(4,1fr); gap: .8rem; margin-bottom: 1.2rem; }
-        .metric-tile {
-            text-align: center; padding: .9rem .4rem;
-            background: rgba(52,211,153,.06); border: 1px solid rgba(52,211,153,.18); border-radius: 10px;
-        }
-        .metric-tile .mv { font-size: 1.4rem; font-weight: 800; color: #34d399; }
-        .metric-tile .ml { font-size: .72rem; color: #64748b; margin-top: .2rem; }
-        .btn-copy {
-            width: 100%; padding: .75rem; background: transparent;
-            border: 2px solid rgba(52,211,153,.5); border-radius: 8px;
-            color: #34d399; font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .25s;
-        }
-        .btn-copy:hover { background: rgba(52,211,153,.1); border-color: #34d399; }
-        .btn-copy.copied { background: rgba(52,211,153,.18); color: #6ee7b7; }
-
-        .banner { padding: .85rem 1.1rem; border-radius: 9px; font-weight: 600; text-align: center; margin-bottom: 1rem; display: none; }
-        .banner.error { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
-
-        /* History */
-        .history-empty { text-align: center; color: #475569; padding: 2.5rem; }
-        .history-item {
-            background: rgba(13,23,38,.6); border: 1px solid rgba(52,211,153,.15);
-            border-radius: 12px; padding: 1.4rem; margin-bottom: 1rem; transition: all .3s;
-        }
-        .history-item:hover { border-color: rgba(52,211,153,.35); box-shadow: 0 4px 14px rgba(52,211,153,.15); }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .9rem; }
-        .history-time { color: #64748b; font-size: .85rem; }
-        .history-badges { display: flex; gap: .7rem; }
-        .badge {
-            background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.25);
-            color: #34d399; font-size: .78rem; font-weight: 700;
-            padding: .2rem .7rem; border-radius: 99px;
-        }
-        .history-prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .history-prompt { background: rgba(52,211,153,.04); padding: .9rem; border-radius: 8px; border-left: 3px solid rgba(52,211,153,.4); }
-        .prompt-label { color: #34d399; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .4rem; }
-        .prompt-text  { color: #94a3b8; font-size: .88rem; line-height: 1.5; }
-
-        /* Tip box */
-        .tip-box {
-            background: rgba(52,211,153,.06); border: 1px solid rgba(52,211,153,.2);
-            border-radius: 10px; padding: 1rem 1.3rem; margin-top: 1.5rem;
-            color: #94a3b8; font-size: .9rem;
-        }
-        .tip-box strong { color: #34d399; }
-
-        footer {
-            background: rgba(10,18,30,.98); padding: 2rem; text-align: center;
-            border-top: 1px solid rgba(52,211,153,.12); margin-top: 3rem;
-        }
-        footer p { color: #475569; margin: .3rem 0; font-size: .88rem; }
-        footer strong { color: #34d399; }
-
-        @media (max-width: 900px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .metrics-row { grid-template-columns: repeat(2, 1fr); }
-            .history-prompts { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 600px) {
-            header { padding: .8rem 1.2rem; }
-            nav { flex-direction: column; gap: .8rem; }
-            .welcome h1 { font-size: 2rem; }
-            .section { padding: 1.5rem 1rem; }
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0d1b2a;color:#f1f5f9;line-height:1.6;overflow-x:hidden;}
+        .bg{position:fixed;inset:0;z-index:-2;background:#0d1b2a;overflow:hidden;}
+        .go{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 20% 30%,rgba(52,211,153,.05) 0%,transparent 45%),radial-gradient(circle at 80% 70%,rgba(59,130,246,.04) 0%,transparent 45%);}
+        .bubble{position:absolute;border-radius:50%;pointer-events:none;background:rgba(52,211,153,.05);animation:fb 30s ease-in-out infinite;}
+        @keyframes fb{0%,100%{transform:translateY(0) translateX(0);opacity:.22}33%{transform:translateY(-35px) translateX(20px);opacity:.32}66%{transform:translateY(-18px) translateX(-18px);opacity:.25}}
+        header{background:rgba(13,27,42,.97);backdrop-filter:blur(12px);padding:.9rem 3rem;position:sticky;top:0;z-index:1000;border-bottom:1px solid rgba(52,211,153,.15);}
+        nav{max-width:1500px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+        .logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:#34d399;font-size:1.25rem;font-weight:700;}
+        .logo-icon{width:36px;height:36px;flex-shrink:0;}
+        .nav-center{display:flex;gap:1.5rem;align-items:center;}
+        .nav-center a{color:#cbd5e1;text-decoration:none;font-size:1rem;font-weight:500;transition:color .3s;}
+        .nav-center a:hover{color:#34d399;}
+        .user-area{display:flex;align-items:center;gap:1rem;}
+        .user-chip{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#34d399;font-weight:600;font-size:.9rem;padding:.4rem 1rem;border-radius:99px;}
+        .btn-logout{padding:.45rem 1.1rem;background:transparent;border:1.5px solid rgba(239,68,68,.5);border-radius:8px;color:#fca5a5;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .25s;}
+        .btn-logout:hover{background:rgba(239,68,68,.1);border-color:#ef4444;}
+        .container{max-width:1300px;margin:0 auto;padding:3rem 2rem;}
+        .welcome{text-align:center;margin-bottom:2.5rem;}
+        .welcome h1{font-size:2.8rem;font-weight:800;color:#34d399;margin-bottom:.4rem;}
+        .welcome p{color:#64748b;font-size:1.05rem;}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2.5rem;}
+        .stat-card{background:rgba(22,34,51,.8);backdrop-filter:blur(8px);padding:1.8rem 1.2rem;border-radius:16px;text-align:center;border:1px solid rgba(52,211,153,.18);transition:all .3s;}
+        .stat-card:hover{transform:translateY(-4px);box-shadow:0 8px 22px rgba(52,211,153,.16);border-color:rgba(52,211,153,.35);}
+        .stat-icon{font-size:2rem;margin-bottom:.5rem;}
+        .stat-val{font-size:2.2rem;font-weight:800;color:#34d399;margin-bottom:.3rem;}
+        .stat-lbl{color:#64748b;font-size:.82rem;}
+        .section{background:rgba(22,34,51,.8);backdrop-filter:blur(8px);padding:2.5rem;border-radius:18px;margin-bottom:2rem;border:1px solid rgba(52,211,153,.16);}
+        .section h2{font-size:1.6rem;color:#34d399;margin-bottom:1.5rem;font-weight:700;}
+        .fl{display:block;color:#34d399;font-weight:700;font-size:.85rem;text-transform:uppercase;margin-bottom:.5rem;}
+        .pi{width:100%;min-height:110px;padding:.9rem 1rem;background:rgba(13,27,42,.85);border:1.5px solid rgba(52,211,153,.25);border-radius:10px;color:#f1f5f9;font-size:.98rem;font-family:inherit;resize:vertical;transition:border-color .25s,box-shadow .25s;margin-bottom:1rem;}
+        .pi:focus{outline:none;border-color:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.1);}
+        .pi::placeholder{color:#475569;}
+        .bo{width:100%;padding:.95rem;background:linear-gradient(135deg,#34d399,#3b82f6);border:none;border-radius:10px;color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:.6rem;}
+        .bo:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 22px rgba(52,211,153,.4);}
+        .bo:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+        .sp{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite;display:none;}
+        .bo.loading .sp{display:block;}.bo.loading .bt{display:none;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .rb{margin-top:1.8rem;background:rgba(13,27,42,.7);border:1.5px solid rgba(52,211,153,.28);border-radius:14px;padding:1.8rem;display:none;animation:fu .4s ease;}
+        @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .rh{display:flex;align-items:center;gap:.6rem;color:#34d399;font-weight:700;font-size:1rem;margin-bottom:1.2rem;}
+        .ot{width:100%;min-height:80px;padding:.85rem 1rem;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);border-radius:8px;color:#e2e8f0;font-size:.95rem;font-family:inherit;resize:none;margin-bottom:1.2rem;line-height:1.6;}
+        .mr{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem;}
+        .mt{text-align:center;padding:.9rem .4rem;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.16);border-radius:10px;}
+        .mt .mv{font-size:1.4rem;font-weight:800;color:#34d399;}.mt .ml{font-size:.72rem;color:#64748b;margin-top:.2rem;}
+        .bc{width:100%;padding:.75rem;background:transparent;border:2px solid rgba(52,211,153,.45);border-radius:8px;color:#34d399;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .25s;}
+        .bc:hover{background:rgba(52,211,153,.1);border-color:#34d399;}.bc.copied{background:rgba(52,211,153,.18);color:#6ee7b7;}
+        .bn{padding:.85rem 1.1rem;border-radius:9px;font-weight:600;text-align:center;margin-bottom:1rem;display:none;}
+        .bn.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        .tip{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18);border-radius:10px;padding:1rem 1.3rem;margin-top:1.5rem;color:#94a3b8;font-size:.9rem;}
+        .tip strong{color:#34d399;}
+        .he{text-align:center;color:#475569;padding:2.5rem;}
+        .hi{background:rgba(13,27,42,.6);border:1px solid rgba(52,211,153,.14);border-radius:12px;padding:1.4rem;margin-bottom:1rem;transition:all .3s;}
+        .hi:hover{border-color:rgba(52,211,153,.3);box-shadow:0 4px 12px rgba(52,211,153,.1);}
+        .hh{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;}
+        .ht{color:#64748b;font-size:.85rem;}
+        .hb{display:flex;gap:.7rem;}
+        .badge{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.22);color:#34d399;font-size:.78rem;font-weight:700;padding:.2rem .7rem;border-radius:99px;}
+        .hp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .hpr{background:rgba(52,211,153,.04);padding:.9rem;border-radius:8px;border-left:3px solid rgba(52,211,153,.35);}
+        .pl{color:#34d399;font-size:.75rem;font-weight:700;text-transform:uppercase;margin-bottom:.4rem;}
+        .pt{color:#94a3b8;font-size:.88rem;line-height:1.5;}
+        footer{background:rgba(13,27,42,.97);padding:2rem;text-align:center;border-top:1px solid rgba(52,211,153,.12);margin-top:3rem;}
+        footer p{color:#64748b;margin:.3rem 0;font-size:.88rem;}
+        @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr);}.mr{grid-template-columns:repeat(2,1fr);}.hp{grid-template-columns:1fr;}}
+        @media(max-width:600px){header{padding:.8rem 1.2rem;}nav{flex-direction:column;gap:.8rem;}.welcome h1{font-size:2rem;}.section{padding:1.5rem 1rem;}}
     </style>
 </head>
 <body>
-
-<div class="bg-wrap" id="bg"></div>
-<div class="gradient-overlay"></div>
-
+<div class="bg" id="bg"></div>
+<div class="go"></div>
 <header>
     <nav>
         <a href="index.html" class="logo">
-            <div class="logo-icon">🌱</div>
+            <img class="logo-icon" src="gpo-icon.svg" alt="GPO">
             Green Prompts Optimizer
         </a>
         <div class="nav-center">
-            <a href="index.html">← Home</a>
+            <a href="index.html">Home</a>
             <a href="optimizer.html">Optimizer</a>
             <a href="stats.html">Stats</a>
         </div>
         <div class="user-area">
-            <span class="user-chip" id="user-chip">Loading…</span>
+            <span class="user-chip" id="user-chip">Loading...</span>
             <button class="btn-logout" id="btn-logout">Logout</button>
         </div>
     </nav>
 </header>
-
 <div class="container">
     <div class="welcome">
-        <h1>Welcome back, <span id="welcome-name">User</span>! 🌱</h1>
+        <h1>Welcome back, <span id="welcome-name">User</span>!</h1>
         <p>Track your environmental impact and keep optimizing your AI prompts</p>
     </div>
-
-    <!-- Personal Stats -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-val" id="u-opts">0</div>
-            <div class="stat-lbl">Optimizations</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">💎</div>
-            <div class="stat-val" id="u-tokens">0</div>
-            <div class="stat-lbl">Tokens Saved</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-val" id="u-energy">0</div>
-            <div class="stat-lbl">Energy Saved (Wh)</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🌍</div>
-            <div class="stat-val" id="u-co2">0</div>
-            <div class="stat-lbl">CO₂ Reduced (g)</div>
-        </div>
+        <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-val" id="u-opts">0</div><div class="stat-lbl">Optimizations</div></div>
+        <div class="stat-card"><div class="stat-icon">💎</div><div class="stat-val" id="u-tokens">0</div><div class="stat-lbl">Tokens Saved</div></div>
+        <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-val" id="u-energy">0</div><div class="stat-lbl">Energy Saved (Wh)</div></div>
+        <div class="stat-card"><div class="stat-icon">🌍</div><div class="stat-val" id="u-co2">0</div><div class="stat-lbl">CO2 Reduced (g)</div></div>
     </div>
-
-    <!-- Optimizer -->
     <div class="section">
-        <h2>✨ Optimize a Prompt</h2>
-        <p style="color:#64748b;margin-bottom:1.5rem;">Every optimization you run here will automatically update your stats above!</p>
-
-        <div class="banner error" id="err-banner"></div>
-
-        <label class="field-label">Enter your prompt:</label>
-        <textarea class="prompt-input" id="prompt-input"
-            placeholder="e.g. Can you please help me understand how to write a Python function?"></textarea>
-
-        <button class="btn-optimize" id="btn-optimize">
-            <div class="btn-spinner"></div>
-            <span class="btn-text">🚀 Optimize Prompt</span>
-        </button>
-
-        <div class="result-box" id="result-box">
-            <div class="result-header">
-                <span>✅</span> Optimization Complete!
+        <h2>Optimize a Prompt</h2>
+        <p style="color:#64748b;margin-bottom:1.5rem;">Every optimization updates your stats above automatically.</p>
+        <div class="bn error" id="err-ban"></div>
+        <label class="fl">Enter your prompt:</label>
+        <textarea class="pi" id="pi" placeholder="e.g. Can you please help me understand how to write a Python function?"></textarea>
+        <button class="bo" id="bo"><div class="sp"></div><span class="bt">Optimize Prompt</span></button>
+        <div class="rb" id="rb">
+            <div class="rh">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#34d399" stroke-width="1.8"/><path d="M6 10.5l3 3 5-5.5" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Optimization Complete!
             </div>
-            <label class="field-label">Optimized Prompt:</label>
-            <textarea class="optimized-textarea" id="optimized-out" readonly></textarea>
-            <div class="metrics-row">
-                <div class="metric-tile"><div class="mv" id="m-tokens">0</div><div class="ml">Tokens Saved</div></div>
-                <div class="metric-tile"><div class="mv" id="m-reduction">0%</div><div class="ml">Reduction</div></div>
-                <div class="metric-tile"><div class="mv" id="m-energy">0</div><div class="ml">Energy (Wh)</div></div>
-                <div class="metric-tile"><div class="mv" id="m-co2">0</div><div class="ml">CO₂ (g)</div></div>
+            <label class="fl">Optimized Prompt:</label>
+            <textarea class="ot" id="ot" readonly></textarea>
+            <div class="mr">
+                <div class="mt"><div class="mv" id="m-t">0</div><div class="ml">Tokens Saved</div></div>
+                <div class="mt"><div class="mv" id="m-r">0%</div><div class="ml">Reduction</div></div>
+                <div class="mt"><div class="mv" id="m-e">0</div><div class="ml">Energy (Wh)</div></div>
+                <div class="mt"><div class="mv" id="m-c">0</div><div class="ml">CO2 (g)</div></div>
             </div>
-            <button class="btn-copy" id="btn-copy">📋 Copy Optimized Prompt</button>
+            <button class="bc" id="bc">Copy Optimized Prompt</button>
         </div>
-
-        <div class="tip-box">
-            <strong>💡 Pro Tip:</strong> Use Ctrl+Enter to optimize quickly. Then paste into ChatGPT, Claude, or any AI tool!
-        </div>
+        <div class="tip"><strong>Tip:</strong> Use Ctrl+Enter to optimize quickly.</div>
     </div>
-
-    <!-- History -->
     <div class="section">
-        <h2>📜 Your Optimization History</h2>
-        <div id="history-container">
-            <div class="history-empty">No optimizations yet — try one above!</div>
-        </div>
+        <h2>Your Optimization History</h2>
+        <div id="hc"><div class="he">No optimizations yet. Try one above!</div></div>
     </div>
 </div>
-
 <footer>
-    <p>🌱 <strong>Green Prompts Optimizer</strong></p>
-    <p>Created by Srinesh Toranala | ISM Original Work 2025–2026</p>
+    <p><strong style="color:#34d399;">Green Prompts Optimizer</strong></p>
+    <p>Created by Srinesh Toranala | 2025-2026</p>
 </footer>
-
 <script src="stats_tracker.js"></script>
 <script src="auth.js"></script>
 <script src="optimizer-core.js"></script>
 <script>
-    // Bubbles
-    (function() {
-        const bg = document.getElementById('bg');
-        for (let i = 0; i < 22; i++) {
-            const b = document.createElement('div'); b.className = 'bubble';
-            const s = Math.random() * 12 + 6;
-            b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*15}s;animation-duration:${Math.random()*20+25}s`;
-            bg.appendChild(b);
+(function(){const bg=document.getElementById('bg');for(let i=0;i<20;i++){const b=document.createElement('div');b.className='bubble';const s=Math.random()*12+5;b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*15}s;animation-duration:${Math.random()*22+24}s`;bg.appendChild(b);}})();
+if(!window.AUTH||!window.AUTH.requireAuth()){}
+let cu=null;
+function loadUser(){
+    cu=window.AUTH.getCurrentUser();if(!cu)return;
+    document.getElementById('user-chip').textContent=cu.name;
+    document.getElementById('welcome-name').textContent=cu.name.split(' ')[0];
+    const s=cu.stats||{};
+    document.getElementById('u-opts').textContent=s.totalOptimizations||0;
+    document.getElementById('u-tokens').textContent=(s.totalTokensSaved||0).toLocaleString();
+    document.getElementById('u-energy').textContent=(s.totalEnergySaved||0).toFixed(4);
+    document.getElementById('u-co2').textContent=(s.totalCO2Saved||0).toFixed(4);
+    renderHistory();
+}
+function renderHistory(){
+    const c=document.getElementById('hc');
+    if(!cu.history||!cu.history.length)return;
+    c.innerHTML='';
+    [...cu.history].reverse().slice(0,15).forEach(item=>{
+        const d=new Date(item.timestamp);
+        const el=document.createElement('div');el.className='hi';
+        el.innerHTML=`<div class="hh"><div class="ht">${d.toLocaleString()}</div><div class="hb"><span class="badge">-${item.tokensSaved} tokens</span><span class="badge">${item.reductionPct} reduction</span></div></div><div class="hp"><div class="hpr"><div class="pl">Original</div><div class="pt">${item.original}</div></div><div class="hpr"><div class="pl">Optimized</div><div class="pt">${item.optimized}</div></div></div>`;
+        c.appendChild(el);
+    });
+}
+const btn=document.getElementById('bo'),inp=document.getElementById('pi'),res=document.getElementById('rb'),err=document.getElementById('err-ban'),cpy=document.getElementById('bc');
+btn.addEventListener('click',async()=>{
+    const p=inp.value.trim();
+    if(!p){err.textContent='Please enter a prompt.';err.style.display='block';return;}
+    err.style.display='none';res.style.display='none';btn.disabled=true;btn.classList.add('loading');
+    try{
+        const r=await window.optimizePrompt(p);
+        document.getElementById('ot').value=r.optimizedPrompt;
+        document.getElementById('m-t').textContent=r.tokensSaved;
+        document.getElementById('m-r').textContent=r.reductionPct+'%';
+        document.getElementById('m-e').textContent=r.energySaved.toFixed(6);
+        document.getElementById('m-c').textContent=r.co2Saved.toFixed(6);
+        res.style.display='block';
+        if(window.GPO)window.GPO.trackOptimization({tokensSaved:r.tokensSaved});
+        cu=window.AUTH.getCurrentUser();
+        if(cu){
+            cu.stats=cu.stats||{};
+            cu.stats.totalOptimizations=(cu.stats.totalOptimizations||0)+1;
+            cu.stats.totalTokensSaved=(cu.stats.totalTokensSaved||0)+r.tokensSaved;
+            cu.stats.totalEnergySaved=(cu.stats.totalEnergySaved||0)+r.energySaved;
+            cu.stats.totalCO2Saved=(cu.stats.totalCO2Saved||0)+r.co2Saved;
+            cu.history=cu.history||[];
+            cu.history.push({timestamp:Date.now(),original:p,optimized:r.optimizedPrompt,tokensSaved:r.tokensSaved,reductionPct:r.reductionPct+'%',energySaved:r.energySaved,co2Saved:r.co2Saved});
+            window.AUTH.saveCurrentUser(cu);loadUser();
         }
-    })();
-
-    // Auth guard
-    if (!window.AUTH || !window.AUTH.requireAuth()) { /* redirects */ }
-
-    let currentUser = null;
-
-    function loadUser() {
-        currentUser = window.AUTH.getCurrentUser();
-        if (!currentUser) return;
-
-        document.getElementById('user-chip').textContent    = currentUser.name;
-        document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
-
-        const s = currentUser.stats || {};
-        document.getElementById('u-opts').textContent   = s.totalOptimizations || 0;
-        document.getElementById('u-tokens').textContent = (s.totalTokensSaved  || 0).toLocaleString();
-        document.getElementById('u-energy').textContent = (s.totalEnergySaved  || 0).toFixed(4);
-        document.getElementById('u-co2').textContent    = (s.totalCO2Saved     || 0).toFixed(4);
-
-        renderHistory();
-    }
-
-    function renderHistory() {
-        const container = document.getElementById('history-container');
-        if (!currentUser.history || currentUser.history.length === 0) return;
-
-        container.innerHTML = '';
-        [...currentUser.history].reverse().slice(0, 15).forEach(item => {
-            const d = new Date(item.timestamp);
-            const el = document.createElement('div');
-            el.className = 'history-item';
-            el.innerHTML = `
-                <div class="history-header">
-                    <div class="history-time">${d.toLocaleString()}</div>
-                    <div class="history-badges">
-                        <span class="badge">-${item.tokensSaved} tokens</span>
-                        <span class="badge">${item.reductionPct} reduction</span>
-                    </div>
-                </div>
-                <div class="history-prompts">
-                    <div class="history-prompt">
-                        <div class="prompt-label">Original</div>
-                        <div class="prompt-text">${item.original}</div>
-                    </div>
-                    <div class="history-prompt">
-                        <div class="prompt-label">Optimized</div>
-                        <div class="prompt-text">${item.optimized}</div>
-                    </div>
-                </div>`;
-            container.appendChild(el);
-        });
-    }
-
-    // Optimizer
-    const btnOpt  = document.getElementById('btn-optimize');
-    const pInput  = document.getElementById('prompt-input');
-    const resBox  = document.getElementById('result-box');
-    const errBan  = document.getElementById('err-banner');
-    const btnCopy = document.getElementById('btn-copy');
-
-    btnOpt.addEventListener('click', async () => {
-        const prompt = pInput.value.trim();
-        if (!prompt) { errBan.textContent = '⚠️ Please enter a prompt.'; errBan.style.display='block'; return; }
-        errBan.style.display = 'none'; resBox.style.display = 'none';
-        btnOpt.disabled = true; btnOpt.classList.add('loading');
-
-        try {
-            const r = await window.optimizePrompt(prompt);
-            document.getElementById('optimized-out').value = r.optimizedPrompt;
-            document.getElementById('m-tokens').textContent    = r.tokensSaved;
-            document.getElementById('m-reduction').textContent = r.reductionPct + '%';
-            document.getElementById('m-energy').textContent    = r.energySaved.toFixed(6);
-            document.getElementById('m-co2').textContent       = r.co2Saved.toFixed(6);
-            resBox.style.display = 'block';
-
-            // Update global stats
-            if (window.GPO) window.GPO.trackOptimization({ tokensSaved: r.tokensSaved });
-
-            // Update user stats
-            currentUser = window.AUTH.getCurrentUser();
-            if (currentUser) {
-                currentUser.stats = currentUser.stats || {};
-                currentUser.stats.totalOptimizations = (currentUser.stats.totalOptimizations || 0) + 1;
-                currentUser.stats.totalTokensSaved   = (currentUser.stats.totalTokensSaved   || 0) + r.tokensSaved;
-                currentUser.stats.totalEnergySaved   = (currentUser.stats.totalEnergySaved   || 0) + r.energySaved;
-                currentUser.stats.totalCO2Saved      = (currentUser.stats.totalCO2Saved      || 0) + r.co2Saved;
-                currentUser.history = currentUser.history || [];
-                currentUser.history.push({
-                    timestamp: Date.now(), original: prompt, optimized: r.optimizedPrompt,
-                    tokensSaved: r.tokensSaved, reductionPct: r.reductionPct + '%',
-                    energySaved: r.energySaved, co2Saved: r.co2Saved
-                });
-                window.AUTH.saveCurrentUser(currentUser);
-                loadUser(); // refresh display
-            }
-        } catch(e) {
-            errBan.textContent = '❌ ' + (e.message || 'Optimization failed.'); errBan.style.display='block';
-        } finally {
-            btnOpt.disabled = false; btnOpt.classList.remove('loading');
-        }
-    });
-
-    pInput.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') btnOpt.click(); });
-
-    btnCopy.addEventListener('click', () => {
-        navigator.clipboard.writeText(document.getElementById('optimized-out').value).then(() => {
-            btnCopy.textContent = '✅ Copied!'; btnCopy.classList.add('copied');
-            setTimeout(() => { btnCopy.textContent = '📋 Copy Optimized Prompt'; btnCopy.classList.remove('copied'); }, 2200);
-        });
-    });
-
-    document.getElementById('btn-logout').addEventListener('click', () => {
-        if (confirm('Log out?')) window.AUTH.logout();
-    });
-
-    document.addEventListener('DOMContentLoaded', loadUser);
+    }catch(e){err.textContent='Optimization failed: '+(e.message||'Please try again.');err.style.display='block';}
+    finally{btn.disabled=false;btn.classList.remove('loading');}
+});
+inp.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')btn.click();});
+cpy.addEventListener('click',()=>{navigator.clipboard.writeText(document.getElementById('ot').value).then(()=>{cpy.textContent='Copied!';cpy.classList.add('copied');setTimeout(()=>{cpy.textContent='Copy Optimized Prompt';cpy.classList.remove('copied');},2200);});});
+document.getElementById('btn-logout').addEventListener('click',()=>{if(confirm('Log out?'))window.AUTH.logout();});
+document.addEventListener('DOMContentLoaded',loadUser);
 </script>
 </body>
 </html>
