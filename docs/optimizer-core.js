@@ -1,16 +1,16 @@
 /**
  * OPTIMIZER-CORE.JS
- * Calls the HF Space proxy. Auto-retries if Space is warming up (503).
+ * Calls the Gradio Space proxy (sirenice/greenpromptshelper)
+ * which forwards to the T5 model server-side — no CORS issues.
  */
 
-const PROXY_URL = 'https://sirenice-greenpromptshelper.hf.space/optimize';
+const PROXY_URL = 'https://sirenice-greenpromptshelper.hf.space/api/predict';
 
 async function optimizePrompt(prompt) {
     if (!prompt || !prompt.trim()) throw new Error('Empty prompt');
 
-    // Try up to 4 times (handles cold Space startup — usually ready in 30-60s)
     const MAX_RETRIES = 4;
-    const RETRY_DELAY = 15000; // 15 seconds between retries
+    const RETRY_DELAY = 15000;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         let res;
@@ -18,7 +18,7 @@ async function optimizePrompt(prompt) {
             res = await fetch(PROXY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt.trim() })
+                body: JSON.stringify({ data: [prompt.trim()] })
             });
         } catch (networkErr) {
             if (attempt === MAX_RETRIES) throw new Error('Network error — check your internet connection.');
@@ -26,9 +26,8 @@ async function optimizePrompt(prompt) {
             continue;
         }
 
-        if (res.status === 503) {
-            if (attempt === MAX_RETRIES) throw new Error('Space is still starting up. Please try again in 30 seconds.');
-            // Show countdown in button text via a custom event
+        if (res.status === 503 || res.status === 502) {
+            if (attempt === MAX_RETRIES) throw new Error('Space is still starting. Please try again in 30 seconds.');
             window.dispatchEvent(new CustomEvent('gpo-warmup', { detail: { attempt, max: MAX_RETRIES } }));
             await sleep(RETRY_DELAY);
             continue;
@@ -41,9 +40,19 @@ async function optimizePrompt(prompt) {
         }
 
         const data = await res.json();
-        let optimized = data.optimized || '';
+        // Gradio returns { data: ["optimized text"] }
+        let optimized = (data.data && data.data[0]) ? data.data[0].trim() : '';
 
-        if (!optimized) throw new Error('Model returned empty response. Try again.');
+        if (!optimized || optimized === 'MODEL_WARMING_UP') {
+            if (attempt === MAX_RETRIES) throw new Error('Model is warming up. Please try again in 20 seconds.');
+            window.dispatchEvent(new CustomEvent('gpo-warmup', { detail: { attempt, max: MAX_RETRIES } }));
+            await sleep(RETRY_DELAY);
+            continue;
+        }
+
+        if (optimized.startsWith('API_ERROR_') || optimized === 'UNEXPECTED_RESPONSE') {
+            throw new Error('Model API error. Please try again.');
+        }
 
         // Fallback if model echoed input unchanged
         if (optimized.toLowerCase() === prompt.trim().toLowerCase()) {
