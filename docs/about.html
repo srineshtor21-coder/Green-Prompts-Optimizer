@@ -4,210 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About | Green Prompts Optimizer</title>
+    <link rel="icon" type="image/svg+xml" href="gpo-icon.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1b2a;
-            color: #f1f5f9;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: #0d1b2a;
-            overflow: hidden;
-        }
-        .gradient-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
-            animation: gradientMove 15s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes gradientMove {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
-        }
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.08), rgba(59, 130, 246, 0.05));
-            box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
-            animation: float-bubble 30s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes float-bubble {
-            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
-            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.5; }
-            50% { transform: translateY(-25px) translateX(-25px) scale(0.95); opacity: 0.45; }
-            75% { transform: translateY(-45px) translateX(35px) scale(1.05); opacity: 0.48; }
-        }
-        header {
-            background: rgba(15, 27, 42, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 0.9rem 3rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-        }
-        nav {
-            max-width: 1500px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: #34d399;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        .logo-icon {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #34d399, #3b82f6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-        }
-        .nav-center {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-        .nav-center a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-size: 1.05rem;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
-            padding-bottom: 0.2rem;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d1b2a; color: #f1f5f9; line-height: 1.6; overflow-x: hidden; }
+        .background-animation { position: fixed; inset: 0; z-index: -2; background: #0d1b2a; overflow: hidden; }
+        .gradient-overlay { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 20% 30%, rgba(52,211,153,.055) 0%, transparent 45%), radial-gradient(circle at 80% 70%, rgba(59,130,246,.045) 0%, transparent 45%); pointer-events: none; }
+        .bubble { position: absolute; border-radius: 50%; background: rgba(52,211,153,.05); animation: fb 30s ease-in-out infinite; pointer-events: none; }
+        @keyframes fb { 0%,100%{transform:translateY(0) translateX(0);opacity:.22} 33%{transform:translateY(-35px) translateX(20px);opacity:.32} 66%{transform:translateY(-18px) translateX(-18px);opacity:.25} }
+        header { background: rgba(13,27,42,.97); backdrop-filter: blur(12px); padding: .9rem 3rem; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(52,211,153,.15); }
+        nav { max-width: 1500px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: #34d399; font-size: 1.25rem; font-weight: 700; }
+        .logo-icon { width: 36px; height: 36px; flex-shrink: 0; }
+        .nav-center { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-center a { color: #cbd5e1; text-decoration: none; font-size: 1rem; font-weight: 500; transition: color .3s; position: relative; padding-bottom: .2rem; }
         .nav-center a:hover { color: #34d399; }
         .nav-center a.active { color: #34d399; }
-        .nav-center a.active::after {
-            content: '';
-            position: absolute;
-            bottom: -0.95rem;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #34d399, #3b82f6);
-            border-radius: 2px;
-        }
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-        .btn-login {
-            padding: 0.55rem 1.4rem;
-            background: transparent;
-            border: 2px solid #34d399;
-            border-radius: 8px;
-            color: #34d399;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-        .btn-login:hover { background: rgba(52, 211, 153, 0.1); }
-        .btn-signup {
-            padding: 0.55rem 1.4rem;
-            background: linear-gradient(135deg, #34d399, #3b82f6);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-        .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        .page-header h1 {
-            font-size: 3rem;
-            color: #34d399;
-            margin-bottom: 1rem;
-        }
-        .page-header p {
-            font-size: 1.1rem;
-            color: #cbd5e1;
-        }
-        .section {
-            background: rgba(30, 41, 59, 0.75);
-            backdrop-filter: blur(10px);
-            padding: 2.5rem;
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(52, 211, 153, 0.25);
-        }
-        .section h2 {
-            font-size: 2rem;
-            color: #34d399;
-            margin-bottom: 1.5rem;
-        }
-        .section p {
-            color: #cbd5e1;
-            line-height: 1.8;
-            margin-bottom: 1rem;
-        }
-        footer {
-            background: rgba(15, 27, 42, 0.95);
-            padding: 2rem;
-            text-align: center;
-            margin-top: 4rem;
-            border-top: 1px solid rgba(52, 211, 153, 0.2);
-        }
-        footer p {
-            color: #cbd5e1;
-            margin: 0.5rem 0;
-        }
-        @media (max-width: 768px) {
-            header { padding: 1rem 1.5rem; }
-            nav { flex-direction: column; gap: 1.5rem; }
-            .nav-center { gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
-            .page-header h1 { font-size: 2rem; }
-        }
-    </style></head>
+        .nav-center a.active::after { content: ''; position: absolute; bottom: -.9rem; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg,#34d399,#3b82f6); border-radius: 2px; }
+        .nav-buttons { display: flex; gap: 1rem; }
+        .btn-login { padding: .55rem 1.4rem; background: transparent; border: 2px solid #34d399; border-radius: 8px; color: #34d399; font-weight: 600; cursor: pointer; transition: all .3s; text-decoration: none; font-size: .95rem; }
+        .btn-login:hover { background: rgba(52,211,153,.1); }
+        .btn-signup { padding: .55rem 1.4rem; background: linear-gradient(135deg,#34d399,#3b82f6); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all .3s; text-decoration: none; font-size: .95rem; }
+        .btn-signup:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52,211,153,.4); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 3rem 2rem; }
+        .page-header { text-align: center; margin-bottom: 3rem; }
+        .page-header h1 { font-size: 3rem; color: #34d399; margin-bottom: 1rem; font-weight: 700; }
+        .page-header p { font-size: 1.1rem; color: #94a3b8; }
+        .section { background: rgba(30,41,59,.75); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(52,211,153,.2); }
+        .section h2 { font-size: 1.8rem; color: #34d399; margin-bottom: 1.5rem; font-weight: 700; }
+        .section p { color: #94a3b8; line-height: 1.8; margin-bottom: 1rem; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .tech-item { text-align: center; padding: 1rem; background: rgba(52,211,153,.07); border-radius: 8px; border: 1px solid rgba(52,211,153,.18); color: #e2e8f0; font-size: .95rem; font-weight: 500; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .feature-item { padding: 1.5rem; background: rgba(52,211,153,.07); border-radius: 10px; border: 1px solid rgba(52,211,153,.2); }
+        .feature-item strong { color: #e2e8f0; display: block; margin-bottom: .4rem; font-size: 1rem; }
+        .feature-item span { color: #94a3b8; font-size: .92rem; }
+        .tip-box { margin-top: 1.5rem; padding: 1.2rem 1.5rem; background: rgba(59,130,246,.08); border-radius: 8px; border-left: 4px solid #3b82f6; }
+        .tip-box strong { color: #34d399; }
+        .tip-box span { color: #94a3b8; }
+        ol.install-steps { list-style: decimal; margin-left: 1.8rem; color: #94a3b8; line-height: 2.2; }
+        ol.install-steps a { color: #34d399; }
+        code { background: rgba(52,211,153,.15); padding: .15rem .5rem; border-radius: 4px; color: #34d399; font-size: .9rem; }
+        .cta-btn { display: inline-block; padding: 1rem 2.5rem; background: linear-gradient(135deg,#34d399,#3b82f6); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all .3s; }
+        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(52,211,153,.4); }
+        footer { background: rgba(13,27,42,.97); padding: 2rem; text-align: center; margin-top: 4rem; border-top: 1px solid rgba(52,211,153,.14); }
+        footer p { color: #64748b; margin: .4rem 0; font-size: .9rem; }
+        @media(max-width:768px){ header{padding:.8rem 1.5rem;} nav{flex-direction:column;gap:1.5rem;} .nav-center{gap:1.2rem;flex-wrap:wrap;justify-content:center;} .page-header h1{font-size:2rem;} }
+    </style>
+</head>
 <body>
     <div class="background-animation" id="bg-animation"></div>
     <div class="gradient-overlay"></div>
     <header>
         <nav>
             <a href="index.html" class="logo">
-                <img class="logo-icon" src="gpo-icon.svg" alt="GPO" style="width:38px;height:38px;">
+                <img class="logo-icon" src="gpo-icon.svg" alt="GPO">
                 Green Prompts Optimizer
             </a>
             <div class="nav-center">
@@ -223,109 +74,72 @@
             </div>
         </nav>
     </header>
-
     <div class="container">
         <div class="page-header">
-            <h1>📖 About the Project</h1>
+            <h1>About the Project</h1>
             <p>How a high school student built an AI to save energy</p>
         </div>
         <div class="section">
-            <h2>🎯 The Problem</h2>
+            <h2>The Problem</h2>
             <p>Large AI models consume massive amounts of energy. A single ChatGPT query can use 10x more energy than a Google search. Many prompts contain unnecessary words that increase computational load without adding value. As AI usage grows exponentially, so does its environmental impact.</p>
         </div>
         <div class="section">
-            <h2>💡 The Solution</h2>
+            <h2>The Solution</h2>
             <p>Green Prompts Optimizer uses a custom-trained T5 transformer model to intelligently reduce prompt length while preserving meaning. By removing filler words and optimizing sentence structure, it can reduce token count by 30-50% on average, directly translating to energy savings.</p>
         </div>
         <div class="section">
-            <h2>🔬 How It Works</h2>
-            <p style="margin-bottom: 2rem;"><strong>1. Data Collection</strong><br>Created a custom dataset of 127 prompt pairs across different domains (coding, writing, analysis)</p>
-            <p style="margin-bottom: 2rem;"><strong>2. Model Training</strong><br>Fine-tuned Google's T5-small model using PyTorch and Hugging Face Transformers</p>
-            <p style="margin-bottom: 2rem;"><strong>3. Energy Measurement</strong><br>Integrated Zeus library to measure actual energy consumption during optimization</p>
-            <p><strong>4. Web Deployment</strong><br>Built Gradio interface and deployed to Hugging Face Spaces with GitHub Pages frontend</p>
+            <h2>How It Was Built</h2>
+            <p><strong style="color:#e2e8f0;">Data Collection</strong> — Created a dataset of 127 prompt pairs across different domains: coding, writing, and analysis.</p>
+            <p><strong style="color:#e2e8f0;">Model Training</strong> — Fine-tuned Google's T5-small model using PyTorch and Hugging Face Transformers.</p>
+            <p><strong style="color:#e2e8f0;">Energy Measurement</strong> — Integrated Zeus library to measure actual energy consumption during optimization.</p>
+            <p><strong style="color:#e2e8f0;">Web Deployment</strong> — Built with GitHub Pages as the frontend, calling the Hugging Face Inference API directly.</p>
         </div>
         <div class="section">
-            <h2>🛠️ Technology Stack</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-                <div style="text-align: center; padding: 1rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px;">🤖 T5 Transformer</div>
-                <div style="text-align: center; padding: 1rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px;">🔥 PyTorch</div>
-                <div style="text-align: center; padding: 1rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px;">🤗 Hugging Face</div>
-                <div style="text-align: center; padding: 1rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px;">⚡ Gradio</div>
-                <div style="text-align: center; padding: 1rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px;">📊 Zeus Energy</div>
-                <div style="text-align: center; padding: 1rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px;">🌐 GitHub Pages</div>
+            <h2>Technology Stack</h2>
+            <div class="tech-grid">
+                <div class="tech-item">T5 Transformer</div>
+                <div class="tech-item">PyTorch</div>
+                <div class="tech-item">Hugging Face</div>
+                <div class="tech-item">Zeus Energy</div>
+                <div class="tech-item">GitHub Pages</div>
+                <div class="tech-item">Vanilla JS</div>
             </div>
         </div>
         <div class="section">
-            <h2>👨‍💻 About the Developer</h2>
-            <p>Hi! I'm Srinesh Toranala, a high school student passionate about AI and environmental sustainability. This project was developed as part of my ISM (Independent Study Mentorship) Original Work for 2025-2026. I wanted to combine my interests in machine learning and climate action to create something that makes a real difference.</p>
-            <p style="margin-top: 1rem;">Through this project, I learned about transformer architectures, energy-efficient computing, and full-stack development. Most importantly, I discovered how technology can be a force for positive environmental change.</p>
+            <h2>About the Developer</h2>
+            <p>Hi, I'm Srinesh Toranala, a high school student interested in AI and environmental sustainability. This project was developed as part of my ISM (Independent Study Mentorship) Original Work for 2025-2026. I wanted to combine my interests in machine learning and climate action to create something that makes a real difference.</p>
+            <p>Through this project, I learned about transformer architectures, energy-efficient computing, and full-stack development. Most importantly, I discovered how technology can be a force for positive environmental change.</p>
         </div>
         <div class="section">
-            <h2>🔌 Chrome Extension</h2>
-            <p>Optimize prompts directly in your browser with our Chrome Extension! Works seamlessly with ChatGPT, Claude, and other AI platforms.</p>
-            
-            <h3 style="font-size: 1.4rem; color: #34d399; margin: 2rem 0 1rem;">✨ Features</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-                <div style="padding: 1.5rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.3);">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
-                    <strong>One-Click Optimization</strong><br>
-                    <span style="color: #cbd5e1;">Optimize any prompt with a single click</span>
-                </div>
-                <div style="padding: 1.5rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.3);">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌐</div>
-                    <strong>Platform Integration</strong><br>
-                    <span style="color: #cbd5e1;">Works on ChatGPT, Claude, and more</span>
-                </div>
-                <div style="padding: 1.5rem; background: rgba(52, 211, 153, 0.1); border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.3);">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
-                    <strong>Real-Time Stats</strong><br>
-                    <span style="color: #cbd5e1;">Track your energy savings instantly</span>
-                </div>
+            <h2>Chrome Extension</h2>
+            <p>Optimize prompts directly in your browser. Works on ChatGPT, Claude, and other AI platforms.</p>
+            <div class="feature-grid">
+                <div class="feature-item"><strong>One-Click Optimization</strong><span>Optimize any prompt with a single click, right inside the chat interface.</span></div>
+                <div class="feature-item"><strong>Platform Integration</strong><span>Works on ChatGPT, Claude, Gemini, and more.</span></div>
+                <div class="feature-item"><strong>Real-Time Stats</strong><span>Track your energy savings instantly as you optimize.</span></div>
             </div>
-            
-            <h3 style="font-size: 1.4rem; color: #34d399; margin: 2rem 0 1rem;">📥 Installation</h3>
-            <ol style="list-style: decimal; margin-left: 2rem; color: #cbd5e1; line-height: 2;">
-                <li>Read instrucitons on how to download the Chrome Extension here <a href="extension.html" style="...">Install Chrome Extension →</a></li>
-                <li>Open Chrome and go to <code style="background: rgba(52, 211, 153, 0.2); padding: 0.2rem 0.5rem; border-radius: 4px;">chrome://extensions/</code></li>
+            <ol class="install-steps" style="margin-top:2rem;">
+                <li>Read instructions on the <a href="extension.html">Install Chrome Extension page</a></li>
+                <li>Open Chrome and go to <code>chrome://extensions/</code></li>
                 <li>Enable "Developer mode" in the top-right corner</li>
                 <li>Click "Load unpacked" and select the chrome-extension folder</li>
-                <li>Start optimizing prompts across all your favorite AI platforms!</li>
+                <li>Start optimizing prompts across all your favorite AI platforms</li>
             </ol>
-            
-            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                <strong style="color: #34d399;">💡 Pro Tip:</strong> 
-                <span style="color: #cbd5e1;">Pin the extension to your toolbar for quick access. Click the puzzle icon in Chrome and pin "Green Prompts Optimizer"!</span>
-            </div>
+            <div class="tip-box"><strong>Tip:</strong> <span>Pin the extension to your toolbar for quick access. Click the puzzle icon in Chrome and pin "Green Prompts Optimizer".</span></div>
         </div>
-        <div class="section">
-            <h2>🌍 Join the Movement</h2>
-            <p style="text-align: center;">Every optimized prompt helps reduce AI's carbon footprint</p>
-            <p style="text-align: center; margin-top: 1.5rem;"><a href="index.html#optimizer" style="display: inline-block; padding: 1rem 2.5rem; background: linear-gradient(135deg, #34d399, #3b82f6); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Try the Optimizer →</a></p>
+        <div class="section" style="text-align:center;">
+            <h2>Join the Movement</h2>
+            <p style="margin-bottom:1.5rem;">Every optimized prompt helps reduce AI's carbon footprint</p>
+            <a href="index.html#optimizer" class="cta-btn">Try the Optimizer</a>
         </div>
     </div>
-
     <footer>
-        <p>🌱 <strong style="color: #34d399;">Green Prompts Optimizer</strong></p>
-        <p>Created by Srinesh Toranala | ISM Original Work 2025-2026</p>
-        <p>Making AI more sustainable, one prompt at a time 🌍</p>
+        <p><strong style="color:#34d399;">Green Prompts Optimizer</strong></p>
+        <p>Created by Srinesh Toranala | 2025-2026</p>
+        <p>Making AI more sustainable, one prompt at a time</p>
     </footer>
     <script>
-        function createBubbles() {{
-            const bg = document.getElementById('bg-animation');
-            for (let i = 0; i < 25; i++) {{
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                const size = Math.random() * 12 + 6;
-                bubble.style.width = size + 'px';
-                bubble.style.height = size + 'px';
-                bubble.style.left = Math.random() * 100 + '%';
-                bubble.style.top = Math.random() * 100 + '%';
-                bubble.style.animationDelay = Math.random() * 15 + 's';
-                bubble.style.animationDuration = (Math.random() * 20 + 25) + 's';
-                bg.appendChild(bubble);
-            }}
-        }}
-        createBubbles();
+        (function(){ const bg=document.getElementById('bg-animation'); for(let i=0;i<22;i++){const b=document.createElement('div');b.className='bubble';const s=Math.random()*12+5;b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*18}s;animation-duration:${Math.random()*22+24}s`;bg.appendChild(b);}})();
     </script>
 </body>
 </html>
