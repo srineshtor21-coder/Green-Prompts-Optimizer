@@ -1,36 +1,29 @@
 /**
  * OPTIMIZER-CORE.JS
- * Calls Hugging Face Inference API for sirenice/greenpromptsoptimizer
+ * Calls the Hugging Face Inference API for sirenice/greenpromptsoptimizer
+ * No token required — model is public. Uses x-wait-for-model to handle cold starts.
  */
 
-const HF_TOKEN = ''; 
 const HF_MODEL = 'sirenice/greenpromptsoptimizer';
 const HF_API   = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
 
 async function optimizePrompt(prompt) {
-    const trimmed = prompt.trim();
-    if (!trimmed) throw new Error('Prompt is empty');
-
-    const headers = { 'Content-Type': 'application/json' };
-    if (HF_TOKEN && !HF_TOKEN.includes('REPLACE')) {
-        headers['Authorization'] = `Bearer ${HF_TOKEN}`;
-    }
+    if (!prompt || !prompt.trim()) throw new Error('Empty prompt');
 
     let res;
     try {
         res = await fetch(HF_API, {
             method: 'POST',
-            headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'x-wait-for-model': 'true'   // tells HF to wait for cold model instead of returning 503
+            },
             body: JSON.stringify({
-                inputs: `optimize: ${trimmed}`,
+                inputs: `optimize: ${prompt.trim()}`,
                 parameters: {
                     max_new_tokens: 150,
                     temperature: 0.3,
                     do_sample: false
-                },
-                options: {
-                    wait_for_model: true,
-                    use_cache: false
                 }
             })
         });
@@ -38,16 +31,14 @@ async function optimizePrompt(prompt) {
         throw new Error('Network error — check your internet connection.');
     }
 
-    // Model is loading (cold start) — HF returns 503
+    // 503 = model still loading despite x-wait-for-model (very rare)
     if (res.status === 503) {
-        const body = await res.json().catch(() => ({}));
-        const wait = body.estimated_time ? Math.ceil(body.estimated_time) : 20;
-        throw new Error(`Model is warming up. Please wait ${wait} seconds and try again.`);
+        throw new Error('Model is warming up. Wait about 20 seconds and try again.');
     }
 
-    // No token / wrong token
+    // 401/403 should not happen for a public model — means HF blocked the request
     if (res.status === 401 || res.status === 403) {
-        throw new Error('API token missing or invalid. Add your HF read token to optimizer-core.js');
+        throw new Error('Access denied by Hugging Face. Make sure your model is set to Public in HF settings.');
     }
 
     if (!res.ok) {
@@ -58,38 +49,35 @@ async function optimizePrompt(prompt) {
 
     const data = await res.json();
 
-    // Parse response — HF text2text-generation returns [{generated_text: "..."}]
     let optimized = '';
-    if (Array.isArray(data)) {
-        optimized = (data[0]?.generated_text || data[0]?.summary_text || '').trim();
-    } else if (typeof data === 'object') {
-        optimized = (data.generated_text || data.summary_text || '').trim();
+    if (Array.isArray(data) && data[0]?.generated_text) {
+        optimized = data[0].generated_text.trim();
+    } else if (data.generated_text) {
+        optimized = data.generated_text.trim();
+    } else {
+        throw new Error('Unexpected API response. Try again.');
     }
 
-    if (!optimized) {
-        throw new Error('Model returned an empty response. Try a longer prompt.');
-    }
-
-    // Strip any accidental "optimize: " prefix the model might echo
+    // Strip any echoed prefix
     optimized = optimized.replace(/^optimize:\s*/i, '').trim();
 
-    // If the model echoed the full input, fall back to a local trim
-    if (optimized.toLowerCase() === trimmed.toLowerCase()) {
-        optimized = localFallback(trimmed);
+    // If model echoed the full input unchanged, do a local trim as fallback
+    if (!optimized || optimized.toLowerCase() === prompt.trim().toLowerCase()) {
+        optimized = prompt.trim()
+            .replace(/\b(please|kindly|could you|can you|would you mind|I was wondering if|I would like you to|I need you to|like)\b/gi, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
     }
 
-    // Metrics — word-based approximation (1 word ≈ 1.3 tokens for English)
-    const wordsOrig = trimmed.split(/\s+/).filter(Boolean).length;
+    // Metrics
+    const wordsOrig = prompt.trim().split(/\s+/).filter(Boolean).length;
     const wordsOpt  = optimized.split(/\s+/).filter(Boolean).length;
     const tokensSaved  = Math.max(0, Math.round((wordsOrig - wordsOpt) * 1.3));
     const reductionPct = wordsOrig > 0
         ? Math.max(0, ((wordsOrig - wordsOpt) / wordsOrig * 100)).toFixed(1)
         : '0.0';
-
-    // Energy: ~0.0003 Wh per token saved (conservative estimate for T5 inference)
     const energySaved = tokensSaved * 0.0003;
-    // CO2: global avg grid = 0.385 kg CO2/kWh → in grams per Wh = 0.000385
-    const co2Saved = energySaved * 0.385;
+    const co2Saved    = energySaved * 0.385;
 
     return {
         optimizedPrompt: optimized,
@@ -100,13 +88,4 @@ async function optimizePrompt(prompt) {
     };
 }
 
-// Local fallback: removes common filler phrases if model fails
-function localFallback(text) {
-    return text
-        .replace(/\b(please|kindly|could you|can you|would you|I was wondering if|I would like you to|I need you to)\b/gi, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim();
-}
-
-// Expose globally so index.html, dashboard.html, optimizer.html can all call it
 window.optimizePrompt = optimizePrompt;
