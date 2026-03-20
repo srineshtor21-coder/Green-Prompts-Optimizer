@@ -12,7 +12,6 @@
         .gradient-overlay { position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(circle at 20% 30%,rgba(52,211,153,.055) 0%,transparent 45%),radial-gradient(circle at 80% 70%,rgba(59,130,246,.045) 0%,transparent 45%); }
         .bubble { position:absolute; border-radius:50%; pointer-events:none; background:rgba(52,211,153,.05); animation:floatB 30s ease-in-out infinite; }
         @keyframes floatB { 0%,100%{transform:translateY(0) translateX(0);opacity:.22} 33%{transform:translateY(-35px) translateX(20px);opacity:.32} 66%{transform:translateY(-18px) translateX(-18px);opacity:.25} }
-
         header { background:rgba(13,27,42,.97); backdrop-filter:blur(12px); padding:.9rem 3rem; position:sticky; top:0; z-index:1000; border-bottom:1px solid rgba(52,211,153,.15); }
         nav { max-width:1500px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
         .logo { display:flex; align-items:center; gap:.7rem; text-decoration:none; color:#34d399; font-size:1.25rem; font-weight:700; }
@@ -27,9 +26,7 @@
         .btn-login:hover { background:rgba(52,211,153,.1); }
         .btn-signup { padding:.55rem 1.4rem; background:linear-gradient(135deg,#34d399,#3b82f6); border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; transition:all .3s; text-decoration:none; font-size:.95rem; }
         .btn-signup:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(52,211,153,.4); }
-
         .container { max-width:1400px; margin:0 auto; padding:3rem 2rem; }
-
         .hero { text-align:center; padding:4rem 2rem; }
         .hero h1 { font-size:3.5rem; color:#34d399; margin-bottom:1.5rem; font-weight:700; }
         .hero p { font-size:1.2rem; color:#cbd5e1; max-width:700px; margin:0 auto 2rem; line-height:1.8; }
@@ -39,24 +36,20 @@
         .btn-primary:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(52,211,153,.4); }
         .btn-ghost { display:inline-block; padding:1rem 3rem; background:transparent; border:2px solid rgba(52,211,153,.5); border-radius:12px; color:#34d399; font-size:1.2rem; font-weight:600; cursor:pointer; text-decoration:none; transition:all .3s; }
         .btn-ghost:hover { background:rgba(52,211,153,.08); border-color:#34d399; }
-
         .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1.5rem; margin:3rem 0; }
         .stat-card { background:rgba(30,41,59,.75); backdrop-filter:blur(10px); padding:2rem; border-radius:12px; text-align:center; border:1px solid rgba(52,211,153,.2); transition:all .3s; }
         .stat-card:hover { transform:translateY(-4px); box-shadow:0 6px 20px rgba(52,211,153,.16); border-color:rgba(52,211,153,.35); }
         .stat-value { font-size:2.2rem; font-weight:700; color:#34d399; margin-bottom:.5rem; }
         .stat-label { color:#94a3b8; font-size:.9rem; }
-
         .section { background:rgba(30,41,59,.75); backdrop-filter:blur(10px); padding:3rem; border-radius:16px; margin:3rem 0; border:1px solid rgba(52,211,153,.2); }
         .section h2 { font-size:2.2rem; color:#34d399; margin-bottom:1.5rem; text-align:center; font-weight:700; }
         .section-subtitle { text-align:center; color:#94a3b8; margin-bottom:2rem; font-size:1rem; }
-
         .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:2rem; }
         .feature-card { background:rgba(13,27,42,.6); padding:2rem; border-radius:12px; border:1px solid rgba(52,211,153,.14); transition:all .3s; }
         .feature-card:hover { transform:translateY(-4px); box-shadow:0 6px 16px rgba(52,211,153,.14); }
         .feature-icon { font-size:2.2rem; margin-bottom:1rem; }
         .feature-card h3 { color:#34d399; margin-bottom:.8rem; font-size:1.2rem; }
         .feature-card p { color:#94a3b8; line-height:1.7; font-size:.95rem; }
-
         .optimizer-wrap { max-width:780px; margin:0 auto; }
         .field-label { display:block; color:#34d399; font-weight:700; font-size:.88rem; text-transform:uppercase; margin-bottom:.5rem; }
         .prompt-textarea { width:100%; min-height:120px; padding:1rem; background:rgba(13,27,42,.85); border:1.5px solid rgba(52,211,153,.28); border-radius:10px; color:#f1f5f9; font-size:1rem; font-family:inherit; resize:vertical; transition:border-color .25s,box-shadow .25s; margin-bottom:1.2rem; }
@@ -83,13 +76,11 @@
         .banner { padding:.85rem 1.1rem; border-radius:9px; font-weight:600; text-align:center; margin-bottom:1rem; display:none; }
         .banner.error   { background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; }
         .banner.warning { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.3); color:#fcd34d; }
-
         .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1.5rem; }
         .step-card { text-align:center; padding:2rem 1.5rem; background:rgba(13,27,42,.6); border:1px solid rgba(52,211,153,.13); border-radius:14px; }
         .step-num { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#34d399,#3b82f6); display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:800; color:white; margin:0 auto 1rem; }
         .step-card h3 { color:#e2e8f0; margin-bottom:.5rem; font-size:1rem; }
         .step-card p { color:#64748b; font-size:.88rem; line-height:1.6; }
-
         .share-banner { background:rgba(52,211,153,.06); border:1px solid rgba(52,211,153,.18); border-radius:14px; padding:2rem; text-align:center; margin:3rem 0; }
         .share-banner h3 { color:#34d399; font-size:1.4rem; margin-bottom:.5rem; font-weight:700; }
         .share-banner p { color:#94a3b8; margin-bottom:1.4rem; font-size:.95rem; }
@@ -99,10 +90,8 @@
         .share-twitter:hover { background:#1a8cd8; transform:translateY(-1px); }
         .share-copy-link { background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.35); color:#34d399; }
         .share-copy-link:hover { background:rgba(52,211,153,.22); }
-
         footer { background:rgba(13,27,42,.97); padding:2rem; text-align:center; margin-top:4rem; border-top:1px solid rgba(52,211,153,.14); }
         footer p { color:#64748b; margin:.4rem 0; font-size:.9rem; }
-
         @media(max-width:900px){.metrics-row{grid-template-columns:repeat(2,1fr);}}
         @media(max-width:768px){header{padding:.8rem 1.5rem;}nav{flex-direction:column;gap:1.2rem;}.nav-center{flex-wrap:wrap;justify-content:center;gap:1rem;}.hero h1{font-size:2.5rem;}.stats-grid{grid-template-columns:repeat(2,1fr);}.section{padding:2rem 1.2rem;}}
         @media(max-width:480px){.stats-grid{grid-template-columns:1fr;}.metrics-row{grid-template-columns:repeat(2,1fr);}}
@@ -125,18 +114,19 @@
             <a href="stats.html">Stats</a>
         </div>
         <div class="nav-buttons">
-            <a href="login.html"  class="btn-login">Login</a>
+            <a href="login.html" class="btn-login">Login</a>
             <a href="signup.html" class="btn-signup">Sign Up</a>
         </div>
     </nav>
 </header>
+
 <div class="container">
     <section class="hero">
         <h1>Energy Saver AI</h1>
         <p>Optimize AI prompts to reduce energy use and protect the planet,<em>one token at a time.</em></p>
         <div class="hero-actions">
             <a href="#optimizer" class="btn-primary">Optimize Now</a>
-            <a href="about.html"  class="btn-ghost">Learn More</a>
+            <a href="about.html" class="btn-ghost">Learn More</a>
         </div>
     </section>
 
@@ -214,83 +204,86 @@
     <p>Making AI more sustainable, one prompt at a time</p>
 </footer>
 
-<!-- Load stats and auth first, then optimizer-core (no /docs/ prefix since we ARE in docs/) -->
 <script src="stats_tracker.js"></script>
 <script src="auth.js"></script>
 <script src="optimizer-core.js"></script>
 <script>
+/* Bubbles */
 (function(){
-    const bg=document.getElementById('bg-animation');
-    for(let i=0;i<22;i++){
-        const b=document.createElement('div');b.className='bubble';
-        const s=Math.random()*12+5;
-        b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*18}s;animation-duration:${Math.random()*22+24}s`;
+    const bg = document.getElementById('bg-animation');
+    for (let i = 0; i < 22; i++) {
+        const b = document.createElement('div'); b.className = 'bubble';
+        const s = Math.random()*12+5;
+        b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*18}s;animation-duration:${Math.random()*22+24}s`;
         bg.appendChild(b);
     }
 })();
 
-document.addEventListener('DOMContentLoaded', () => {
+/* Wire everything AFTER DOM + scripts are fully parsed */
+document.addEventListener('DOMContentLoaded', function() {
     if (window.AUTH) window.AUTH.updateNavAuth();
-});
 
-const btnOpt  = document.getElementById('btn-optimize');
-const pIn     = document.getElementById('prompt-input');
-const resBox  = document.getElementById('result-box');
-const errB    = document.getElementById('err-banner');
-const warnB   = document.getElementById('warn-banner');
-const btnCopy = document.getElementById('btn-copy');
+    const btnOpt  = document.getElementById('btn-optimize');
+    const pIn     = document.getElementById('prompt-input');
+    const resBox  = document.getElementById('result-box');
+    const errB    = document.getElementById('err-banner');
+    const warnB   = document.getElementById('warn-banner');
+    const btnCopy = document.getElementById('btn-copy');
 
-btnOpt.addEventListener('click', async () => {
-    const p = pIn.value.trim();
-    if (!p) { errB.textContent = 'Please enter a prompt first.'; errB.style.display = 'block'; return; }
-    errB.style.display = 'none'; warnB.style.display = 'none'; resBox.style.display = 'none';
-    btnOpt.disabled = true; btnOpt.classList.add('loading');
-    try {
-        const r = await window.optimizePrompt(p);
-        document.getElementById('optimized-output').value = r.optimizedPrompt;
-        document.getElementById('m-tokens').textContent    = r.tokensSaved;
-        document.getElementById('m-reduction').textContent = r.reductionPct + '%';
-        document.getElementById('m-energy').textContent    = r.energySaved.toFixed(6);
-        document.getElementById('m-co2').textContent       = r.co2Saved.toFixed(6);
-        resBox.style.display = 'block';
-        resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        if (window.GPO) window.GPO.trackOptimization({ tokensSaved: r.tokensSaved });
-        if (window.AUTH) {
-            const u = window.AUTH.getCurrentUser();
-            if (u) {
-                u.stats = u.stats || {};
-                u.stats.totalOptimizations  = (u.stats.totalOptimizations  || 0) + 1;
-                u.stats.totalTokensSaved    = (u.stats.totalTokensSaved    || 0) + r.tokensSaved;
-                u.stats.totalEnergySaved    = (u.stats.totalEnergySaved    || 0) + r.energySaved;
-                u.stats.totalCO2Saved       = (u.stats.totalCO2Saved       || 0) + r.co2Saved;
-                u.history = u.history || [];
-                u.history.push({ timestamp: Date.now(), original: p, optimized: r.optimizedPrompt,
-                    tokensSaved: r.tokensSaved, reductionPct: r.reductionPct + '%',
-                    energySaved: r.energySaved, co2Saved: r.co2Saved });
-                window.AUTH.saveCurrentUser(u);
+    async function runOptimize() {
+        const p = pIn.value.trim();
+        if (!p) { errB.textContent = 'Please enter a prompt first.'; errB.style.display = 'block'; return; }
+        errB.style.display = 'none'; warnB.style.display = 'none'; resBox.style.display = 'none';
+        btnOpt.disabled = true; btnOpt.classList.add('loading');
+        try {
+            if (!window.optimizePrompt) throw new Error('Optimizer not loaded — please refresh the page.');
+            const r = await window.optimizePrompt(p);
+            document.getElementById('optimized-output').value  = r.optimizedPrompt;
+            document.getElementById('m-tokens').textContent    = r.tokensSaved;
+            document.getElementById('m-reduction').textContent = r.reductionPct + '%';
+            document.getElementById('m-energy').textContent    = r.energySaved.toFixed(6);
+            document.getElementById('m-co2').textContent       = r.co2Saved.toFixed(6);
+            resBox.style.display = 'block';
+            resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (window.GPO) window.GPO.trackOptimization({ tokensSaved: r.tokensSaved });
+            if (window.AUTH) {
+                const u = window.AUTH.getCurrentUser();
+                if (u) {
+                    u.stats = u.stats || {};
+                    u.stats.totalOptimizations = (u.stats.totalOptimizations||0)+1;
+                    u.stats.totalTokensSaved   = (u.stats.totalTokensSaved||0)+r.tokensSaved;
+                    u.stats.totalEnergySaved   = (u.stats.totalEnergySaved||0)+r.energySaved;
+                    u.stats.totalCO2Saved      = (u.stats.totalCO2Saved||0)+r.co2Saved;
+                    u.history = u.history||[];
+                    u.history.push({ timestamp:Date.now(), original:p, optimized:r.optimizedPrompt,
+                        tokensSaved:r.tokensSaved, reductionPct:r.reductionPct+'%',
+                        energySaved:r.energySaved, co2Saved:r.co2Saved });
+                    window.AUTH.saveCurrentUser(u);
+                }
             }
+        } catch(e) {
+            errB.textContent = 'Optimization failed: ' + (e.message || 'Please try again.');
+            errB.style.display = 'block';
+        } finally {
+            btnOpt.disabled = false; btnOpt.classList.remove('loading');
         }
-    } catch(e) {
-        errB.textContent = 'Optimization failed: ' + (e.message || 'Please try again.');
-        errB.style.display = 'block';
-    } finally {
-        btnOpt.disabled = false; btnOpt.classList.remove('loading');
     }
-});
 
-btnCopy.addEventListener('click', () => {
-    navigator.clipboard.writeText(document.getElementById('optimized-output').value).then(() => {
-        btnCopy.textContent = 'Copied!'; btnCopy.classList.add('copied');
-        setTimeout(() => { btnCopy.textContent = 'Copy Optimized Prompt'; btnCopy.classList.remove('copied'); }, 2200);
+    btnOpt.addEventListener('click', runOptimize);
+    pIn.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') runOptimize(); });
+
+    btnCopy.addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('optimized-output').value).then(() => {
+            btnCopy.textContent = 'Copied!'; btnCopy.classList.add('copied');
+            setTimeout(() => { btnCopy.textContent = 'Copy Optimized Prompt'; btnCopy.classList.remove('copied'); }, 2200);
+        });
     });
-});
 
-pIn.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') btnOpt.click(); });
-
-document.getElementById('btn-share-copy').addEventListener('click', function() {
-    navigator.clipboard.writeText('https://greenprompts.xyz').then(() => {
-        this.textContent = 'Copied!';
-        setTimeout(() => { this.textContent = 'Copy Link'; }, 2000);
+    document.getElementById('btn-share-copy').addEventListener('click', function() {
+        navigator.clipboard.writeText('https://greenprompts.xyz').then(() => {
+            this.textContent = 'Copied!';
+            setTimeout(() => { this.textContent = 'Copy Link'; }, 2000);
+        });
     });
 });
 </script>
