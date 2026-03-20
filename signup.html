@@ -5,194 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up | Green Prompts Optimizer</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1b2a;
-            color: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:#0d1b2a; color:#f1f5f9; min-height:100vh; display:flex; flex-direction:column; }
+        .bg-wrap { position:fixed; inset:0; z-index:-2; background:#0d1b2a; }
         .gradient-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
-            animation: gradientMove 15s ease-in-out infinite;
+            position:fixed; inset:0; z-index:-1; pointer-events:none;
+            background: radial-gradient(circle at 30% 40%, rgba(16,185,129,.13) 0%, transparent 55%),
+                        radial-gradient(circle at 70% 60%, rgba(59,130,246,.13) 0%, transparent 55%);
         }
-        @keyframes gradientMove {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
+        header {
+            background:rgba(13,23,38,.97); backdrop-filter:blur(14px);
+            padding:.9rem 3rem; border-bottom:1px solid rgba(52,211,153,.15);
         }
-        .signup-container {
-            background: rgba(30, 41, 59, 0.85);
-            backdrop-filter: blur(12px);
-            padding: 3rem;
-            border-radius: 16px;
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
+        .logo { display:flex; align-items:center; gap:.7rem; text-decoration:none; color:#34d399; font-size:1.2rem; font-weight:700; }
+        .logo-icon { width:34px; height:34px; background:linear-gradient(135deg,#34d399,#3b82f6); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+
+        .page-center { flex:1; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem; }
+        .auth-card {
+            background:rgba(22,34,51,.9); backdrop-filter:blur(14px);
+            border:1px solid rgba(52,211,153,.2); border-radius:22px;
+            padding:3rem 2.5rem; width:100%; max-width:460px;
         }
-        .logo-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #34d399, #3b82f6);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            margin: 0 auto 1.5rem;
+        .auth-card h1 { font-size:2rem; color:#34d399; font-weight:800; text-align:center; margin-bottom:.5rem; }
+        .auth-card .sub { color:#64748b; text-align:center; font-size:.95rem; margin-bottom:2rem; }
+
+        .field { margin-bottom:1.2rem; }
+        .field label { display:block; color:#94a3b8; font-size:.85rem; font-weight:600; letter-spacing:.03em; text-transform:uppercase; margin-bottom:.5rem; }
+        .field input {
+            width:100%; padding:.9rem 1rem;
+            background:rgba(13,23,38,.8); border:1.5px solid rgba(52,211,153,.2);
+            border-radius:9px; color:#f1f5f9; font-size:1rem; font-family:inherit;
+            transition:border-color .25s, box-shadow .25s;
         }
-        h1 {
-            color: #34d399;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+        .field input:focus { outline:none; border-color:#34d399; box-shadow:0 0 0 3px rgba(52,211,153,.12); }
+        .field input::placeholder { color:#475569; }
+
+        .strength-bar { height:4px; background:rgba(52,211,153,.1); border-radius:2px; margin-top:.5rem; overflow:hidden; }
+        .strength-fill { height:100%; border-radius:2px; transition:all .3s; width:0%; }
+
+        .btn-submit {
+            width:100%; padding:1rem;
+            background:linear-gradient(135deg,#34d399,#3b82f6);
+            border:none; border-radius:10px; color:#fff;
+            font-size:1.05rem; font-weight:700; cursor:pointer; transition:all .3s; margin-top:.5rem;
         }
-        .subtitle {
-            color: #cbd5e1;
-            margin-bottom: 2rem;
-        }
-        label {
-            display: block;
-            text-align: left;
-            color: #34d399;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-        input {
-            width: 100%;
-            padding: 0.9rem;
-            margin-bottom: 1.5rem;
-            background: rgba(15, 27, 42, 0.7);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            border-radius: 8px;
-            color: #f1f5f9;
-            font-size: 1rem;
-        }
-        input:focus {
-            outline: none;
-            border-color: #34d399;
-            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
-        }
-        button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #34d399, #3b82f6);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(52, 211, 153, 0.4);
-        }
-        .links {
-            margin-top: 1.5rem;
-            color: #cbd5e1;
-        }
-        .links a {
-            color: #34d399;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .links a:hover {
-            text-decoration: underline;
-        }
-        .back-link {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-        .back-link a {
-            color: #34d399;
-            text-decoration: none;
-        }
+        .btn-submit:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 22px rgba(52,211,153,.4); }
+        .btn-submit:disabled { opacity:.6; cursor:not-allowed; }
+
+        .banner { padding:.85rem 1.1rem; border-radius:9px; font-weight:600; text-align:center; margin-bottom:1rem; display:none; }
+        .banner.error   { background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; }
+        .banner.success { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#6ee7b7; }
+
+        .perks { display:flex; flex-direction:column; gap:.6rem; margin-bottom:1.8rem; }
+        .perk { display:flex; align-items:center; gap:.7rem; color:#64748b; font-size:.9rem; }
+        .perk-icon { color:#34d399; font-size:1rem; }
+
+        .auth-footer { text-align:center; margin-top:1.8rem; color:#64748b; font-size:.92rem; }
+        .auth-footer a { color:#34d399; text-decoration:none; font-weight:600; }
+        .auth-footer a:hover { text-decoration:underline; }
     </style>
 </head>
 <body>
-    <div class="gradient-overlay"></div>
-    <div class="signup-container">
+<div class="bg-wrap"></div>
+<div class="gradient-overlay"></div>
+
+<header>
+    <a href="index.html" class="logo">
         <div class="logo-icon">🌱</div>
-        <h1>Join Green Prompts</h1>
-        <p class="subtitle">Start tracking your environmental impact today</p>
-        
-        <form id="signup-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="johndoe" required>
-            
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
-            
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" required>
-            
-            <button type="submit">Create Account</button>
-        </form>
-        
-        <div class="links">
-            Already have an account? <a href="login.html">Sign in</a>
+        Green Prompts Optimizer
+    </a>
+</header>
+
+<div class="page-center">
+    <div class="auth-card">
+        <h1>Join the Movement 🌍</h1>
+        <p class="sub">Create your free account and start saving energy</p>
+
+        <div class="perks">
+            <div class="perk"><span class="perk-icon">✅</span> Track your total tokens saved & CO₂ reduced</div>
+            <div class="perk"><span class="perk-icon">✅</span> View your full optimization history</div>
+            <div class="perk"><span class="perk-icon">✅</span> Contribute to the global impact counter</div>
         </div>
-        <div class="back-link">
-            ← <a href="index.html">Back to Home</a>
+
+        <div class="banner error"   id="err-banner"></div>
+        <div class="banner success" id="ok-banner"></div>
+
+        <div class="field">
+            <label>Username</label>
+            <input type="text" id="name" placeholder="Your name">
+        </div>
+        <div class="field">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="At least 6 characters" oninput="checkStrength(this.value)">
+            <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        </div>
+
+        <button class="btn-submit" id="btn-signup">Create Free Account</button>
+
+        <div class="auth-footer">
+            Already have an account? <a href="login.html">Log in</a>
         </div>
     </div>
-    <script>
-        document.getElementById('signup-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Get existing users
-            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
-            
-            // Check if email already exists
-            if (users[email]) {
-                alert('This email is already registered. Please login instead.');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // Create new user
-            users[email] = {
-                name: username,
-                email: email,
-                password: password, // In production, hash this!
-                createdAt: Date.now(),
-                stats: {
-                    totalOptimizations: 0,
-                    totalTokensSaved: 0,
-                    totalEnergySaved: 0,
-                    totalCO2Saved: 0
-                },
-                history: []
-            };
-            
-            localStorage.setItem('greenPromptsUsers', JSON.stringify(users));
-            
-            // Create session
-            localStorage.setItem('greenPromptsSession', JSON.stringify({
-                email: email,
-                loginTime: Date.now()
-            }));
-            
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
-        });
-    </script>
+</div>
+
+<script src="stats_tracker.js"></script>
+<script src="auth.js"></script>
+<script>
+    if (window.AUTH && window.AUTH.getSession()) window.location.href = 'dashboard.html';
+
+    function checkStrength(pw) {
+        const fill = document.getElementById('strength-fill');
+        let score = 0;
+        if (pw.length >= 6)  score++;
+        if (pw.length >= 10) score++;
+        if (/[A-Z]/.test(pw)) score++;
+        if (/[0-9]/.test(pw)) score++;
+        if (/[^A-Za-z0-9]/.test(pw)) score++;
+        const pct = (score / 5) * 100;
+        const colors = ['#ef4444','#f97316','#eab308','#84cc16','#22c55e'];
+        fill.style.width = pct + '%';
+        fill.style.background = colors[Math.max(0, score-1)] || '#ef4444';
+    }
+
+    const errBanner = document.getElementById('err-banner');
+    const okBanner  = document.getElementById('ok-banner');
+
+    document.getElementById('btn-signup').addEventListener('click', () => {
+        const name     = document.getElementById('name').value.trim();
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        errBanner.style.display = 'none';
+        okBanner.style.display  = 'none';
+
+        if (!name || !email || !password) { errBanner.textContent='Please fill in all fields.'; errBanner.style.display='block'; return; }
+        if (password.length < 6)          { errBanner.textContent='Password must be at least 6 characters.'; errBanner.style.display='block'; return; }
+        if (!/\S+@\S+\.\S+/.test(email))  { errBanner.textContent='Please enter a valid email.'; errBanner.style.display='block'; return; }
+
+        const result = window.AUTH.signup(name, email, password);
+        if (!result.ok) { errBanner.textContent=result.error; errBanner.style.display='block'; return; }
+
+        okBanner.textContent = '🎉 Account created! Redirecting to your dashboard…';
+        okBanner.style.display = 'block';
+        setTimeout(() => window.location.href = 'dashboard.html', 1200);
+    });
+
+    document.addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('btn-signup').click(); });
+</script>
 </body>
 </html>
