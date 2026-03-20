@@ -1,14 +1,9 @@
 /**
  * OPTIMIZER-CORE.JS
  * Calls Hugging Face Inference API for sirenice/greenpromptsoptimizer
- *
- * HOW TO GET YOUR FREE TOKEN (required to avoid CORS block):
- *  1. Go to huggingface.co → click your profile → Settings → Access Tokens
- *  2. Click "New token" → Name it anything → Role: Read → Generate
- *  3. Paste it below — read-only tokens are safe for public repos
  */
 
-const HF_TOKEN = 'hf_REPLACE_WITH_YOUR_TOKEN'; // <-- paste your read token here
+const HF_TOKEN = ''; 
 const HF_MODEL = 'sirenice/greenpromptsoptimizer';
 const HF_API   = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
 
