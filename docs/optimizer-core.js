@@ -1,10 +1,9 @@
 /**
  * OPTIMIZER-CORE.JS
- * Calls the Gradio Space proxy (sirenice/greenpromptshelper)
- * which forwards to the T5 model server-side — no CORS issues.
+ * Calls the Flask proxy on HF Docker Space — no CORS issues.
  */
 
-const PROXY_URL = 'https://sirenice-greenpromptshelper.hf.space/api/predict';
+const PROXY_URL = 'https://sirenice-greenpromptshelper.hf.space/optimize';
 
 async function optimizePrompt(prompt) {
     if (!prompt || !prompt.trim()) throw new Error('Empty prompt');
@@ -18,7 +17,7 @@ async function optimizePrompt(prompt) {
             res = await fetch(PROXY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: [prompt.trim()] })
+                body: JSON.stringify({ prompt: prompt.trim() })
             });
         } catch (networkErr) {
             if (attempt === MAX_RETRIES) throw new Error('Network error — check your internet connection.');
@@ -34,25 +33,14 @@ async function optimizePrompt(prompt) {
         }
 
         if (!res.ok) {
-            let msg = `API error ${res.status}`;
+            let msg = `Error ${res.status}`;
             try { const b = await res.json(); msg = b.error || msg; } catch {}
             throw new Error(msg);
         }
 
         const data = await res.json();
-        // Gradio returns { data: ["optimized text"] }
-        let optimized = (data.data && data.data[0]) ? data.data[0].trim() : '';
-
-        if (!optimized || optimized === 'MODEL_WARMING_UP') {
-            if (attempt === MAX_RETRIES) throw new Error('Model is warming up. Please try again in 20 seconds.');
-            window.dispatchEvent(new CustomEvent('gpo-warmup', { detail: { attempt, max: MAX_RETRIES } }));
-            await sleep(RETRY_DELAY);
-            continue;
-        }
-
-        if (optimized.startsWith('API_ERROR_') || optimized === 'UNEXPECTED_RESPONSE') {
-            throw new Error('Model API error. Please try again.');
-        }
+        let optimized = data.optimized || '';
+        if (!optimized) throw new Error('Model returned empty response. Try again.');
 
         // Fallback if model echoed input unchanged
         if (optimized.toLowerCase() === prompt.trim().toLowerCase()) {
@@ -61,7 +49,6 @@ async function optimizePrompt(prompt) {
                 .replace(/\s{2,}/g, ' ').trim();
         }
 
-        // Metrics
         const wordsOrig   = prompt.trim().split(/\s+/).filter(Boolean).length;
         const wordsOpt    = optimized.split(/\s+/).filter(Boolean).length;
         const tokensSaved = Math.max(0, Math.round((wordsOrig - wordsOpt) * 1.3));
@@ -75,5 +62,4 @@ async function optimizePrompt(prompt) {
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
 window.optimizePrompt = optimizePrompt;
