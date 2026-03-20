@@ -214,9 +214,11 @@
     <p>Making AI more sustainable, one prompt at a time</p>
 </footer>
 
+<!-- Load stats and auth first, then optimizer-core (no /docs/ prefix since we ARE in docs/) -->
 <script src="stats_tracker.js"></script>
 <script src="auth.js"></script>
 <script src="optimizer-core.js"></script>
+<script>
 (function(){
     const bg=document.getElementById('bg-animation');
     for(let i=0;i<22;i++){
@@ -226,30 +228,71 @@
         bg.appendChild(b);
     }
 })();
-document.addEventListener('DOMContentLoaded',()=>{if(window.AUTH)window.AUTH.updateNavAuth();});
-const btnOpt=document.getElementById('btn-optimize'),pIn=document.getElementById('prompt-input'),resBox=document.getElementById('result-box'),errB=document.getElementById('err-banner'),warnB=document.getElementById('warn-banner'),btnCopy=document.getElementById('btn-copy');
-btnOpt.addEventListener('click',async()=>{
-    const p=pIn.value.trim();
-    if(!p){errB.textContent='Please enter a prompt first.';errB.style.display='block';return;}
-    errB.style.display='none';warnB.style.display='none';resBox.style.display='none';
-    btnOpt.disabled=true;btnOpt.classList.add('loading');
-    try{
-        const r=await window.optimizePrompt(p);
-        document.getElementById('optimized-output').value=r.optimizedPrompt;
-        document.getElementById('m-tokens').textContent=r.tokensSaved;
-        document.getElementById('m-reduction').textContent=r.reductionPct+'%';
-        document.getElementById('m-energy').textContent=r.energySaved.toFixed(6);
-        document.getElementById('m-co2').textContent=r.co2Saved.toFixed(6);
-        resBox.style.display='block';
-        resBox.scrollIntoView({behavior:'smooth',block:'nearest'});
-        if(window.GPO)window.GPO.trackOptimization({tokensSaved:r.tokensSaved});
-        if(window.AUTH){const u=window.AUTH.getCurrentUser();if(u){u.stats=u.stats||{};u.stats.totalOptimizations=(u.stats.totalOptimizations||0)+1;u.stats.totalTokensSaved=(u.stats.totalTokensSaved||0)+r.tokensSaved;u.stats.totalEnergySaved=(u.stats.totalEnergySaved||0)+r.energySaved;u.stats.totalCO2Saved=(u.stats.totalCO2Saved||0)+r.co2Saved;u.history=u.history||[];u.history.push({timestamp:Date.now(),original:p,optimized:r.optimizedPrompt,tokensSaved:r.tokensSaved,reductionPct:r.reductionPct+'%',energySaved:r.energySaved,co2Saved:r.co2Saved});window.AUTH.saveCurrentUser(u);}}
-    }catch(e){errB.textContent='Optimization failed: '+(e.message||'Please try again.');errB.style.display='block';}
-    finally{btnOpt.disabled=false;btnOpt.classList.remove('loading');}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.AUTH) window.AUTH.updateNavAuth();
 });
-btnCopy.addEventListener('click',()=>{navigator.clipboard.writeText(document.getElementById('optimized-output').value).then(()=>{btnCopy.textContent='Copied!';btnCopy.classList.add('copied');setTimeout(()=>{btnCopy.textContent='Copy Optimized Prompt';btnCopy.classList.remove('copied');},2200);});});
-pIn.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')btnOpt.click();});
-document.getElementById('btn-share-copy').addEventListener('click',function(){navigator.clipboard.writeText('https://greenprompts.xyz').then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy Link';},2000);});});
+
+const btnOpt  = document.getElementById('btn-optimize');
+const pIn     = document.getElementById('prompt-input');
+const resBox  = document.getElementById('result-box');
+const errB    = document.getElementById('err-banner');
+const warnB   = document.getElementById('warn-banner');
+const btnCopy = document.getElementById('btn-copy');
+
+btnOpt.addEventListener('click', async () => {
+    const p = pIn.value.trim();
+    if (!p) { errB.textContent = 'Please enter a prompt first.'; errB.style.display = 'block'; return; }
+    errB.style.display = 'none'; warnB.style.display = 'none'; resBox.style.display = 'none';
+    btnOpt.disabled = true; btnOpt.classList.add('loading');
+    try {
+        const r = await window.optimizePrompt(p);
+        document.getElementById('optimized-output').value = r.optimizedPrompt;
+        document.getElementById('m-tokens').textContent    = r.tokensSaved;
+        document.getElementById('m-reduction').textContent = r.reductionPct + '%';
+        document.getElementById('m-energy').textContent    = r.energySaved.toFixed(6);
+        document.getElementById('m-co2').textContent       = r.co2Saved.toFixed(6);
+        resBox.style.display = 'block';
+        resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (window.GPO) window.GPO.trackOptimization({ tokensSaved: r.tokensSaved });
+        if (window.AUTH) {
+            const u = window.AUTH.getCurrentUser();
+            if (u) {
+                u.stats = u.stats || {};
+                u.stats.totalOptimizations  = (u.stats.totalOptimizations  || 0) + 1;
+                u.stats.totalTokensSaved    = (u.stats.totalTokensSaved    || 0) + r.tokensSaved;
+                u.stats.totalEnergySaved    = (u.stats.totalEnergySaved    || 0) + r.energySaved;
+                u.stats.totalCO2Saved       = (u.stats.totalCO2Saved       || 0) + r.co2Saved;
+                u.history = u.history || [];
+                u.history.push({ timestamp: Date.now(), original: p, optimized: r.optimizedPrompt,
+                    tokensSaved: r.tokensSaved, reductionPct: r.reductionPct + '%',
+                    energySaved: r.energySaved, co2Saved: r.co2Saved });
+                window.AUTH.saveCurrentUser(u);
+            }
+        }
+    } catch(e) {
+        errB.textContent = 'Optimization failed: ' + (e.message || 'Please try again.');
+        errB.style.display = 'block';
+    } finally {
+        btnOpt.disabled = false; btnOpt.classList.remove('loading');
+    }
+});
+
+btnCopy.addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('optimized-output').value).then(() => {
+        btnCopy.textContent = 'Copied!'; btnCopy.classList.add('copied');
+        setTimeout(() => { btnCopy.textContent = 'Copy Optimized Prompt'; btnCopy.classList.remove('copied'); }, 2200);
+    });
+});
+
+pIn.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') btnOpt.click(); });
+
+document.getElementById('btn-share-copy').addEventListener('click', function() {
+    navigator.clipboard.writeText('https://greenprompts.xyz').then(() => {
+        this.textContent = 'Copied!';
+        setTimeout(() => { this.textContent = 'Copy Link'; }, 2000);
+    });
+});
 </script>
 </body>
 </html>
