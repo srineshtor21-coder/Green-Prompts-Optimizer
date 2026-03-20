@@ -19,6 +19,41 @@ import re
 from functools import wraps
 import traceback
 
+import requests
+
+HF_MODEL = "sirenice/greenpromptsoptimizer"
+HF_API = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
+HF_TOKEN = os.environ.get("HF_TOKEN")
+
+def call_huggingface(prompt):
+    headers = {
+        "Authorization": f"Bearer {HF_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "inputs": f"optimize: {prompt}",
+        "parameters": {
+            "max_new_tokens": 100,
+            "temperature": 0.3,
+            "do_sample": False
+        },
+        "options": {"wait_for_model": True}
+    }
+
+    response = requests.post(HF_API, headers=headers, json=payload)
+
+    if response.status_code != 200:
+        raise Exception(f"HF API error: {response.text}")
+
+    data = response.json()
+
+    if isinstance(data, list) and "generated_text" in data[0]:
+        return data[0]["generated_text"]
+    elif "generated_text" in data:
+        return data["generated_text"]
+    else:
+        return "Error: Unexpected response"
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'green-prompts-secret-key-2024')
 app.config.update(
