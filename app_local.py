@@ -535,7 +535,13 @@ def optimize_prompt():
                 'model_status': 'offline'
                 }), 503
 
-        result = optimizer.optimize(prompt)
+        optimized_text = call_huggingface(prompt)
+
+        result = {
+                "success": True,
+                "original": prompt,
+                "optimized": optimized_text.replace("optimize:", "").strip()
+        }
 
         
         if not result.get('success'):
