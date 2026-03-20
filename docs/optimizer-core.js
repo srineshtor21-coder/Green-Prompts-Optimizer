@@ -4,29 +4,33 @@
  */
 
 const HF_MODEL = 'sirenice/greenpromptsoptimizer';
-const HF_API   = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
-
-// Optional: add HF read token for faster cold starts
-// Get one free at huggingface.co > Settings > Access Tokens
-const HF_TOKEN = '';
+const HF_MODEL = 'sirenice/greenpromptsoptimizer';
+const HF_API = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
 
 async function optimizePrompt(prompt) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (HF_TOKEN) headers['Authorization'] = `Bearer ${HF_TOKEN}`;
-
-    const body = JSON.stringify({
-        inputs: `optimize: ${prompt.trim()}`,
-        parameters: { max_new_tokens: 100, temperature: 0.3, do_sample: false },
-        options: { wait_for_model: true }
+    const res = await fetch(HF_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            inputs: `optimize: ${prompt.trim()}`,
+            parameters: {
+                max_new_tokens: 100,
+                temperature: 0.3,
+                do_sample: false
+            },
+            options: { wait_for_model: true }
+        })
     });
 
-    const res = await fetch(HF_API, { method: 'POST', headers, body });
+    const data = await res.json();
 
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        if (res.status === 503) throw new Error('Model is warming up. Please wait 20 seconds and try again.');
-        throw new Error(err.error || `API error ${res.status}`);
-    }
+    let optimized = data?.[0]?.generated_text || data.generated_text || "";
+    optimized = optimized.replace(/^optimize:\s*/i, '').trim();
+
+    return { optimizedPrompt: optimized };
+}
+
+window.optimizePrompt = optimizePrompt;
 
     const data = await res.json();
     let optimized = '';
