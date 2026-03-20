@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Green Prompts Optimizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1b2a;
+            color: #f1f5f9;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .background-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            background: #0d1b2a;
+            overflow: hidden;
+        }
+        
+        /* toned-down overlay, no animation */
+        .gradient-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.07) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.06), rgba(59, 130, 246, 0.03));
+            animation: float-bubble 30s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes float-bubble {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.3; }
+            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.4; }
+            50% { transform: translateY(-25px) translateX(-25px) scale(0.95); opacity: 0.32; }
+            75% { transform: translateY(-45px) translateX(35px) scale(1.05); opacity: 0.36; }
+        }
+        
+        /* Header */
+        header {
+            background: rgba(15, 27, 42, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 0.9rem 3rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+        }
+        
+        nav {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #34d399;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+        }
+        
+        .nav-center {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .nav-center a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 0.2rem;
+        }
+        .nav-center a:hover  { color: #34d399; }
+        .nav-center a.active { color: #34d399; }
+        .nav-center a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.95rem; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, #34d399, #3b82f6);
+            border-radius: 2px;
+        }
+        
+        .nav-buttons { display: flex; gap: 1rem; }
+        
+        .btn-login {
+            padding: 0.55rem 1.4rem;
+            background: transparent;
+            border: 2px solid #34d399;
+            border-radius: 8px;
+            color: #34d399;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .btn-login:hover { background: rgba(52, 211, 153, 0.1); }
+        
+        .btn-signup {
+            padding: 0.55rem 1.4rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .btn-signup:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4); }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        /* Hero - original */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #34d399;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+        .hero em { display: block; margin-top: 0.5rem; font-style: italic; }
+
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        
+        .btn-primary {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(52, 211, 153, 0.4); }
+
+        .btn-ghost {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: transparent;
+            border: 2px solid rgba(52, 211, 153, 0.5);
+            border-radius: 12px;
+            color: #34d399;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-ghost:hover { background: rgba(52, 211, 153, 0.08); border-color: #34d399; }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .stat-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(52, 211, 153, 0.2);
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #34d399;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label { color: #cbd5e1; font-size: 0.95rem; }
+        
+        /* Section */
+        .section {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 16px;
+            margin: 3rem 0;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+        .section h2 {
+            font-size: 2.5rem;
+            color: #34d399;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* =============================
+           OPTIMIZER
+           ============================= */
+        .optimizer-wrap { max-width: 780px; margin: 0 auto; }
+
+        .field-label {
+            display: block;
+            color: #34d399;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .prompt-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            background: rgba(15, 27, 42, 0.8);
+            border: 1.5px solid rgba(52, 211, 153, 0.3);
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            margin-bottom: 1.2rem;
+        }
+        .prompt-textarea:focus {
+            outline: none;
+            border-color: #34d399;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+        }
+        .prompt-textarea::placeholder { color: #475569; }
+
+        .btn-optimize {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .btn-optimize:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(52, 211, 153, 0.4); }
+        .btn-optimize:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-spinner {
+            width: 20px; height: 20px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            display: none;
+        }
+        .btn-optimize.loading .btn-spinner { display: block; }
+        .btn-optimize.loading .btn-text    { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .result-box {
+            margin-top: 2rem;
+            background: rgba(15, 27, 42, 0.7);
+            border: 1.5px solid rgba(52, 211, 153, 0.35);
+            border-radius: 14px;
+            padding: 1.8rem;
+            display: none;
+            animation: fadeUp 0.4s ease;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #34d399;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+        .optimized-output {
+            width: 100%;
+            min-height: 90px;
+            padding: 0.9rem 1rem;
+            background: rgba(52, 211, 153, 0.05);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+        .metric-tile {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            background: rgba(52, 211, 153, 0.06);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            border-radius: 10px;
+        }
+        .metric-tile .mv { font-size: 1.6rem; font-weight: 800; color: #34d399; }
+        .metric-tile .ml { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; }
+
+        .btn-copy {
+            width: 100%;
+            padding: 0.85rem;
+            background: transparent;
+            border: 2px solid rgba(52, 211, 153, 0.5);
+            border-radius: 9px;
+            color: #34d399;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .btn-copy:hover  { background: rgba(52, 211, 153, 0.1); border-color: #34d399; }
+        .btn-copy.copied { background: rgba(52, 211, 153, 0.18); color: #6ee7b7; }
+
+        .banner {
+            padding: 0.85rem 1.1rem;
+            border-radius: 9px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .banner.error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #fca5a5; }
+        .banner.warning { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); color: #fcd34d; }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .feature-card {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            transition: all 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(52, 211, 153, 0.2); }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .feature-card h3 { color: #34d399; margin-bottom: 1rem; font-size: 1.3rem; }
+        .feature-card p  { color: #cbd5e1; line-height: 1.7; }
+
+        /* How It Works */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        .step-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: rgba(15, 27, 42, 0.6);
+            border: 1px solid rgba(52, 211, 153, 0.15);
+            border-radius: 14px;
+        }
+        .step-num {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34d399, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 800; color: white;
+            margin: 0 auto 1rem;
+        }
+        .step-card h3 { color: #e2e8f0; margin-bottom: 0.5rem; font-size: 1.05rem; }
+        .step-card p  { color: #64748b; font-size: 0.9rem; line-height: 1.6; }
+        
+        /* Footer */
+        footer {
+            background: rgba(15, 27, 42, 0.95);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        footer p { color: #cbd5e1; margin: 0.5rem 0; }
+        
+        @media (max-width: 900px) {
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            header { padding: 0.8rem 1.5rem; }
+            nav { flex-direction: column; gap: 1.5rem; }
+            .nav-center { gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+            .hero h1 { font-size: 2.5rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .section { padding: 2rem 1.2rem; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation" id="bg-animation"></div>
+    <div class="gradient-overlay"></div>
+    
+    <header>
+        <nav>
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🌱</div>
+                Green Prompts Optimizer
+            </a>
+            <div class="nav-center">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <a href="optimizer.html">Optimizer</a>
+                <a href="impact.html">Impact</a>
+                <a href="stats.html">Stats</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn-login">Login</a>
+                <a href="signup.html" class="btn-signup">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+
+        <!-- Hero - original design preserved -->
+        <section class="hero">
+            <h1>Energy Saver AI</h1>
+            <p>
+                Optimize AI prompts to reduce energy use and protect the planet,
+                <em>one token at a time.</em>
+            </p>
+            <div class="hero-actions">
+                <a href="#optimizer" class="btn-primary">Optimize Now</a>
+                <a href="about.html" class="btn-ghost">Learn More</a>
+            </div>
+        </section>
+        
+        <!-- Stats - dummy values seeded in stats_tracker.js, grow over time and with real usage -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">30-50%</div>
+                <div class="stat-label">Token Reduction</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="global-tokens">18,547</div>
+                <div class="stat-label">Tokens Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="global-energy">4.21 Wh</div>
+                <div class="stat-label">Energy Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="global-co2">2.67g</div>
+                <div class="stat-label">CO2 Reduced</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="global-users">2,547</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+
+        <!-- Why Choose Green Prompts -->
+        <div class="section">
+            <h2>Why Choose Green Prompts?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Optimization</h3>
+                    <p>T5 model trained on 127 prompt pairs to reduce token count while preserving meaning.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Energy Tracking</h3>
+                    <p>Real-time calculation of energy savings and CO2 reduction for every optimization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Environmental Impact</h3>
+                    <p>See the real-world environmental impact of your AI usage reduction.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optimizer Section - new addition -->
+        <div class="section" id="optimizer">
+            <h2>Optimize Your Prompt</h2>
+            <p class="section-subtitle">Paste your AI prompt below and we will shorten it, save energy, and show you the impact.</p>
+
+            <div class="optimizer-wrap">
+                <div class="banner error"   id="err-banner"></div>
+                <div class="banner warning" id="warn-banner"></div>
+
+                <label class="field-label">Enter your prompt:</label>
+                <textarea
+                    class="prompt-textarea"
+                    id="prompt-input"
+                    placeholder="e.g. Can you please help me understand how I might go about writing a Python function that calculates the factorial of a number?"
+                ></textarea>
+
+                <button class="btn-optimize" id="btn-optimize">
+                    <div class="btn-spinner"></div>
+                    <span class="btn-text">🚀 Optimize Prompt</span>
+                </button>
+
+                <div class="result-box" id="result-box">
+                    <div class="result-header">
+                        <span>✅</span> Optimization Complete!
+                    </div>
+                    <label class="field-label">Optimized Prompt:</label>
+                    <textarea class="optimized-output" id="optimized-output" readonly></textarea>
+                    <div class="metrics-row">
+                        <div class="metric-tile">
+                            <div class="mv" id="m-tokens">0</div>
+                            <div class="ml">Tokens Saved</div>
+                        </div>
+                        <div class="metric-tile">
+                            <div class="mv" id="m-reduction">0%</div>
+                            <div class="ml">Reduction</div>
+                        </div>
+                        <div class="metric-tile">
+                            <div class="mv" id="m-energy">0</div>
+                            <div class="ml">Energy Saved (Wh)</div>
+                        </div>
+                        <div class="metric-tile">
+                            <div class="mv" id="m-co2">0</div>
+                            <div class="ml">CO2 Saved (g)</div>
+                        </div>
+                    </div>
+                    <button class="btn-copy" id="btn-copy">📋 Copy Optimized Prompt</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section">
+            <h2>How It Works</h2>
+            <p class="section-subtitle">Three simple steps to greener AI usage</p>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h3>Paste Your Prompt</h3>
+                    <p>Enter any prompt you would normally send to ChatGPT, Claude, or another AI tool.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h3>AI Optimizes It</h3>
+                    <p>Our fine-tuned T5 model rewrites your prompt to be shorter while preserving full meaning.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h3>See Your Impact</h3>
+                    <p>View tokens saved, energy reduced, and CO2 emissions avoided, then copy and use it.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">4</div>
+                    <h3>Track Over Time</h3>
+                    <p>Sign up to track your personal environmental impact across all your optimizations.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <footer>
+        <p>🌱 <strong style="color: #34d399;">Green Prompts Optimizer</strong></p>
+        <p>Created by Srinesh Toranala | 2025-2026</p>
+        <p>Making AI more sustainable, one prompt at a time 🌍</p>
+    </footer>
+
+    <script src="stats_tracker.js"></script>
+    <script src="auth.js"></script>
+    <script src="optimizer-core.js"></script>
+    <script>
+        // Bubbles
+        (function() {
+            const bg = document.getElementById('bg-animation');
+            for (let i = 0; i < 25; i++) {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                const s = Math.random() * 12 + 6;
+                b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*15}s;animation-duration:${Math.random()*20+25}s`;
+                bg.appendChild(b);
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.AUTH) window.AUTH.updateNavAuth();
+        });
+
+        const btnOptimize = document.getElementById('btn-optimize');
+        const promptInput = document.getElementById('prompt-input');
+        const resultBox   = document.getElementById('result-box');
+        const errBanner   = document.getElementById('err-banner');
+        const warnBanner  = document.getElementById('warn-banner');
+        const btnCopy     = document.getElementById('btn-copy');
+
+        btnOptimize.addEventListener('click', async () => {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                errBanner.textContent = 'Please enter a prompt first.';
+                errBanner.style.display = 'block';
+                return;
+            }
+            errBanner.style.display  = 'none';
+            warnBanner.style.display = 'none';
+            resultBox.style.display  = 'none';
+            btnOptimize.disabled = true;
+            btnOptimize.classList.add('loading');
+
+            try {
+                const r = await window.optimizePrompt(prompt);
+
+                document.getElementById('optimized-output').value = r.optimizedPrompt;
+                document.getElementById('m-tokens').textContent    = r.tokensSaved;
+                document.getElementById('m-reduction').textContent = r.reductionPct + '%';
+                document.getElementById('m-energy').textContent    = r.energySaved.toFixed(6);
+                document.getElementById('m-co2').textContent       = r.co2Saved.toFixed(6);
+                resultBox.style.display = 'block';
+                resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                if (window.GPO) window.GPO.trackOptimization({ tokensSaved: r.tokensSaved });
+
+                if (window.AUTH) {
+                    const user = window.AUTH.getCurrentUser();
+                    if (user) {
+                        user.stats = user.stats || {};
+                        user.stats.totalOptimizations = (user.stats.totalOptimizations || 0) + 1;
+                        user.stats.totalTokensSaved   = (user.stats.totalTokensSaved   || 0) + r.tokensSaved;
+                        user.stats.totalEnergySaved   = (user.stats.totalEnergySaved   || 0) + r.energySaved;
+                        user.stats.totalCO2Saved      = (user.stats.totalCO2Saved      || 0) + r.co2Saved;
+                        user.history = user.history || [];
+                        user.history.push({
+                            timestamp   : Date.now(),
+                            original    : prompt,
+                            optimized   : r.optimizedPrompt,
+                            tokensSaved : r.tokensSaved,
+                            reductionPct: r.reductionPct + '%',
+                            energySaved : r.energySaved,
+                            co2Saved    : r.co2Saved,
+                        });
+                        window.AUTH.saveCurrentUser(user);
+                    }
+                }
+
+            } catch (e) {
+                errBanner.textContent = 'Optimization failed: ' + (e.message || 'Please try again.');
+                errBanner.style.display = 'block';
+            } finally {
+                btnOptimize.disabled = false;
+                btnOptimize.classList.remove('loading');
+            }
+        });
+
+        btnCopy.addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('optimized-output').value).then(() => {
+                btnCopy.textContent = '✅ Copied!';
+                btnCopy.classList.add('copied');
+                setTimeout(() => {
+                    btnCopy.textContent = '📋 Copy Optimized Prompt';
+                    btnCopy.classList.remove('copied');
+                }, 2200);
+            });
+        });
+
+        promptInput.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') btnOptimize.click();
+        });
+    </script>
+</body>
+</html>
