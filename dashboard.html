@@ -6,690 +6,439 @@
     <title>Dashboard | Green Prompts Optimizer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1b2a;
-            color: #f1f5f9;
-            line-height: 1.6;
-            overflow-x: hidden;
+            background: #0d1b2a; color: #f1f5f9; line-height: 1.6; overflow-x: hidden;
         }
-        
-        /* Animated Background with gradient overlay */
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: #0d1b2a;
-            overflow: hidden;
-        }
-        
+        .bg-wrap { position: fixed; inset: 0; z-index: -2; background: #0d1b2a; overflow: hidden; }
         .gradient-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
-            animation: gradientMove 15s ease-in-out infinite;
-            pointer-events: none;
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: radial-gradient(circle at 25% 35%, rgba(16,185,129,.12) 0%, transparent 55%),
+                        radial-gradient(circle at 75% 65%, rgba(59,130,246,.12) 0%, transparent 55%);
+            animation: gm 18s ease-in-out infinite;
         }
-        
-        @keyframes gradientMove {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
-        }
-        
+        @keyframes gm { 0%,100%{opacity:.6;transform:scale(1)} 50%{opacity:.9;transform:scale(1.08)} }
         .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.08), rgba(59, 130, 246, 0.05));
-            box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
-            animation: float-bubble 30s ease-in-out infinite;
-            pointer-events: none;
+            position: absolute; border-radius: 50%; pointer-events: none;
+            background: radial-gradient(circle at 30% 30%, rgba(52,211,153,.07), rgba(59,130,246,.04));
+            animation: fb 30s ease-in-out infinite;
         }
-        
-        @keyframes float-bubble {
-            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
-            25% { transform: translateY(-40px) translateX(30px) scale(1.1); opacity: 0.5; }
-            50% { transform: translateY(-25px) translateX(-25px) scale(0.95); opacity: 0.45; }
-            75% { transform: translateY(-45px) translateX(35px) scale(1.05); opacity: 0.48; }
+        @keyframes fb {
+            0%,100%{transform:translateY(0) translateX(0) scale(1);opacity:.4}
+            25%{transform:translateY(-40px) translateX(30px) scale(1.1);opacity:.5}
+            50%{transform:translateY(-25px) translateX(-25px) scale(.95);opacity:.45}
+            75%{transform:translateY(-45px) translateX(35px) scale(1.05);opacity:.48}
         }
-        
-        /* Header - matching other pages */
         header {
-            background: rgba(15, 27, 42, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 0.9rem 3rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+            background: rgba(13,23,38,.97); backdrop-filter: blur(14px);
+            padding: .9rem 3rem; position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(52,211,153,.15);
         }
-        
         nav {
-            max-width: 1500px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            max-width: 1400px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: #34d399;
-            font-size: 1.3rem;
-            font-weight: 600;
+            display: flex; align-items: center; gap: .7rem;
+            text-decoration: none; color: #34d399;
+            font-size: 1.2rem; font-weight: 700;
         }
-        
         .logo-icon {
-            width: 38px;
-            height: 38px;
+            width: 36px; height: 36px;
             background: linear-gradient(135deg, #34d399, #3b82f6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
+            border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
         }
-        
-        .nav-center {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-        
-        .nav-center a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-size: 1.05rem;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
-            padding-bottom: 0.2rem;
-        }
-        
+        .nav-center { display: flex; gap: 1.5rem; }
+        .nav-center a { color: #94a3b8; text-decoration: none; font-size: .95rem; font-weight: 500; transition: color .25s; }
         .nav-center a:hover { color: #34d399; }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .user-area { display: flex; align-items: center; gap: 1rem; }
+        .user-chip {
+            background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3);
+            color: #34d399; font-weight: 600; font-size: .9rem;
+            padding: .4rem 1rem; border-radius: 99px;
         }
-        
-        .user-name {
-            color: #34d399;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        
         .btn-logout {
-            padding: 0.55rem 1.4rem;
-            background: transparent;
-            border: 2px solid rgba(239, 68, 68, 0.6);
-            border-radius: 8px;
-            color: #fca5a5;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            font-size: 0.95rem;
+            padding: .45rem 1.1rem; background: transparent;
+            border: 1.5px solid rgba(239,68,68,.5); border-radius: 8px;
+            color: #fca5a5; font-weight: 600; font-size: .88rem;
+            cursor: pointer; transition: all .25s;
         }
-        
-        .btn-logout:hover {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: #ef4444;
-        }
-        
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-        
-        /* Welcome Section */
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .welcome-section h1 {
-            font-size: 3rem;
-            color: #34d399;
-            margin-bottom: 0.5rem;
-        }
-        
-        .welcome-section p {
-            color: #cbd5e1;
-            font-size: 1.1rem;
-        }
-        
-        /* Stats Grid */
+        .btn-logout:hover { background: rgba(239,68,68,.1); border-color: #ef4444; }
+
+        .container { max-width: 1300px; margin: 0 auto; padding: 3rem 2rem; }
+
+        /* Welcome */
+        .welcome { text-align: center; margin-bottom: 2.5rem; }
+        .welcome h1 { font-size: 2.8rem; font-weight: 800; color: #34d399; margin-bottom: .4rem; }
+        .welcome p  { color: #64748b; font-size: 1.05rem; }
+
+        /* Personal stats */
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin: 3rem 0;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 2.5rem;
         }
-        
         .stat-card {
-            background: rgba(30, 41, 59, 0.75);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(52, 211, 153, 0.25);
-            transition: all 0.3s;
+            background: rgba(22,34,51,.8); backdrop-filter: blur(8px);
+            padding: 1.8rem 1.2rem; border-radius: 16px; text-align: center;
+            border: 1px solid rgba(52,211,153,.2); transition: all .3s;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3);
-            border-color: rgba(52, 211, 153, 0.4);
-        }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #34d399;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-label {
-            color: #cbd5e1;
-            font-size: 0.95rem;
-        }
-        
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(52,211,153,.2); border-color: rgba(52,211,153,.4); }
+        .stat-icon { font-size: 2rem; margin-bottom: .5rem; }
+        .stat-val  { font-size: 2.2rem; font-weight: 800; color: #34d399; margin-bottom: .3rem; }
+        .stat-lbl  { color: #64748b; font-size: .82rem; }
+
         /* Section */
         .section {
-            background: rgba(30, 41, 59, 0.75);
-            backdrop-filter: blur(10px);
-            padding: 2.5rem;
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(52, 211, 153, 0.25);
+            background: rgba(22,34,51,.8); backdrop-filter: blur(8px);
+            padding: 2.5rem; border-radius: 18px; margin-bottom: 2rem;
+            border: 1px solid rgba(52,211,153,.18);
         }
-        
-        .section h2 {
-            font-size: 2rem;
-            color: #34d399;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        
+        .section h2 { font-size: 1.6rem; color: #34d399; margin-bottom: 1.5rem; }
+
         /* Optimizer */
-        .optimizer-section {
-            margin: 2rem 0;
+        .field-label { display: block; color: #34d399; font-weight: 700; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; margin-bottom: .5rem; }
+        .prompt-input {
+            width: 100%; min-height: 110px;
+            padding: .9rem 1rem;
+            background: rgba(13,23,38,.85);
+            border: 1.5px solid rgba(52,211,153,.25);
+            border-radius: 10px; color: #f1f5f9;
+            font-size: .98rem; font-family: inherit; resize: vertical;
+            transition: border-color .25s, box-shadow .25s; margin-bottom: 1rem;
         }
-        
-        label {
-            display: block;
-            color: #34d399;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(15, 27, 42, 0.7);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            border-radius: 8px;
-            color: #f1f5f9;
-            font-size: 1rem;
-            font-family: inherit;
-            resize: vertical;
-            margin-bottom: 1rem;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #34d399;
-            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
-        }
-        
-        .btn-primary {
-            padding: 1rem 2.5rem;
+        .prompt-input:focus { outline: none; border-color: #34d399; box-shadow: 0 0 0 3px rgba(52,211,153,.1); }
+        .prompt-input::placeholder { color: #475569; }
+
+        .btn-optimize {
+            width: 100%; padding: .95rem;
             background: linear-gradient(135deg, #34d399, #3b82f6);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
+            border: none; border-radius: 10px; color: #fff;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all .3s;
+            display: flex; align-items: center; justify-content: center; gap: .6rem;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(52, 211, 153, 0.4);
+        .btn-optimize:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(52,211,153,.4); }
+        .btn-optimize:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+        .btn-spinner {
+            width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff; border-radius: 50%; animation: spin .75s linear infinite; display: none;
         }
-        
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .btn-optimize.loading .btn-spinner { display: block; }
+        .btn-optimize.loading .btn-text    { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .result-box {
+            margin-top: 1.8rem;
+            background: rgba(13,23,38,.7);
+            border: 1.5px solid rgba(52,211,153,.3);
+            border-radius: 14px; padding: 1.8rem;
+            display: none; animation: fadeUp .4s ease;
         }
-        
-        .btn-secondary {
-            padding: 0.8rem 2rem;
-            background: transparent;
-            border: 2px solid #34d399;
-            border-radius: 8px;
-            color: #34d399;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
-            margin-left: 1rem;
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .result-header { display: flex; align-items: center; gap: .6rem; color: #34d399; font-weight: 700; font-size: 1rem; margin-bottom: 1.2rem; }
+        .optimized-textarea {
+            width: 100%; min-height: 80px; padding: .85rem 1rem;
+            background: rgba(52,211,153,.05); border: 1px solid rgba(52,211,153,.2);
+            border-radius: 8px; color: #e2e8f0; font-size: .95rem;
+            font-family: inherit; resize: none; margin-bottom: 1.2rem; line-height: 1.6;
         }
-        
-        .btn-secondary:hover {
-            background: rgba(52, 211, 153, 0.1);
+        .metrics-row { display: grid; grid-template-columns: repeat(4,1fr); gap: .8rem; margin-bottom: 1.2rem; }
+        .metric-tile {
+            text-align: center; padding: .9rem .4rem;
+            background: rgba(52,211,153,.06); border: 1px solid rgba(52,211,153,.18); border-radius: 10px;
         }
-        
-        /* Results */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
+        .metric-tile .mv { font-size: 1.4rem; font-weight: 800; color: #34d399; }
+        .metric-tile .ml { font-size: .72rem; color: #64748b; margin-top: .2rem; }
+        .btn-copy {
+            width: 100%; padding: .75rem; background: transparent;
+            border: 2px solid rgba(52,211,153,.5); border-radius: 8px;
+            color: #34d399; font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .25s;
         }
-        
-        .metric-card {
-            background: rgba(52, 211, 153, 0.1);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            text-align: center;
-        }
-        
-        .metric-label {
-            color: #cbd5e1;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #34d399;
-        }
-        
+        .btn-copy:hover { background: rgba(52,211,153,.1); border-color: #34d399; }
+        .btn-copy.copied { background: rgba(52,211,153,.18); color: #6ee7b7; }
+
+        .banner { padding: .85rem 1.1rem; border-radius: 9px; font-weight: 600; text-align: center; margin-bottom: 1rem; display: none; }
+        .banner.error { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
+
         /* History */
+        .history-empty { text-align: center; color: #475569; padding: 2.5rem; }
         .history-item {
-            background: rgba(15, 27, 42, 0.6);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(52, 211, 153, 0.2);
-            margin-bottom: 1rem;
-            transition: all 0.3s;
+            background: rgba(13,23,38,.6); border: 1px solid rgba(52,211,153,.15);
+            border-radius: 12px; padding: 1.4rem; margin-bottom: 1rem; transition: all .3s;
         }
-        
-        .history-item:hover {
-            border-color: rgba(52, 211, 153, 0.4);
-            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.2);
+        .history-item:hover { border-color: rgba(52,211,153,.35); box-shadow: 0 4px 14px rgba(52,211,153,.15); }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .9rem; }
+        .history-time { color: #64748b; font-size: .85rem; }
+        .history-badges { display: flex; gap: .7rem; }
+        .badge {
+            background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.25);
+            color: #34d399; font-size: .78rem; font-weight: 700;
+            padding: .2rem .7rem; border-radius: 99px;
         }
-        
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .history-prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .history-prompt { background: rgba(52,211,153,.04); padding: .9rem; border-radius: 8px; border-left: 3px solid rgba(52,211,153,.4); }
+        .prompt-label { color: #34d399; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .4rem; }
+        .prompt-text  { color: #94a3b8; font-size: .88rem; line-height: 1.5; }
+
+        /* Tip box */
+        .tip-box {
+            background: rgba(52,211,153,.06); border: 1px solid rgba(52,211,153,.2);
+            border-radius: 10px; padding: 1rem 1.3rem; margin-top: 1.5rem;
+            color: #94a3b8; font-size: .9rem;
         }
-        
-        .history-time {
-            color: #cbd5e1;
-            font-size: 0.9rem;
-        }
-        
-        .history-stats {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.9rem;
-            color: #34d399;
-        }
-        
-        .history-prompts {
-            display: grid;
-            gap: 1rem;
-        }
-        
-        .history-prompt {
-            background: rgba(52, 211, 153, 0.05);
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 3px solid #34d399;
-        }
-        
-        .prompt-label {
-            color: #34d399;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .prompt-text {
-            color: #cbd5e1;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-        
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            display: none;
-        }
-        
-        .loading.active {
-            display: block;
-        }
-        
-        .spinner {
-            border: 4px solid rgba(52, 211, 153, 0.2);
-            border-top: 4px solid #34d399;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Error */
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            display: none;
-        }
-        
-        .error-message.active {
-            display: block;
-        }
-        
-        /* Success */
-        .success-message {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            color: #34d399;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            display: none;
-        }
-        
-        .success-message.active {
-            display: block;
-        }
-        
-        /* Hidden */
-        .hidden {
-            display: none !important;
-        }
-        
-        /* Footer */
+        .tip-box strong { color: #34d399; }
+
         footer {
-            background: rgba(15, 27, 42, 0.95);
-            padding: 2rem;
-            text-align: center;
-            margin-top: 4rem;
-            border-top: 1px solid rgba(52, 211, 153, 0.2);
+            background: rgba(10,18,30,.98); padding: 2rem; text-align: center;
+            border-top: 1px solid rgba(52,211,153,.12); margin-top: 3rem;
         }
-        
-        footer p {
-            color: #cbd5e1;
-            margin: 0.5rem 0;
+        footer p { color: #475569; margin: .3rem 0; font-size: .88rem; }
+        footer strong { color: #34d399; }
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+            .history-prompts { grid-template-columns: 1fr; }
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            header { padding: 0.8rem 1.5rem; }
-            nav { flex-direction: column; gap: 1rem; }
-            .welcome-section h1 { font-size: 2rem; }
-            .btn-secondary { margin-left: 0; margin-top: 0.5rem; }
-            .history-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        @media (max-width: 600px) {
+            header { padding: .8rem 1.2rem; }
+            nav { flex-direction: column; gap: .8rem; }
+            .welcome h1 { font-size: 2rem; }
+            .section { padding: 1.5rem 1rem; }
         }
     </style>
 </head>
 <body>
-    <div class="background-animation" id="bg-animation"></div>
-    <div class="gradient-overlay"></div>
-    
-    <header>
-        <nav>
-            <a href="index.html" class="logo">
-                <div class="logo-icon">🌱</div>
-                Green Prompts Optimizer
-            </a>
-            <div class="nav-center">
-                <a href="index.html">← Back to Home</a>
-            </div>
-            <div class="user-info">
-                <span class="user-name" id="user-name">Loading...</span>
-                <button class="btn-logout" id="logout-btn">Logout</button>
-            </div>
-        </nav>
-    </header>
-    
-    <div class="container">
-        <section class="welcome-section">
-            <h1>Welcome back, <span id="welcome-name">User</span>! 🌱</h1>
-            <p>Track your environmental impact and optimize your AI prompts</p>
-        </section>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">🎯</div>
-                <div class="stat-value" id="total-optimizations">0</div>
-                <div class="stat-label">Total Optimizations</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💎</div>
-                <div class="stat-value" id="total-tokens">0</div>
-                <div class="stat-label">Tokens Saved</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⚡</div>
-                <div class="stat-value" id="total-energy">0</div>
-                <div class="stat-label">Energy Saved (Wh)</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🌍</div>
-                <div class="stat-value" id="total-co2">0</div>
-                <div class="stat-label">CO₂ Reduced (g)</div>
-            </div>
+
+<div class="bg-wrap" id="bg"></div>
+<div class="gradient-overlay"></div>
+
+<header>
+    <nav>
+        <a href="index.html" class="logo">
+            <div class="logo-icon">🌱</div>
+            Green Prompts Optimizer
+        </a>
+        <div class="nav-center">
+            <a href="index.html">← Home</a>
+            <a href="optimizer.html">Optimizer</a>
+            <a href="stats.html">Stats</a>
         </div>
-        
-        <div class="section">
-            <h2>✨ Optimize Your Prompt</h2>
-            <p style="text-align: center; color: #cbd5e1; margin-bottom: 1.5rem;">
-                Each optimization you complete will automatically update your personal stats above!
-            </p>
-            <iframe 
-                src="https://sirenice-greenpromptsoptimizer.hf.space"
-                width="100%"
-                height="750px"
-                style="border: none; border-radius: 12px; background: white;"
-                title="Green Prompts Optimizer"
-            ></iframe>
-            
-            <div style="background: rgba(52, 211, 153, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1.5rem; text-align: center;">
-                <strong style="color: #34d399;">💡 Pro Tip:</strong>
-                <span style="color: #cbd5e1;"> Copy the optimized prompt and use it in ChatGPT, Claude, or any AI tool to save energy!</span>
-            </div>
+        <div class="user-area">
+            <span class="user-chip" id="user-chip">Loading…</span>
+            <button class="btn-logout" id="btn-logout">Logout</button>
         </div>
-        
-        <div class="section">
-            <h2>📜 Your Optimization History</h2>
-            <div id="history-container">
-                <p style="color: #cbd5e1; text-align: center; padding: 2rem;">No optimizations yet. Start optimizing to build your history!</p>
-            </div>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="welcome">
+        <h1>Welcome back, <span id="welcome-name">User</span>! 🌱</h1>
+        <p>Track your environmental impact and keep optimizing your AI prompts</p>
+    </div>
+
+    <!-- Personal Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-val" id="u-opts">0</div>
+            <div class="stat-lbl">Optimizations</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💎</div>
+            <div class="stat-val" id="u-tokens">0</div>
+            <div class="stat-lbl">Tokens Saved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-val" id="u-energy">0</div>
+            <div class="stat-lbl">Energy Saved (Wh)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-val" id="u-co2">0</div>
+            <div class="stat-lbl">CO₂ Reduced (g)</div>
         </div>
     </div>
-    
-    <footer>
-        <p>🌱 <strong style="color: #34d399;">Green Prompts Optimizer</strong></p>
-        <p>Created by Srinesh Toranala | ISM Original Work 2025-2026</p>
-        <p>Making AI more sustainable, one prompt at a time 🌍</p>
-    </footer>
-    
-    <script>
-        let currentUser = null;
-        
-        // Check authentication
-        function checkAuth() {
-            const session = localStorage.getItem('greenPromptsSession');
-            if (!session) {
-                window.location.href = 'login.html';
-                return null;
-            }
-            
-            const { email, loginTime } = JSON.parse(session);
-            const dayInMs = 24 * 60 * 60 * 1000;
-            
-            if (Date.now() - loginTime > 7 * dayInMs) {
-                localStorage.removeItem('greenPromptsSession');
-                window.location.href = 'login.html';
-                return null;
-            }
-            
-            return JSON.parse(session);
+
+    <!-- Optimizer -->
+    <div class="section">
+        <h2>✨ Optimize a Prompt</h2>
+        <p style="color:#64748b;margin-bottom:1.5rem;">Every optimization you run here will automatically update your stats above!</p>
+
+        <div class="banner error" id="err-banner"></div>
+
+        <label class="field-label">Enter your prompt:</label>
+        <textarea class="prompt-input" id="prompt-input"
+            placeholder="e.g. Can you please help me understand how to write a Python function?"></textarea>
+
+        <button class="btn-optimize" id="btn-optimize">
+            <div class="btn-spinner"></div>
+            <span class="btn-text">🚀 Optimize Prompt</span>
+        </button>
+
+        <div class="result-box" id="result-box">
+            <div class="result-header">
+                <span>✅</span> Optimization Complete!
+            </div>
+            <label class="field-label">Optimized Prompt:</label>
+            <textarea class="optimized-textarea" id="optimized-out" readonly></textarea>
+            <div class="metrics-row">
+                <div class="metric-tile"><div class="mv" id="m-tokens">0</div><div class="ml">Tokens Saved</div></div>
+                <div class="metric-tile"><div class="mv" id="m-reduction">0%</div><div class="ml">Reduction</div></div>
+                <div class="metric-tile"><div class="mv" id="m-energy">0</div><div class="ml">Energy (Wh)</div></div>
+                <div class="metric-tile"><div class="mv" id="m-co2">0</div><div class="ml">CO₂ (g)</div></div>
+            </div>
+            <button class="btn-copy" id="btn-copy">📋 Copy Optimized Prompt</button>
+        </div>
+
+        <div class="tip-box">
+            <strong>💡 Pro Tip:</strong> Use Ctrl+Enter to optimize quickly. Then paste into ChatGPT, Claude, or any AI tool!
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="section">
+        <h2>📜 Your Optimization History</h2>
+        <div id="history-container">
+            <div class="history-empty">No optimizations yet — try one above!</div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>🌱 <strong>Green Prompts Optimizer</strong></p>
+    <p>Created by Srinesh Toranala | ISM Original Work 2025–2026</p>
+</footer>
+
+<script src="stats_tracker.js"></script>
+<script src="auth.js"></script>
+<script src="optimizer-core.js"></script>
+<script>
+    // Bubbles
+    (function() {
+        const bg = document.getElementById('bg');
+        for (let i = 0; i < 22; i++) {
+            const b = document.createElement('div'); b.className = 'bubble';
+            const s = Math.random() * 12 + 6;
+            b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*15}s;animation-duration:${Math.random()*20+25}s`;
+            bg.appendChild(b);
         }
-        
-        // Get current user
-        function getCurrentUser() {
-            const session = checkAuth();
-            if (!session) return null;
-            
-            const users = JSON.parse(localStorage.getItem('greenPromptsUsers') || '{}');
-            return users[session.email];
-        }
-        
-        // Load user info
-        function loadUserInfo() {
-            currentUser = getCurrentUser();
-            if (!currentUser) return;
-            
-            document.getElementById('user-name').textContent = currentUser.name;
-            document.getElementById('welcome-name').textContent = currentUser.name;
-            
-            const stats = currentUser.stats || {
-                totalOptimizations: 0,
-                totalTokensSaved: 0,
-                totalEnergySaved: 0,
-                totalCO2Saved: 0
-            };
-            
-            document.getElementById('total-optimizations').textContent = stats.totalOptimizations;
-            document.getElementById('total-tokens').textContent = stats.totalTokensSaved.toLocaleString();
-            document.getElementById('total-energy').textContent = stats.totalEnergySaved.toFixed(4);
-            document.getElementById('total-co2').textContent = stats.totalCO2Saved.toFixed(4);
-            
-            loadHistory();
-        }
-        
-        // Load history
-        function loadHistory() {
-            if (!currentUser || !currentUser.history || currentUser.history.length === 0) {
-                return;
-            }
-            
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-            
-            const sortedHistory = [...currentUser.history].reverse().slice(0, 10);
-            
-            sortedHistory.forEach(item => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                
-                const date = new Date(item.timestamp);
-                const timeStr = date.toLocaleString();
-                
-                historyItem.innerHTML = `
-                    <div class="history-header">
-                        <div class="history-time">${timeStr}</div>
-                        <div class="history-stats">
-                            <span>${item.tokensSaved} tokens</span>
-                            <span>${item.reductionPct} reduction</span>
-                        </div>
+    })();
+
+    // Auth guard
+    if (!window.AUTH || !window.AUTH.requireAuth()) { /* redirects */ }
+
+    let currentUser = null;
+
+    function loadUser() {
+        currentUser = window.AUTH.getCurrentUser();
+        if (!currentUser) return;
+
+        document.getElementById('user-chip').textContent    = currentUser.name;
+        document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
+
+        const s = currentUser.stats || {};
+        document.getElementById('u-opts').textContent   = s.totalOptimizations || 0;
+        document.getElementById('u-tokens').textContent = (s.totalTokensSaved  || 0).toLocaleString();
+        document.getElementById('u-energy').textContent = (s.totalEnergySaved  || 0).toFixed(4);
+        document.getElementById('u-co2').textContent    = (s.totalCO2Saved     || 0).toFixed(4);
+
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('history-container');
+        if (!currentUser.history || currentUser.history.length === 0) return;
+
+        container.innerHTML = '';
+        [...currentUser.history].reverse().slice(0, 15).forEach(item => {
+            const d = new Date(item.timestamp);
+            const el = document.createElement('div');
+            el.className = 'history-item';
+            el.innerHTML = `
+                <div class="history-header">
+                    <div class="history-time">${d.toLocaleString()}</div>
+                    <div class="history-badges">
+                        <span class="badge">-${item.tokensSaved} tokens</span>
+                        <span class="badge">${item.reductionPct} reduction</span>
                     </div>
-                    <div class="history-prompts">
-                        <div class="history-prompt">
-                            <div class="prompt-label">ORIGINAL</div>
-                            <div class="prompt-text">${item.original}</div>
-                        </div>
-                        <div class="history-prompt">
-                            <div class="prompt-label">OPTIMIZED</div>
-                            <div class="prompt-text">${item.optimized}</div>
-                        </div>
+                </div>
+                <div class="history-prompts">
+                    <div class="history-prompt">
+                        <div class="prompt-label">Original</div>
+                        <div class="prompt-text">${item.original}</div>
                     </div>
-                `;
-                
-                container.appendChild(historyItem);
-            });
-        }
-        
-        // Logout
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('greenPromptsSession');
-                window.location.href = 'index.html';
-            }
-        }
-        
-        // Create bubbles
-        function createBubbles() {
-            const bg = document.getElementById('bg-animation');
-            for (let i = 0; i < 25; i++) {
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                const size = Math.random() * 12 + 6;
-                bubble.style.width = size + 'px';
-                bubble.style.height = size + 'px';
-                bubble.style.left = Math.random() * 100 + '%';
-                bubble.style.top = Math.random() * 100 + '%';
-                bubble.style.animationDelay = Math.random() * 15 + 's';
-                bubble.style.animationDuration = (Math.random() * 20 + 25) + 's';
-                bg.appendChild(bubble);
-            }
-        }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            createBubbles();
-            loadUserInfo();
-            document.getElementById('logout-btn').addEventListener('click', logout);
-            
-            // Note: Stats tracking happens when users manually update after using the iframe optimizer
-            // For automatic tracking, you'd need the Gradio API working or postMessage communication
+                    <div class="history-prompt">
+                        <div class="prompt-label">Optimized</div>
+                        <div class="prompt-text">${item.optimized}</div>
+                    </div>
+                </div>`;
+            container.appendChild(el);
         });
-    </script>
+    }
+
+    // Optimizer
+    const btnOpt  = document.getElementById('btn-optimize');
+    const pInput  = document.getElementById('prompt-input');
+    const resBox  = document.getElementById('result-box');
+    const errBan  = document.getElementById('err-banner');
+    const btnCopy = document.getElementById('btn-copy');
+
+    btnOpt.addEventListener('click', async () => {
+        const prompt = pInput.value.trim();
+        if (!prompt) { errBan.textContent = '⚠️ Please enter a prompt.'; errBan.style.display='block'; return; }
+        errBan.style.display = 'none'; resBox.style.display = 'none';
+        btnOpt.disabled = true; btnOpt.classList.add('loading');
+
+        try {
+            const r = await window.optimizePrompt(prompt);
+            document.getElementById('optimized-out').value = r.optimizedPrompt;
+            document.getElementById('m-tokens').textContent    = r.tokensSaved;
+            document.getElementById('m-reduction').textContent = r.reductionPct + '%';
+            document.getElementById('m-energy').textContent    = r.energySaved.toFixed(6);
+            document.getElementById('m-co2').textContent       = r.co2Saved.toFixed(6);
+            resBox.style.display = 'block';
+
+            // Update global stats
+            if (window.GPO) window.GPO.trackOptimization({ tokensSaved: r.tokensSaved });
+
+            // Update user stats
+            currentUser = window.AUTH.getCurrentUser();
+            if (currentUser) {
+                currentUser.stats = currentUser.stats || {};
+                currentUser.stats.totalOptimizations = (currentUser.stats.totalOptimizations || 0) + 1;
+                currentUser.stats.totalTokensSaved   = (currentUser.stats.totalTokensSaved   || 0) + r.tokensSaved;
+                currentUser.stats.totalEnergySaved   = (currentUser.stats.totalEnergySaved   || 0) + r.energySaved;
+                currentUser.stats.totalCO2Saved      = (currentUser.stats.totalCO2Saved      || 0) + r.co2Saved;
+                currentUser.history = currentUser.history || [];
+                currentUser.history.push({
+                    timestamp: Date.now(), original: prompt, optimized: r.optimizedPrompt,
+                    tokensSaved: r.tokensSaved, reductionPct: r.reductionPct + '%',
+                    energySaved: r.energySaved, co2Saved: r.co2Saved
+                });
+                window.AUTH.saveCurrentUser(currentUser);
+                loadUser(); // refresh display
+            }
+        } catch(e) {
+            errBan.textContent = '❌ ' + (e.message || 'Optimization failed.'); errBan.style.display='block';
+        } finally {
+            btnOpt.disabled = false; btnOpt.classList.remove('loading');
+        }
+    });
+
+    pInput.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') btnOpt.click(); });
+
+    btnCopy.addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('optimized-out').value).then(() => {
+            btnCopy.textContent = '✅ Copied!'; btnCopy.classList.add('copied');
+            setTimeout(() => { btnCopy.textContent = '📋 Copy Optimized Prompt'; btnCopy.classList.remove('copied'); }, 2200);
+        });
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        if (confirm('Log out?')) window.AUTH.logout();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadUser);
+</script>
 </body>
 </html>
