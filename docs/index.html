@@ -57,7 +57,7 @@
         .prompt-textarea::placeholder { color:#475569; }
         .btn-optimize { width:100%; padding:1rem; background:linear-gradient(135deg,#34d399,#3b82f6); border:none; border-radius:10px; color:white; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all .3s; display:flex; align-items:center; justify-content:center; gap:.6rem; }
         .btn-optimize:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 22px rgba(52,211,153,.4); }
-        .btn-optimize:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+        .btn-optimize:disabled { opacity:.7; cursor:not-allowed; transform:none; }
         .btn-spinner { width:20px; height:20px; border:2.5px solid rgba(255,255,255,.3); border-top-color:white; border-radius:50%; animation:spin .75s linear infinite; display:none; }
         .btn-optimize.loading .btn-spinner { display:block; }
         .btn-optimize.loading .btn-text { display:none; }
@@ -75,7 +75,7 @@
         .btn-copy.copied { background:rgba(52,211,153,.18); color:#6ee7b7; }
         .banner { padding:.85rem 1.1rem; border-radius:9px; font-weight:600; text-align:center; margin-bottom:1rem; display:none; }
         .banner.error   { background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; }
-        .banner.warning { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.3); color:#fcd34d; }
+        .banner.warning { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.28); color:#fcd34d; }
         .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1.5rem; }
         .step-card { text-align:center; padding:2rem 1.5rem; background:rgba(13,27,42,.6); border:1px solid rgba(52,211,153,.13); border-radius:14px; }
         .step-num { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#34d399,#3b82f6); display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:800; color:white; margin:0 auto 1rem; }
@@ -119,7 +119,6 @@
         </div>
     </nav>
 </header>
-
 <div class="container">
     <section class="hero">
         <h1>Energy Saver AI</h1>
@@ -208,7 +207,6 @@
 <script src="auth.js"></script>
 <script src="optimizer-core.js"></script>
 <script>
-/* Bubbles */
 (function(){
     const bg = document.getElementById('bg-animation');
     for (let i = 0; i < 22; i++) {
@@ -219,22 +217,33 @@
     }
 })();
 
-/* Wire everything AFTER DOM + scripts are fully parsed */
 document.addEventListener('DOMContentLoaded', function() {
     if (window.AUTH) window.AUTH.updateNavAuth();
 
     const btnOpt  = document.getElementById('btn-optimize');
+    const btnText = btnOpt.querySelector('.btn-text');
     const pIn     = document.getElementById('prompt-input');
     const resBox  = document.getElementById('result-box');
     const errB    = document.getElementById('err-banner');
     const warnB   = document.getElementById('warn-banner');
     const btnCopy = document.getElementById('btn-copy');
 
+    // Show warmup status in button text during auto-retry
+    window.addEventListener('gpo-warmup', function(e) {
+        const { attempt, max } = e.detail;
+        btnText.textContent = `Warming up... retry ${attempt}/${max}`;
+        btnText.style.display = 'block';
+        btnOpt.classList.remove('loading');
+        btnOpt.classList.add('loading');
+    });
+
     async function runOptimize() {
         const p = pIn.value.trim();
         if (!p) { errB.textContent = 'Please enter a prompt first.'; errB.style.display = 'block'; return; }
         errB.style.display = 'none'; warnB.style.display = 'none'; resBox.style.display = 'none';
         btnOpt.disabled = true; btnOpt.classList.add('loading');
+        btnText.textContent = 'Optimize Prompt';
+
         try {
             if (!window.optimizePrompt) throw new Error('Optimizer not loaded — please refresh the page.');
             const r = await window.optimizePrompt(p);
@@ -265,7 +274,9 @@ document.addEventListener('DOMContentLoaded', function() {
             errB.textContent = 'Optimization failed: ' + (e.message || 'Please try again.');
             errB.style.display = 'block';
         } finally {
-            btnOpt.disabled = false; btnOpt.classList.remove('loading');
+            btnOpt.disabled = false;
+            btnOpt.classList.remove('loading');
+            btnText.textContent = 'Optimize Prompt';
         }
     }
 
