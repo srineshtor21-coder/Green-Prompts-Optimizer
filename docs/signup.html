@@ -4,157 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up | Green Prompts Optimizer</title>
+    <link rel="icon" type="image/svg+xml" href="gpo-icon.svg">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:#0d1b2a; color:#f1f5f9; min-height:100vh; display:flex; flex-direction:column; }
-        .bg-wrap { position:fixed; inset:0; z-index:-2; background:#0d1b2a; }
-        .gradient-overlay {
-            position:fixed; inset:0; z-index:-1; pointer-events:none;
-            background: radial-gradient(circle at 30% 40%, rgba(16,185,129,.13) 0%, transparent 55%),
-                        radial-gradient(circle at 70% 60%, rgba(59,130,246,.13) 0%, transparent 55%);
-        }
-        header {
-            background:rgba(13,23,38,.97); backdrop-filter:blur(14px);
-            padding:.9rem 3rem; border-bottom:1px solid rgba(52,211,153,.15);
-        }
-        .logo { display:flex; align-items:center; gap:.7rem; text-decoration:none; color:#34d399; font-size:1.2rem; font-weight:700; }
-        .logo-icon { width:34px; height:34px; background:linear-gradient(135deg,#34d399,#3b82f6); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
-
-        .page-center { flex:1; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem; }
-        .auth-card {
-            background:rgba(22,34,51,.9); backdrop-filter:blur(14px);
-            border:1px solid rgba(52,211,153,.2); border-radius:22px;
-            padding:3rem 2.5rem; width:100%; max-width:460px;
-        }
-        .auth-card h1 { font-size:2rem; color:#34d399; font-weight:800; text-align:center; margin-bottom:.5rem; }
-        .auth-card .sub { color:#64748b; text-align:center; font-size:.95rem; margin-bottom:2rem; }
-
-        .field { margin-bottom:1.2rem; }
-        .field label { display:block; color:#94a3b8; font-size:.85rem; font-weight:600; letter-spacing:.03em; text-transform:uppercase; margin-bottom:.5rem; }
-        .field input {
-            width:100%; padding:.9rem 1rem;
-            background:rgba(13,23,38,.8); border:1.5px solid rgba(52,211,153,.2);
-            border-radius:9px; color:#f1f5f9; font-size:1rem; font-family:inherit;
-            transition:border-color .25s, box-shadow .25s;
-        }
-        .field input:focus { outline:none; border-color:#34d399; box-shadow:0 0 0 3px rgba(52,211,153,.12); }
-        .field input::placeholder { color:#475569; }
-
-        .strength-bar { height:4px; background:rgba(52,211,153,.1); border-radius:2px; margin-top:.5rem; overflow:hidden; }
-        .strength-fill { height:100%; border-radius:2px; transition:all .3s; width:0%; }
-
-        .btn-submit {
-            width:100%; padding:1rem;
-            background:linear-gradient(135deg,#34d399,#3b82f6);
-            border:none; border-radius:10px; color:#fff;
-            font-size:1.05rem; font-weight:700; cursor:pointer; transition:all .3s; margin-top:.5rem;
-        }
-        .btn-submit:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 22px rgba(52,211,153,.4); }
-        .btn-submit:disabled { opacity:.6; cursor:not-allowed; }
-
-        .banner { padding:.85rem 1.1rem; border-radius:9px; font-weight:600; text-align:center; margin-bottom:1rem; display:none; }
-        .banner.error   { background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; }
-        .banner.success { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#6ee7b7; }
-
-        .perks { display:flex; flex-direction:column; gap:.6rem; margin-bottom:1.8rem; }
-        .perk { display:flex; align-items:center; gap:.7rem; color:#64748b; font-size:.9rem; }
-        .perk-icon { color:#34d399; font-size:1rem; }
-
-        .auth-footer { text-align:center; margin-top:1.8rem; color:#64748b; font-size:.92rem; }
-        .auth-footer a { color:#34d399; text-decoration:none; font-weight:600; }
-        .auth-footer a:hover { text-decoration:underline; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0d1b2a;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;}
+        .go{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 30% 40%,rgba(52,211,153,.05) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(59,130,246,.04) 0%,transparent 50%);}
+        header{background:rgba(13,27,42,.97);backdrop-filter:blur(12px);padding:.9rem 3rem;border-bottom:1px solid rgba(52,211,153,.15);}
+        .logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:#34d399;font-size:1.25rem;font-weight:700;}
+        .logo-icon{width:36px;height:36px;flex-shrink:0;}
+        .pc{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;}
+        .card{background:rgba(22,34,51,.9);backdrop-filter:blur(14px);border:1px solid rgba(52,211,153,.2);border-radius:22px;padding:3rem 2.5rem;width:100%;max-width:460px;}
+        .card h1{font-size:2rem;color:#34d399;font-weight:800;text-align:center;margin-bottom:.5rem;}
+        .sub{color:#64748b;text-align:center;font-size:.95rem;margin-bottom:1.5rem;}
+        .perks{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.8rem;}
+        .perk{display:flex;align-items:center;gap:.6rem;color:#64748b;font-size:.88rem;}
+        .perk-check{color:#34d399;font-weight:700;}
+        .field{margin-bottom:1.2rem;}
+        .field label{display:block;color:#94a3b8;font-size:.85rem;font-weight:600;text-transform:uppercase;margin-bottom:.5rem;}
+        .field input{width:100%;padding:.9rem 1rem;background:rgba(13,27,42,.8);border:1.5px solid rgba(52,211,153,.2);border-radius:9px;color:#f1f5f9;font-size:1rem;font-family:inherit;transition:border-color .25s,box-shadow .25s;}
+        .field input:focus{outline:none;border-color:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.12);}
+        .field input::placeholder{color:#475569;}
+        .sb{height:4px;background:rgba(52,211,153,.1);border-radius:2px;margin-top:.5rem;overflow:hidden;}
+        .sf{height:100%;border-radius:2px;transition:all .3s;width:0;}
+        .btn-sub{width:100%;padding:1rem;background:linear-gradient(135deg,#34d399,#3b82f6);border:none;border-radius:10px;color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .3s;margin-top:.5rem;}
+        .btn-sub:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 22px rgba(52,211,153,.4);}
+        .btn-sub:disabled{opacity:.6;cursor:not-allowed;}
+        .bn{padding:.85rem 1.1rem;border-radius:9px;font-weight:600;text-align:center;margin-bottom:1rem;display:none;}
+        .bn.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+        .bn.success{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#6ee7b7;}
+        .af{text-align:center;margin-top:1.8rem;color:#64748b;font-size:.92rem;}
+        .af a{color:#34d399;text-decoration:none;font-weight:600;}
+        .af a:hover{text-decoration:underline;}
+        footer{background:rgba(13,27,42,.97);padding:1.5rem;text-align:center;border-top:1px solid rgba(52,211,153,.12);}
+        footer p{color:#64748b;font-size:.85rem;}
     </style>
 </head>
 <body>
-<div class="bg-wrap"></div>
-<div class="gradient-overlay"></div>
-
+<div class="go"></div>
 <header>
     <a href="index.html" class="logo">
-        <div class="logo-icon">🌱</div>
+        <img class="logo-icon" src="gpo-icon.svg" alt="GPO">
         Green Prompts Optimizer
     </a>
 </header>
-
-<div class="page-center">
-    <div class="auth-card">
-        <h1>Join the Movement 🌍</h1>
+<div class="pc">
+    <div class="card">
+        <h1>Join the Movement</h1>
         <p class="sub">Create your free account and start saving energy</p>
-
         <div class="perks">
-            <div class="perk"><span class="perk-icon">✅</span> Track your total tokens saved & CO₂ reduced</div>
-            <div class="perk"><span class="perk-icon">✅</span> View your full optimization history</div>
-            <div class="perk"><span class="perk-icon">✅</span> Contribute to the global impact counter</div>
+            <div class="perk"><span class="perk-check">+</span> Track your total tokens saved and CO2 reduced</div>
+            <div class="perk"><span class="perk-check">+</span> View your full optimization history</div>
+            <div class="perk"><span class="perk-check">+</span> Contribute to the global impact counter</div>
         </div>
-
-        <div class="banner error"   id="err-banner"></div>
-        <div class="banner success" id="ok-banner"></div>
-
-        <div class="field">
-            <label>Username</label>
-            <input type="text" id="name" placeholder="Your name">
-        </div>
-        <div class="field">
-            <label>Email</label>
-            <input type="email" id="email" placeholder="you@example.com">
-        </div>
+        <div class="bn error" id="err"></div>
+        <div class="bn success" id="ok"></div>
+        <div class="field"><label>Full Name</label><input type="text" id="name" placeholder="Your name"></div>
+        <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@example.com"></div>
         <div class="field">
             <label>Password</label>
-            <input type="password" id="password" placeholder="At least 6 characters" oninput="checkStrength(this.value)">
-            <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+            <input type="password" id="pw" placeholder="At least 6 characters" oninput="cs(this.value)">
+            <div class="sb"><div class="sf" id="sf"></div></div>
         </div>
-
-        <button class="btn-submit" id="btn-signup">Create Free Account</button>
-
-        <div class="auth-footer">
-            Already have an account? <a href="login.html">Log in</a>
-        </div>
+        <button class="btn-sub" id="btn">Create Free Account</button>
+        <div class="af">Already have an account? <a href="login.html">Log in</a></div>
     </div>
 </div>
-
+<footer><p>Green Prompts Optimizer &mdash; Making AI more sustainable</p></footer>
 <script src="stats_tracker.js"></script>
 <script src="auth.js"></script>
 <script>
-    if (window.AUTH && window.AUTH.getSession()) window.location.href = 'dashboard.html';
-
-    function checkStrength(pw) {
-        const fill = document.getElementById('strength-fill');
-        let score = 0;
-        if (pw.length >= 6)  score++;
-        if (pw.length >= 10) score++;
-        if (/[A-Z]/.test(pw)) score++;
-        if (/[0-9]/.test(pw)) score++;
-        if (/[^A-Za-z0-9]/.test(pw)) score++;
-        const pct = (score / 5) * 100;
-        const colors = ['#ef4444','#f97316','#eab308','#84cc16','#22c55e'];
-        fill.style.width = pct + '%';
-        fill.style.background = colors[Math.max(0, score-1)] || '#ef4444';
-    }
-
-    const errBanner = document.getElementById('err-banner');
-    const okBanner  = document.getElementById('ok-banner');
-
-    document.getElementById('btn-signup').addEventListener('click', () => {
-        const name     = document.getElementById('name').value.trim();
-        const email    = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-
-        errBanner.style.display = 'none';
-        okBanner.style.display  = 'none';
-
-        if (!name || !email || !password) { errBanner.textContent='Please fill in all fields.'; errBanner.style.display='block'; return; }
-        if (password.length < 6)          { errBanner.textContent='Password must be at least 6 characters.'; errBanner.style.display='block'; return; }
-        if (!/\S+@\S+\.\S+/.test(email))  { errBanner.textContent='Please enter a valid email.'; errBanner.style.display='block'; return; }
-
-        const result = window.AUTH.signup(name, email, password);
-        if (!result.ok) { errBanner.textContent=result.error; errBanner.style.display='block'; return; }
-
-        okBanner.textContent = '🎉 Account created! Redirecting to your dashboard…';
-        okBanner.style.display = 'block';
-        setTimeout(() => window.location.href = 'dashboard.html', 1200);
-    });
-
-    document.addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('btn-signup').click(); });
+if(window.AUTH&&window.AUTH.getSession())window.location.href='dashboard.html';
+function cs(pw){
+    const f=document.getElementById('sf');let sc=0;
+    if(pw.length>=6)sc++;if(pw.length>=10)sc++;
+    if(/[A-Z]/.test(pw))sc++;if(/[0-9]/.test(pw))sc++;if(/[^A-Za-z0-9]/.test(pw))sc++;
+    f.style.width=(sc/5*100)+'%';
+    f.style.background=['#ef4444','#f97316','#eab308','#84cc16','#22c55e'][Math.max(0,sc-1)]||'#ef4444';
+}
+const err=document.getElementById('err'),ok=document.getElementById('ok');
+document.getElementById('btn').addEventListener('click',()=>{
+    const name=document.getElementById('name').value.trim();
+    const email=document.getElementById('email').value.trim();
+    const pw=document.getElementById('pw').value;
+    err.style.display='none';ok.style.display='none';
+    if(!name||!email||!pw){err.textContent='Please fill in all fields.';err.style.display='block';return;}
+    if(pw.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+    if(!/\S+@\S+\.\S+/.test(email)){err.textContent='Please enter a valid email.';err.style.display='block';return;}
+    const r=window.AUTH.signup(name,email,pw);
+    if(!r.ok){err.textContent=r.error;err.style.display='block';return;}
+    ok.textContent='Account created! Redirecting to your dashboard...';ok.style.display='block';
+    setTimeout(()=>window.location.href='dashboard.html',1200);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btn').click();});
 </script>
 </body>
 </html>
