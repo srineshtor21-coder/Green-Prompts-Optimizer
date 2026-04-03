@@ -1,12 +1,12 @@
 """
-GreenPromptsOptimizer: Model Training Script (Large Dataset Version)
-Trains T5-small on the expanded ~3000 pair dataset.
+GreenPromptsOptimizer: Training Script v3 (T5-base, 14k dataset)
+Trains T5-base on the expanded dataset for best optimization quality.
 
 Usage:
-    python train_optimizer_v2.py
+    python train_optimizer_v3.py
 
 Output:
-    models/prompt_optimizer/   (upload this folder to Hugging Face)
+    models/prompt_optimizer/   <-- upload this folder to Hugging Face
 """
 
 import json
@@ -28,18 +28,37 @@ from transformers import (
 # ---------------------------------------------------------------------------
 
 CONFIG = {
-    "model_name": "t5-small",
+    # T5-base is 4x more capable than T5-small and fixes most accuracy issues.
+    # Change back to "t5-small" only if your machine runs out of RAM.
+    "model_name": "t5-base",
+
     "dataset_path": "data/training_dataset_10k.json",
     "output_path": "models/prompt_optimizer",
-    "batch_size": 8,           # larger batches since we have more data
-    "num_epochs": 20,          # fewer epochs needed with more data
-    "learning_rate": 3e-4,
-    "max_input_length": 256,
-    "max_output_length": 64,
-    "warmup_ratio": 0.06,
+
+    # Larger batch = more stable gradients with a big dataset.
+    "batch_size": 16,
+
+    # With 14k pairs, fewer epochs are needed to avoid overfitting.
+    "num_epochs": 15,
+
+    # Lower LR is better for larger models.
+    "learning_rate": 1e-4,
+
+    # Shorter sequences = faster training, outputs are short phrases anyway.
+    "max_input_length": 128,
+    "max_output_length": 32,
+
+    "warmup_ratio": 0.05,
     "gradient_accumulation_steps": 2,
+
+    # Fraction of data held out for validation.
     "val_split": 0.1,
+
+    # Save a checkpoint every N epochs (in addition to best-model saves).
     "save_every_n_epochs": 5,
+
+    # Stop early if validation loss does not improve for this many epochs.
+    "early_stopping_patience": 4,
 }
 
 DATA_DIR = Path("data")
@@ -48,6 +67,9 @@ MODELS_DIR.mkdir(exist_ok=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
+if device.type == "cpu":
+    print("Note: training on CPU. T5-base will take roughly 2-3 hours.")
+    print("      If you have a GPU available, set CUDA_VISIBLE_DEVICES=0.")
 
 
 # ---------------------------------------------------------------------------
@@ -94,14 +116,15 @@ class PromptDataset(Dataset):
 # ---------------------------------------------------------------------------
 
 def load_data():
-    path = CONFIG["dataset_path"]
-    with open(path, encoding="utf-8") as f:
+    with open(CONFIG["dataset_path"], encoding="utf-8") as f:
         raw = json.load(f)
     pairs = raw["data"]
     np.random.seed(42)
     np.random.shuffle(pairs)
     n_val = int(len(pairs) * CONFIG["val_split"])
-    return pairs[n_val:], pairs[:n_val]
+    train, val = pairs[n_val:], pairs[:n_val]
+    print(f"Dataset loaded: {len(train)} train, {len(val)} val")
+    return train, val
 
 
 def run_epoch(model, loader, optimizer, scheduler, training=True):
@@ -109,14 +132,13 @@ def run_epoch(model, loader, optimizer, scheduler, training=True):
     total_loss = 0.0
     steps = 0
 
-    ctx = torch.enable_grad() if training else torch.no_grad()
-    with ctx:
+    with (torch.enable_grad() if training else torch.no_grad()):
         for step, batch in enumerate(loader):
-            ids = batch["input_ids"].to(device)
-            mask = batch["attention_mask"].to(device)
+            ids   = batch["input_ids"].to(device)
+            mask  = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
 
-            out = model(input_ids=ids, attention_mask=mask, labels=labels)
+            out  = model(input_ids=ids, attention_mask=mask, labels=labels)
             loss = out.loss
 
             if training:
@@ -134,6 +156,7 @@ def run_epoch(model, loader, optimizer, scheduler, training=True):
 
 
 def test_examples(model, tokenizer):
+    """Run a few sample prompts and print before/after."""
     model.eval()
     examples = [
         "Can you please help me understand how neural networks work in a very detailed way?",
@@ -142,9 +165,12 @@ def test_examples(model, tokenizer):
         "I would really like to know about quantum computing and how it differs from classical computing",
         "Could you kindly explain the process of photosynthesis and why it matters for life on earth?",
         "How do I sort a list in Python?",
-        "I need you to very thoroughly explain what Docker containers are and how they work",
+        "I need you to very thoroughly explain what Docker containers are and how they work in practice",
+        "Can you please tell me about the causes and major effects of World War II?",
+        "I want to really understand how to implement a binary search tree from scratch in Python",
+        "Hey could you explain what carbon capture technology is and how it works to reduce emissions?",
     ]
-    print("\n--- Sample outputs ---")
+    print("\n--- Sample outputs (input -> optimized) ---")
     for prompt in examples:
         ids = tokenizer.encode(
             f"optimize: {prompt}",
@@ -153,11 +179,19 @@ def test_examples(model, tokenizer):
             truncation=True,
         ).to(device)
         with torch.no_grad():
-            out = model.generate(ids, max_length=CONFIG["max_output_length"], num_beams=4, early_stopping=True)
+            out = model.generate(
+                ids,
+                max_length=CONFIG["max_output_length"],
+                num_beams=4,
+                early_stopping=True,
+                no_repeat_ngram_size=2,
+            )
         result = tokenizer.decode(out[0], skip_special_tokens=True)
-        reduction = 100 * (1 - len(result.split()) / max(len(prompt.split()), 1))
-        print(f"  IN  : {prompt[:75]}")
-        print(f"  OUT : {result}  ({reduction:.0f}% shorter)")
+        in_words  = len(prompt.split())
+        out_words = len(result.split())
+        reduction = 100 * (1 - out_words / max(in_words, 1))
+        print(f"  IN  ({in_words:>3}w): {prompt[:70]}")
+        print(f"  OUT ({out_words:>3}w): {result}   [{reduction:.0f}% shorter]")
         print()
 
 
@@ -167,72 +201,83 @@ def test_examples(model, tokenizer):
 
 def main():
     print("=" * 65)
-    print("GreenPromptsOptimizer: Training v2 (Large Dataset)")
+    print("GreenPromptsOptimizer: Training v3")
+    print(f"Model: {CONFIG['model_name']}  |  Device: {device}")
     print("=" * 65)
 
     train_pairs, val_pairs = load_data()
-    print(f"Train: {len(train_pairs)}  |  Val: {len(val_pairs)}")
 
     tokenizer = T5Tokenizer.from_pretrained(CONFIG["model_name"])
-    model = T5ForConditionalGeneration.from_pretrained(CONFIG["model_name"])
+    model     = T5ForConditionalGeneration.from_pretrained(CONFIG["model_name"])
     model.to(device)
 
     train_ds = PromptDataset(train_pairs, tokenizer, CONFIG["max_input_length"], CONFIG["max_output_length"])
-    val_ds = PromptDataset(val_pairs, tokenizer, CONFIG["max_input_length"], CONFIG["max_output_length"])
+    val_ds   = PromptDataset(val_pairs,   tokenizer, CONFIG["max_input_length"], CONFIG["max_output_length"])
 
-    train_loader = DataLoader(train_ds, batch_size=CONFIG["batch_size"], shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_ds, batch_size=CONFIG["batch_size"], shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_ds, batch_size=CONFIG["batch_size"], shuffle=True,  num_workers=0)
+    val_loader   = DataLoader(val_ds,   batch_size=CONFIG["batch_size"], shuffle=False, num_workers=0)
 
-    total_steps = (len(train_loader) // CONFIG["gradient_accumulation_steps"]) * CONFIG["num_epochs"]
+    total_steps  = (len(train_loader) // CONFIG["gradient_accumulation_steps"]) * CONFIG["num_epochs"]
     warmup_steps = int(total_steps * CONFIG["warmup_ratio"])
 
     optimizer = AdamW(model.parameters(), lr=CONFIG["learning_rate"], weight_decay=0.01)
     scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps, total_steps)
 
-    best_val = float("inf")
-    start = time.time()
+    best_val   = float("inf")
+    no_improve = 0
+    start      = time.time()
 
-    print(f"\n{'Epoch':>6}  {'Train Loss':>10}  {'Val Loss':>10}  {'Best':>6}")
-    print("-" * 40)
+    print(f"\n{'Epoch':>6}  {'Train':>8}  {'Val':>8}  {'Best':>6}  {'Time':>6}")
+    print("-" * 45)
 
     for epoch in range(1, CONFIG["num_epochs"] + 1):
+        t0 = time.time()
         t_loss = run_epoch(model, train_loader, optimizer, scheduler, training=True)
-        v_loss = run_epoch(model, val_loader, optimizer, scheduler, training=False)
+        v_loss = run_epoch(model, val_loader,   optimizer, scheduler, training=False)
+        elapsed = (time.time() - t0) / 60
 
         is_best = v_loss < best_val
         if is_best:
-            best_val = v_loss
+            best_val   = v_loss
+            no_improve = 0
             model.save_pretrained(CONFIG["output_path"])
             tokenizer.save_pretrained(CONFIG["output_path"])
+            marker = " *"
+        else:
+            no_improve += 1
+            marker = ""
 
-        marker = " *" if is_best else ""
-        print(f"{epoch:>6}  {t_loss:>10.4f}  {v_loss:>10.4f}  {marker}")
+        print(f"{epoch:>6}  {t_loss:>8.4f}  {v_loss:>8.4f}  {best_val:>6.4f}  {elapsed:>4.1f}m{marker}")
 
         if epoch % CONFIG["save_every_n_epochs"] == 0:
             ckpt = MODELS_DIR / f"checkpoint_epoch_{epoch}"
             model.save_pretrained(ckpt)
             tokenizer.save_pretrained(ckpt)
-            print(f"         Checkpoint saved: {ckpt}")
+            print(f"         Checkpoint: {ckpt}")
 
-    elapsed = (time.time() - start) / 60
-    print(f"\nDone in {elapsed:.1f} min. Best val loss: {best_val:.4f}")
-    print(f"Model saved to: {CONFIG['output_path']}")
+        if no_improve >= CONFIG["early_stopping_patience"]:
+            print(f"\nEarly stopping: no improvement for {no_improve} epochs.")
+            break
 
-    # Load best model and show test outputs
+    elapsed_total = (time.time() - start) / 60
+    print(f"\nDone in {elapsed_total:.1f} min. Best val loss: {best_val:.4f}")
+    print(f"Best model saved to: {CONFIG['output_path']}")
+
+    # Load best model and show sample outputs
     best_model = T5ForConditionalGeneration.from_pretrained(CONFIG["output_path"]).to(device)
-    best_tok = T5Tokenizer.from_pretrained(CONFIG["output_path"])
+    best_tok   = T5Tokenizer.from_pretrained(CONFIG["output_path"])
     test_examples(best_model, best_tok)
 
-    # Save training metadata
+    # Save metadata
     info = {
-        "model": CONFIG["model_name"],
-        "dataset_size": len(train_pairs) + len(val_pairs),
-        "train_size": len(train_pairs),
-        "val_size": len(val_pairs),
-        "epochs": CONFIG["num_epochs"],
+        "model":         CONFIG["model_name"],
+        "dataset_size":  len(train_pairs) + len(val_pairs),
+        "train_size":    len(train_pairs),
+        "val_size":      len(val_pairs),
+        "epochs_run":    epoch,
         "best_val_loss": best_val,
-        "training_minutes": elapsed,
-        "device": str(device),
+        "training_min":  elapsed_total,
+        "device":        str(device),
     }
     with open(MODELS_DIR / "training_info.json", "w") as f:
         json.dump(info, f, indent=2)
